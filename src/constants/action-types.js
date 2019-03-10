@@ -1,0 +1,37 @@
+// src/js/constants/action-types.js
+
+// messages in snackbar
+export const DO_SNACK = "DO_SNACK";
+export const DO_SNACK_ERROR = "DO_SNACK_ERROR"
+
+export const SET_ACCESS_OBJECT = "SET_ACCESS_OBJECT";
+export const PASSED_TEST = "PASSED_TEST";
+export const SET_BATCH_ERROR = "SET_BATCH_ERROR";
+
+export const SET_LEDGERS = "SET_LEDGERS";
+export const SET_CUSTOM_FIELDS = "SET_CUSTOM_FIELDS";
+
+export const ADD_INCOMING = "ADD_INCOMING";
+export const SET_INCOMING_LEDGER = "SET_INCOMING_LEDGER";
+export const SET_INCOMING_CUSTOM_FIELD = "SET_INCOMING_CUSTOM_FIELD";
+export const SET_INCOMING_PAYMENT = "SET_INCOMING_PAYMENT";
+export const SET_INCOMING_LOADING ="SET_INCOMING_LOADING";
+
+export const ADD_CONTACTS = "ADD_CONTACTS";
+export const SET_CONTACT_FIELD = "SET_CONTACT_FIELD";
+export const SET_CONTACT_CUSTOM_FIELD = "SET_CONTACT_CUSTOM_FIELD";
+export const SET_CONTACTS_LOADING ="SET_CONTACTS_LOADING";
+
+export const ADD_RECEIVED = "ADD_RECEIVED";
+
+export const SET_BATCH_MSG = "SET_BATCH_MSG";
+export const CLEAR_BATCH_MSG = "CLEAR_BATCH_MSG";
+
+// for testing only
+export const LOGIN = "LOGIN";
+export const LOGOUT = "LOGOUT";
+
+export const TEST = "TEST";
+export const SET_TEST_RESULT ="SET_TEST_RESULT";
+export const SET_COUNT ="SET_COUNT";
+

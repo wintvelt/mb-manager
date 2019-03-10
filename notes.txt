@@ -1,0 +1,106 @@
+// Notes
+
+INCOMING ACTIONS
+
+FUNCTIE processLedgerChange - voor het updaten van de categorie in geselecteerde rows
+functie voor dispatch moet in Incoming - daar is in state de selectie bekend
+
+eerst filter op rawRows om uitsluitend selectie over te houden.
+-> 0 over dan snack (zou niet voor mogen komen)
+dan filter op rows met contact
+-> 0 over dan snack
+dan filter op standaard categorie
+-> 0 over dan snack
+dan map met toevoeging ledger-id (ophalen bij elke standaard categorie)
+dan filteren op ledger-id
+-> 0 over dan snack
+dan filteren op > 0 details
+-> 0 over dan snack
+
+
+
+met resultaat multiple dispatch doen, met een overall msg-deel dat al klaar staat
+
+voor elke row:
+-> apiDispatch naar server
+-> OK = row in store moet geupdate
+-> NOK = message
+heeft ws wel timeout nodig op fetch die error genereert: https://stackoverflow.com/a/46946573/5358807
+
+
+in de store een tijdelijke multi-update met results opslaan?
+waar dan geen subscription op zit?
+
+await (Object) met key: batchID value: 
+	list met batched (Object) 
+		key: fetchID, res: string, msg: string
+
+single call(batchID, fetchID, :
+	dispatch setApiQ SET
+	fetch doen
+		OK = setApiQ OK(res)
+		ERR = setApiQ ERR(msg)
+		TIMEOUT = setApiQ TIMEOUT
+
+// in middleware (multiple dispatches)
+setApiQ(batchID, fetchID, type, payload):
+	case SET: verwerk
+	case OK(res): handle res, en verwerk dan checkApiQ(batchID)
+	case ERR(msg): verwerk dan checkApiQ(batchID)
+	case TIMEOUT: verwerk dan checkApiQ(batchID)
+
+// in actions/ reducers (check op state kan daar, ook update message)
+checkApiQ(batchID):
+	if (alle fetchIDs opgelost): message maken
+	anders: niks doen
+
+** vanaf hier verwerk dispatch
+// in middleware (multiple dispatches)
+
+
+// in actions
+setLedgerIncoming = ()
+
+// in reducer
+case SET_INCOMING_LEDGER:
+	if (!state.incoming || state.incoming.length === 0) return state;
+	const incomingList = state.incoming.filter( (incoming) => (incoming.id === payload.incomingId) );
+	if (incomingList.length === 0) return state;
+	const incomingToUpdate = incomingList[0];
+	const newIncoming = setLedgerInRow(incomingToUpdate, payload.newLedgerId);
+	if (newIncoming === incomingToUpdate) return state;
+	const newIncomingList = state.incoming.map( (incoming, i) => {
+		if (incoming.id === payload.incomingId) { 
+			return newIncoming;
+		} else return incoming;
+	});
+  	return Object.assign({}, state, {
+        incoming: newIncoming
+    })
+
+
+const setLedgerInRow = (incomingObj, newLedgerId) = {
+	if (!incomingObj) return incomingObj;
+	if (!incomingObj.details) return incomingObj;
+	const newDetails = setLedgerInDetails(incomingObj.details, newLedgerId);
+	if (newDetails === incoming.details) return incomingObj;
+	return Object.assign({}, incomingObject, { details : newDetails });
+}
+
+// check if ledger in min 1 anders is, dan set
+// anders origineel terug
+const setLedgerInDetails = (details, newLedgerId) => {
+	if (details.filter( d => (d.ledger_account_id !== newLedgerId) ).length === 0) return details;
+	return details.map((d, i) => { 
+		return Object.assign({},d, { ledger_account_id: newLedgerId })
+	});
+}
+
+// generieke vervanging van row in array
+const setInArr = (arr, index, newObj) => {
+	if (arr.length === 0) return [ newObj ]
+	if (index === 0) return [ newObj, ...arr.slice(1,)]
+	if (index === arr.length-1) return [ ...arr.slice(0, arr.length-1), newObj ]
+	if (index > arr.length-1) return [ ...arr, newObj ]
+	return [ ...arr.slice(0, index), newObj, ...arr.slice(index+1,)]
+}

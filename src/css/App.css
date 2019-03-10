@@ -1,0 +1,208 @@
+div.css-d7kz7c.select__control, 
+div.css-176rqfc.select__control.select__control--is-focused
+{
+	line-height: 18px;
+}
+
+td, th {
+  padding: 15px 2em 15px 1em;
+  position: relative;
+}
+.chip {
+	margin-left: 8px;
+	margin-bottom: 0;
+	font-size: 80%;
+}
+.container {
+	width: 90%;
+}
+
+.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+.clickable:hover {
+  background-color: #eee;
+}
+
+th .flex i {
+	margin: 0;
+	width: 0;
+}
+
+th .flex, div .flex {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+.flex-center, .h-center > * {
+	justify-content: center;
+}
+
+.h-right > * {
+	justify-content: flex-end;
+}
+
+p.flex, li.flex {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+}
+.flex i, .flex span, .flex p {
+	margin-right: 4px;
+}
+table.small {
+	font-size: 80%;
+}
+.select__input input[type=text]{
+	margin: 0;
+
+}
+.select-menu-outer { position: absolute; }
+
+.Collapsible__contentOuter {
+	overflow: visible;
+}
+.Collapsible__trigger {
+	cursor: pointer;
+}
+
+.label {
+	text-align: center;
+	padding: 4px 8px;
+	border-radius: 4px;
+	width: 64px;
+	display: inline-block;
+	color: white;
+}
+
+.label.paid, .label.done {
+	background-color: #2cb9a0;
+}
+.label.open {
+	background-color: #e6ac44;
+}
+.label.late {
+	background-color: #ff4b4b;
+}
+.label.new {
+	background-color: #aaaaaa;
+}
+.label.pending {
+	background-color: #3191F0;
+}
+
+.upload-zone {
+	height: 128px;
+	padding: 16px;
+	border-radius: 4px;
+	background-color: lightgrey;
+}
+.upload-zone > * {
+	pointer-events: none;
+}
+.upload-zone .upload-border {
+	width: 100%;
+	height: 100%;
+	border: 2px dashed grey;
+	border-radius: 4px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+.upload-zone.dragover {
+	background-color: #b2dfdb;
+	padding: 4px;
+}
+
+.sidenav {
+	position: absolute;
+	width: 400px;
+	height: auto;
+	overflow: visible;
+	top: 64px;
+	will-change: transform;
+	transition: 200ms ease-in-out;
+}
+.sidenav .btn-sidenav {
+	position: absolute;
+	left: 400px;
+	top: 0;
+}
+.main-with-sidenav {
+	will-change: transform;
+	transform: translateX(0) scale(1);
+	transform-origin: top left;
+	/* padding: 0px; */
+	transition: 200ms ease-in-out;
+}
+.main-with-sidenav.move {
+	/* padding-left: 360px; */
+	transform: translateX(360px) scale(0.75);
+	transform-origin: top left;
+}
+
+.sidenav .subheader {
+	padding: 0 32px;
+}
+.sidenav .divider {
+	margin-top: 48px;
+
+}
+.sidenav li>div>i, .sidenav li>div>[class^="mdi-"], 
+.sidenav li>div li>div>[class*="mdi-"], .sidenav li>div>i.material-icons {
+	float: left;
+	height: 48px;
+	line-height: 48px;
+	margin: 0 16px 0 0;
+	width: 24px;
+	color: rgba(0,0,0,0.54);
+}
+.sidenav li>div>i.material-icons.icon-right {
+	float: right;
+	height: 48px;
+	line-height: 48px;
+	margin: 0;
+	width: 24px;
+	color: rgba(0,0,0,0.54);
+}
+.sidenav li>div {
+	padding: 0 32px;
+}
+.sidenav li .clickable {
+	color: rgba(0,0,0,0.87);
+	display: block;
+	font-size: 14px;
+	font-weight: 500;
+	height: 48px;
+	line-height: 48px;
+}
+.sidenav-dropdown.hidden {
+	display: none;
+}
+.sidenav-dropdown li {
+	min-height: 48px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+.sidenav .select__option {
+	height: 32px;
+	line-height: 16px;
+	font-size: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.sidenav .sidenav-input {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.sidenav-input > p {
+	margin: 8px 0;
+	line-height: 16px;
+	flex: 1;
+}
