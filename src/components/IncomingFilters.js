@@ -22,7 +22,7 @@ const IncomingFilters = (props) => {
 	    					<Select 
 	    						options={props.statusOptions} 
 	    						styles={customStyles}
-	    						placeholder="Alles.."	    						
+	    						placeholder="Alle statussen.."	    						
 	    						defaultValue={props.statusFilter}
 	    						onChange={ (list, action) => props.onChange({type: "status", list: list}) }  
 							    isMulti
@@ -47,7 +47,7 @@ const IncomingFilters = (props) => {
 	    					<Select 
 	    						options={props.payOptions} 
 	    						styles={customStyles}
-	    						placeholder="Alles.."	    						
+	    						placeholder="Alle betaalmethoden.."	    						
 	    						defaultValue={props.payFilter}
 	    						onChange={ (list, action) => props.onChange({type: "pay", list: list}) }  
 							    isMulti
@@ -60,7 +60,7 @@ const IncomingFilters = (props) => {
 	    					<Select 
 	    						options={props.ownerOptions} 
 	    						styles={customStyles}
-	    						placeholder="Allen.."	    						
+	    						placeholder="Alle owners.."	    						
 	    						defaultValue={props.ownerFilter}
 	    						onChange={ (list, action) => props.onChange({type: "owner", list: list}) }  
 							    isMulti
@@ -73,7 +73,7 @@ const IncomingFilters = (props) => {
 	    					<Select 
 	    						options={props.supplierOptions} 
 	    						styles={customStyles}
-	    						placeholder="Allen.."	    						
+	    						placeholder="Alle leveranciers.."	    						
 	    						defaultValue={props.supplierFilter}
 	    						onChange={ (list, action) => props.onChange({type: "supplier", list: list}) }  
 							    isMulti

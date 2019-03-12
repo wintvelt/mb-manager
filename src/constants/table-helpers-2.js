@@ -1,4 +1,4 @@
-// constants/table-helpers.js
+// constants/table-helpers-2.js
 // tCell() - takes string or cell object, and returns cell object
 // tHead() - takes string or head object, returns head object
 // tHeadAddSelect() - takes a headers, onSelect(id), onSelectAll(state), 
@@ -28,7 +28,9 @@ export const tCell = (strOrObj) => {
 // Making heads
 // icon and className only used in cells, not in header
 const defaultHead = {
-	value: "",		// title
+    value: "",		// title
+    withNext: false, // if the value of this cell is to be combined in next cell
+    column: 0,      // if unspecified or 0, cell will get its own column (after specified columns)
 	align: "left",	// of cell col
 	sortable: true,	// can column be sorted
 	icon: false,	// if all cells are icons

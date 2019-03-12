@@ -116,7 +116,19 @@ const ReceivedFilters = (props) => {
 		          						onChange={(e) => props.onChange({type: "search", list: e.target.value})}/>
 		        			</div>
 		    				</div>
-		    			</li>
+		    		</li>
+						<li>
+								<div className="switch">
+									<label>
+										Alles tonen
+										<input type="checkbox" 
+											checked={props.selFilter} 
+											onChange={() => props.onChange({type:"sel"})}/>
+										<span className="lever"></span>
+										Alleen selectie
+									</label>
+								</div>
+							</li>
 		</SideNavDropDown>
 	);
 }

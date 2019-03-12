@@ -13,6 +13,11 @@ td, th {
 	margin-bottom: 0;
 	font-size: 80%;
 }
+.switch {
+	display: flex;
+	justify-content: center;
+}
+
 .container {
 	width: 90%;
 }
