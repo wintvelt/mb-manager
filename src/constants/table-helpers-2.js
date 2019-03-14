@@ -30,11 +30,12 @@ export const tCell = (strOrObj) => {
 const defaultHead = {
     value: "",		// title
     withNext: false, // if the value of this cell is to be combined in next cell
-    column: 0,      // if unspecified or 0, cell will get its own column (after specified columns)
+    column: 0,      // should always be specified
 	align: "left",	// of cell col
 	sortable: true,	// can column be sorted
 	icon: false,	// if all cells are icons
-	label: false,   // if cell to be displayed as label
+    label: false,   // if cell to be displayed as label
+    amount: false,  // if cell is amount (bigger and red/green)
 	shorten: true, // if cell text needs to be shortened
 	className: "",	// of the cells
 	onSelect: null, // for selecting cells
@@ -82,7 +83,7 @@ export const tToggleSelect = (rows, rowKey, colIndex) => {
 // onSort(tHead.value) = function for sorting
 // sortValue : if this matches tHead value, then this is the column used in sorting
 // sortDirection: up, down - used to show sorting icon
-function hCell(item, i, onSort, sortValue, sortDirection) {
+function hCell(item, onSort, sortValue, sortDirection) {
 	var className = (item.align)? "h-"+item.align : "";
 	if (item.className) { className = className + " " + item.className; }
 	if ((onSort && item.sortable) || (item.onSelectAll))
@@ -91,17 +92,21 @@ function hCell(item, i, onSort, sortValue, sortDirection) {
 		<i className="material-icons">{(sortDirection === "up")?"arrow_drop_up":"arrow_drop_down"}</i>
 		:
 		"";
-	if (item.onSelectAll) {
-		return <th key={i} className={className} 
+    const styling = Object.assign({}, 	
+        (item.align !== "left")? { textAlign : item.align } : {},
+        (item.width)? { width: item.width} : {}
+    );
+    if (item.onSelectAll) {
+		return <li key={item.index} className={className} style={styling}
 					onClick={() => item.onSelectAll(item.value, item.visibleIds)}>
 				<i className="material-icons tiny">{item.value}</i>
-			</th>
+			</li>
 	}
 	if (onSort && item.sortable) {
-		return <th key={i} className={className} onClick={() => onSort(item.value)}>
-			<div className="flex">{item.value}{sortIcon}</div></th>
+		return <li key={item.index} className={className} onClick={() => onSort(item.value)} style={styling}>
+			<div className="flex">{item.value}{sortIcon}</div></li>
 	}
-	return <th key={i} className={className} >{item.value}</th>
+	return <li key={item.index} className={className} style={styling}>{item.value}</li>
 
 }
 
@@ -112,27 +117,47 @@ function hCell(item, i, onSort, sortValue, sortDirection) {
 // hideKey: true, *false for hiding first column with keys
 function hRow(headers, onSort, sortValue, sortDirection, hideKey) {
 	const headArr = (hideKey)? headers.slice(1,) : headers;
+    const row2D = makeRow2D(headArr, headArr);
 	return (
-		<thead><tr>
-			{headArr.map((item, i) => hCell(item, i, onSort, sortValue, sortDirection))}
-		</tr></thead>
+		<li key="headers" className="headers">
+			<ul className="cell">
+                {row2D.map( (subArr, i) => {
+                    return <li key={i}>
+                        <ul className="cell-col" >
+                            {subArr.map( (item) => {
+                                return hCell(item, onSort, sortValue, sortDirection)
+                            })}
+                        </ul>
+                    </li>
+                })}
+            </ul>
+		</li>
 	);
 }
 
 
-// takes a tCell and returns Component
+
+// takes a tCell and returns Component Cell
 // i: index (used as key, columns are not moveable)
 // head: tHead, used for styling
 // rowKey: key of the row, used for passing to item.OnSelect
-function cell(item, i, head, rowKey) {
-	const onSelect = item.onSelect || head.onSelect;
-	const value = (head.icon || !head.shorten)? item.value : short(item.value);
+function cell(item, headers, rowKey, hideKey=false) {
+    const head = headers[item.index];
+    const i = (hideKey)? item.index + 1 : item.index;
+    const onSelect = item.onSelect || head.onSelect;
+    const value = (head.icon || !head.shorten)? 
+        (item.value.length > 30)? item.value.split('/').join('/ ') : item.value
+        : short(item.value);
 	const styling = Object.assign({}, 	
-		(head.align !== "left")? { textAlign : head.align } : {},
-		(head.icon)? { width: "1em" } : {}
+        (head.align !== "left")? { textAlign : head.align } : {},
+        (head.width)? { width: head.width} : {}
 	);
 	var className = (onSelect)? head.className + " clickable" : head.className;
-	className = (item.className)? className + " " + item.className : className;
+    className = (item.className)? className + " " + item.className : className;
+    className = (head.amount)? 
+        (item.value[0] === '-')? className + " red-text text-lighten-2" 
+        : className + " teal-text"
+        : className;
 	const content = (head.icon)?
 		<i className="material-icons">{value}</i>
 		: (head.label)?
@@ -142,26 +167,67 @@ function cell(item, i, head, rowKey) {
 		<a href={item.href} target="_blank" rel="noopener noreferrer">{content}</a> 
 		: content;
 	return ( (onSelect)? 
-		<td className={className} key={i} style={styling} onClick={()=> {onSelect(rowKey,i)}}>
-			{contentWrapped}</td>
-		: <td className={className} key={i} style={styling}>{contentWrapped}</td>
+		<li className={className} key={i} style={styling} onClick={()=> {onSelect(rowKey,i)}}>
+			{contentWrapped}</li>
+		: <li className={className} key={i} style={styling}>{contentWrapped}</li>
 
 	);
 }
 
-// arr = [ rowItems ]
+// helper to convert flat row to a row of columns
+// input = headers, arr
+// output = newArr
+// index = 1 or 0 to add to item-index
+const makeRow2D = ( headers, arr ) => {
+    const columns = headers.reduce( (output, head) => {
+        if (head.withNext) return output;
+        return [...output, head.column];
+    }, []);
+    const acc = arr.reduce( (output, item, index) => { 
+        // als header is withNext dan return output met geupdate next
+        if (headers[index].withNext) { return Object.assign({}, output, { next : [...output.next, item.value] })}
+        // als output.next dan item updaten
+        const item2 = (output.next.length > 0)? 
+            Object.assign({}, item, { value : [...output.next, item.value].join(" / "), index: index }) 
+            : Object.assign({}, item, { index : index });
+        var newArr = [];
+        if (output.newArr[columns[index]]) {
+            newArr = output.newArr.map( (sub, i) => {
+                // add to the right subarr
+                if (i === columns[index]) { return [...sub, item2]}
+                return sub;
+            })
+        } else {
+            // add item to newarr
+            newArr = [...output.newArr, [item2]]
+        }
+        return { newArr : newArr, next : [] }
+    }, { newArr: [], next: [] });
+    return acc.newArr;
+}
+
+// takes a row of items and returns a component row.
+// arr = [ [tCell] ]
 // headers = [ header ]
-function row(arr, j, headers, hideKey) {
+function row(arr, headers, hideKey) {
 	const row = (hideKey)? arr.slice(1,) : arr;
 	const headArr = (hideKey)? headers.slice(1,) : headers;
-	const ind = (index) => { return (hideKey)? index + 1 : index };
-	const rowKey = arr[0].value;
+    const rowKey = arr[0].value;
+    const row2D = makeRow2D(headArr, row);
 	return (
-		<tr key={rowKey}>
-			{ row.map((item, i) => {
-				return cell(item, ind(i), headArr[i], rowKey, headArr[i].onSelect)})
-			}
-		</tr>
+		<li className="card" key={rowKey}>
+			<ul className="cell">
+                {row2D.map( (subArr, i) => {
+                    return <li key={i}>
+                        <ul className="cell-col" >
+                            {subArr.map( (item) => {
+                                return cell(item, headArr, rowKey, hideKey)
+                            })}
+                        </ul>
+                    </li>
+                })}
+            </ul>
+		</li>
 	);
 }
 
@@ -173,12 +239,10 @@ function row(arr, j, headers, hideKey) {
 */
 export const CustomTable = ({ headers, rows, onSort, sortValue, sortDirection, hideKey }) => {
 	return (
-		<table className='striped small'>
+		<ul>
 			{ hRow(headers, onSort, sortValue, sortDirection, hideKey) }
-			<tbody>
-				{ rows.map((r, i) => row(r, i, headers, hideKey) )}
-			</tbody>
-		</table>
+            { rows.map( r => row(r, headers, hideKey) )}
+		</ul>
 	);
 }
 

@@ -44,6 +44,29 @@ th .flex, div .flex {
 	justify-content: center;
 }
 
+.cell {
+	display: flex;
+	flex-direction: row;
+	overflow: hidden;
+}
+
+ul.cell-col {
+	display: flex;
+	flex-direction: column;
+	padding: 8px;
+}
+.headers .cell {
+	font-weight: bold;
+}
+
+.large-text {
+	font-size: 150%;
+	font-weight: bold;
+}
+.lowercase {
+	text-transform: lowercase;
+}
+
 .h-right > * {
 	justify-content: flex-end;
 }

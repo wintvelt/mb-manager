@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 import { getReceived } from "../actions/apiActions";
 import { doSnack } from "../actions/actions";
-import { SortableTable, tHeadAddSelect, toggleCell } from '../constants/table-helpers';
+import { SortableTable, tHeadAddSelect, toggleCell } from '../constants/table-helpers-2';
 import { receivedRows, receivedHeaders } from '../constants/data-helpers-received';
 import ReceivedFilters, { filterMonth, filterStatus, filterAmount, filterSearch } from './ReceivedFilters';
 import ReceivedActions from './ReceivedActions';

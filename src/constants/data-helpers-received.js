@@ -1,13 +1,16 @@
 // data-helpers-received
 // bevat ook tabel-bouw functies en tabel logica
 
-import { tHead, tCell } from '../constants/table-helpers';
+import { tHead, tCell } from '../constants/table-helpers-2';
 
 export const receivedHeaders = [
-	"Key", { value: "check_box_outline_blank", align: "center", sortable: false, icon: true },
-	"Datum", { value: "Bedrag", align: "right" },
-	{ value: "Status", align: "center", label: true }, { value : "Van/ aan", shorten: false },
-	{ value : "Omschrijving", shorten: false }
+	"Key", 
+	{ value: "check_box_outline_blank", align: "center", sortable: false, icon: true, width: "2em", column: 0 },
+	{ value: "Datum", width: "8em", column: 1 },
+	{ value: "Bedrag", align: "right", width: "5em", className: "large-text", amount: true, column: 2 },
+	{ value: "Status", align: "center", label: true, width: "8em", column: 3 }, 
+	{ value : "Van/ aan", shorten: false, width: "15em", column: 1 },
+	{ value : "Omschrijving", shorten: false, className: "lowercase", column: 4 }
 ].map(tHead);
 
 const receivedIds = [ 
@@ -43,7 +46,7 @@ var formatter = new Intl.NumberFormat('nl-NL', {
 
 // helpers to try to get name from description
 const isMyNum = (val) => {
-	return (val.length === 7 && /^\d+$/.test(val))
+	return (val.length === 7 && /^\d+$/.test(val) && val.slice(0,3) === "201")
 }
 
 const initCaps = (txt) => {
