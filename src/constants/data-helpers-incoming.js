@@ -1,7 +1,7 @@
 // data-helpers-incoming
 // bevat ook tabel-bouw functies en tabel logica voor incoming
 
-import { tHead, tCell } from '../constants/table-helpers';
+import { tHead, tCell } from '../constants/table-helpers-2';
 import { adminCode } from '../actions/apiActions';
 import { uniqByKey } from '../constants/helpers';
 
@@ -16,12 +16,18 @@ export const ledgerDict = (ledgerList = []) => {
 }
 
 export const incomingHeaders = [
-	"Key", { value: "check_box_outline_blank", align: "center", sortable: false, icon: true },
-	"Datum", "Leverancier", "Factuur-ref", { value: "Bedrag", align: "right" }, 
-	{ value: "Status", align: "center", label: true }, "Owner", "Categorie factuur", 
-	"Standaard categorie",
-	{ value: "Betaling", align: "center", sortable: true, icon: true },	
-	{ value: "Link", align: "center", sortable: false, icon: true }
+	"Key", 
+	{ value: "check_box_outline_blank", align: "center", sortable: false, icon: true, width: "2em", column: 0 },
+	{ value: "Datum", width: "8em", column: 1 },
+	{ value: "Leverancier", width: "20em", column: 1, shorten: false },
+	{ value: "Factuur-ref", width: "30em", column: 1, shorten: false },
+	{ value: "Bedrag", align: "right", width: "180px", column: 2, className: "large-text", amount: true }, 
+	{ value: "Status", align: "right", label: true, width: "180px", column: 2 }, 
+	{ value: "Owner", align: "center", width: "8em", column: 3 },
+	{ value: "Categorie factuur", width: "25em", column: 4, shorten: false },
+	{ value: "Standaard categorie",width: "25em", column: 4, shorten: false },
+	{ value: "Betaling", align: "center", sortable: true, icon: true, width: "8em", column: 3 },
+	{ value: "Link", align: "right", sortable: false, icon: true, column: 5 }
 ].map(tHead);
 
 const incomingIds = [ 

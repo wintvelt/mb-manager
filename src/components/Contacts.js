@@ -155,7 +155,7 @@ class ConnectedContacts extends Component {
 				rowsRaw.filter( item => {
 						return (selected.indexOf(item[0].value) !== -1)
 				});
-		downloadCsv(rowsFiltered, [0,2,3,4], ["ID", "Naam", "Stad","Land"], "Contacten Mobly");
+		downloadCsv(rowsFiltered, [0,2,3,4,7], ["ID", "Naam", "Stad","Land", "Owner"], "Contacten Mobly");
 	}
 
 	render() {

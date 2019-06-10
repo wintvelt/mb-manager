@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { getLedgers, getIncoming } from "../actions/apiActions";
 import { batchLedgerUpdate, batchContactCustomUpdate, batchPaymentUpdate } from '../actions/batchActions';
 import { doSnack } from "../actions/actions";
-import { SortableTable, tHeadAddSelect, toggleCell } from '../constants/table-helpers';
+import { SortableTable, tHeadAddSelect, toggleCell } from '../constants/table-helpers-2';
 import { incomingRows, incomingHeaders, 
 	makePatchList, makeContactList, makePaymentList } from '../constants/data-helpers-incoming';
 import IncomingFilters from './IncomingFilters';
