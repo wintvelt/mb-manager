@@ -26,7 +26,7 @@ export function getRequestToken() {
 		+ '&redirect_uri=' + redir
 		+ '&response_type=code'
 		+ '&scope=sales_invoices documents estimates bank settings';
-	fetch(url, {mode: 'cors', redirect: 'follow'})
+	fetch(url, {mode: 'no-cors', redirect: 'follow'})
 	  .then(res => {
 	  	window.location.href=res.url;
 	  });

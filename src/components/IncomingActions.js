@@ -37,7 +37,7 @@ const IncomingActions = (props) => {
 			<li>
 				<div className="sidenav-input">
 	    				<p>Download csv</p>
-	    				<div className={btnClass}>
+	    				<div className={btnClass} onClick={props.onDownload}>
 	    					<i className="material-icons">cloud_download</i>
 	    				</div>
 				</div>
