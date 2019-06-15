@@ -17,7 +17,7 @@ export const initialState = {
   newSnack: "",
   connectionError: false,
   accessObject: null,
-  isConnected: true,
+  isConnected: false,
   testOutput: "",
   ledgers: null,
   ledgerDate: "",

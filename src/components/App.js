@@ -35,7 +35,7 @@ const ConnectedApp = (props) => {
 				    	isConnected={props.isConnected}/>
 				    <PrivateRoute path="/betalingen" component={Received} 
 				    	isConnected={props.isConnected}/>
-				    <Route exact path="/connection" component={Connection} />
+					<Route exact path="/connection" component={Connection} />
 			    	<Route render={(routeprops) => 
 			    		{ 
 			    			const newSnack = "De pagina \"" + 

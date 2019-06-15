@@ -15,36 +15,37 @@ const secretKey = "795c98d7db73f34ff3bcdf69bcc495b7bbfa0b8b64fdd4160ecbc14536269
 export const adminCode = "243231934476453244";
 
 const base_url = 'https://moneybird.com/api/v2/' + adminCode;
+const redir_url = 'http://localhost:3000/connection';
+// const redir_url ='http://moblybird.com/connection';
 
 // const access_token = "5c871550f446b557d9f48e89e899dd46bb7d1e058cb76dfa000394143681a9ae";
 
 // does NOT update state
 export function getRequestToken() {
-	const redir = 'urn:ietf:wg:oauth:2.0:oob';
 	const url = 'https://moneybird.com/oauth/authorize?'
 		+ 'client_id=' + clientID
-		+ '&redirect_uri=' + redir
+		+ '&redirect_uri=' + redir_url
 		+ '&response_type=code'
 		+ '&scope=sales_invoices documents estimates bank settings';
-	fetch(url, {mode: 'no-cors', redirect: 'follow'})
-	  .then(res => {
-	  	window.location.href=res.url;
-	  });
+	window.location.href=url;
+	// fetch(url, {mode: 'no-cors', redirect: 'follow'})
+	//   .then(res => {
+	//   	window.location.href=res.url;
+	//   });
 }
 
 // fetches Access Object + stores result (Access Object + reqToken) in store
 export function setAccess(reqToken) {
 	return function(dispatch) {
-		// console.log(reqToken);
 		const url = 'https://moneybird.com/oauth/token';
 		const data = {
 			client_id : clientID,
 			client_secret : secretKey,
 			code : reqToken,
-			redirect_uri : 'urn:ietf:wg:oauth:2.0:oob',
+			redirect_uri : redir_url,
 			grant_type : 'authorization_code'
 		};
-		postInitialData(url, data)
+		postInitialData(url, data, "POST")
 			.then(res => {
 				setCookie(res);
 				dispatch(setAccessObject(res));
