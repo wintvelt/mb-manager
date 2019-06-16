@@ -43,7 +43,7 @@ function rootReducer(state = initialState, action) {
     case SET_ACCESS_OBJECT: {
       return Object.assign({}, state, {
         accessObject: action.payload,
-        isConnected: false
+        isConnected: true
       })
     }
     // payload = ()

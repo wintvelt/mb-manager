@@ -234,3 +234,13 @@ table.small {
 	line-height: 16px;
 	flex: 1;
 }
+
+.select__value-container input[type=text] {
+	height: 16px;
+}
+.select__value-container {
+	height: 36px;
+}
+.select__indicators div.select__dropdown-indicator {
+	padding: 0 8px;
+}
