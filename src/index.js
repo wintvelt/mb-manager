@@ -10,7 +10,8 @@ import { getCookie } from "./actions/cookies";
 import { initialState } from './reducers/reducers';
 
 const initFromCookie = () => {
-	return Object.assign({}, initialState, { accessObject : getCookie() })
+	const cookie = getCookie();
+	return Object.assign({}, initialState, { accessObject : cookie, isConnected : (cookie)? true : false })
 }
 
 ReactDOM.render(

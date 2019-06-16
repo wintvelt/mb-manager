@@ -7,7 +7,7 @@ const days = 30;
 // cookies
 export function getCookie() {
     var v = document.cookie.match('(^|;) ?' + cookieName + '=([^;]*)(;|$)');
-    return v ? JSON.parse(decodeURI(v[2])) : {};
+    return v ? JSON.parse(decodeURI(v[2])) : null;
 }
 
 export function setCookie(object) {
