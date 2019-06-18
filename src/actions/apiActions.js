@@ -55,7 +55,7 @@ export function setAccess(reqToken) {
 				dispatch(setAccessObject(res));
 			})
 			.catch(error => {
-				const msg = "Ophalen Access Object helaas mislukt. Server gaf foutmelding \""
+				const msg = "Verificatie van inlog mislukt. Server gaf foutmelding \""
 					+ error.message + "\".";
 				dispatch(doSnackError(msg));
 			});

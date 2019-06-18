@@ -7,7 +7,7 @@ const days = 30;
 // cookies
 export function getCookie() {
     var v = document.cookie.match('(^|;) ?' + cookieName + '=([^;]*)(;|$)');
-    return v ? JSON.parse(decodeURI(v[2])) : null;
+    return (v && v[2].length > 0) ? JSON.parse(decodeURI(v[2])) : null;
 }
 
 export function setCookie(object) {
@@ -18,5 +18,5 @@ export function setCookie(object) {
 }
 
 export function deleteCookie() { 
-	setCookie(cookieName, '', -1); 
+    document.cookie = cookieName + "= ;path=/;expires=0";
 }

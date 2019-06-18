@@ -11,13 +11,13 @@ import { DO_SNACK, DO_SNACK_ERROR,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT, SET_CONTACTS_LOADING 
   } from "../constants/action-types";
 import { setLedgerInRow, setCustomFieldInRow, setPaymentInRow } from './reducer-helpers';
+import { deleteCookie } from '../actions/cookies';
 
 // initial state also exported to root (to set default when initializing)
 export const initialState = {
   newSnack: "",
-  connectionError: false,
   accessObject: null,
-  isConnected: false,
+  accessVerified: false,
   testOutput: "",
   ledgers: null,
   ledgerDate: "",
@@ -43,14 +43,13 @@ function rootReducer(state = initialState, action) {
     case SET_ACCESS_OBJECT: {
       return Object.assign({}, state, {
         accessObject: action.payload,
-        isConnected: true
+        accessVerified: true
       })
     }
     // payload = ()
     case PASSED_TEST: {
       return Object.assign({}, state, {
-        isConnected: true,
-        connectionError: false
+        accessVerified: true
       })
     }
     // payload = (bool)
@@ -64,14 +63,14 @@ function rootReducer(state = initialState, action) {
       return Object.assign({}, state, {
         ledgers: action.payload.ledgers,
         ledgerDate: action.payload.ledgerDate,
-        connectionError: false
+        accessVerified: true
       })
     }
     case SET_CUSTOM_FIELDS: {
       return Object.assign({}, state, {
         customFields: action.payload.customFields,
         customFieldsDate: action.payload.customFieldsDate,
-        connectionError: false
+        accessVerified: true
       })
     }
 
@@ -84,7 +83,7 @@ function rootReducer(state = initialState, action) {
         incomingDate: action.payload.incomingDate,
         incomingLoaded: (action.payload.incoming.length === 0),
         incomingLoading: state.incomingLoading.filter(item => (item !== action.payload.page)),
-        connectionError: false
+        accessVerified: true
       })
     }
 
@@ -155,7 +154,7 @@ function rootReducer(state = initialState, action) {
         contactsLoaded: (action.payload.contacts.length === 0),
         contactsLoading: state.contactsLoading.filter(item => (item !== action.payload.page)),
         contactsDate: action.payload.contactsDate,
-        connectionError: false
+        accessVerified: true
       })
     }
 
@@ -210,7 +209,7 @@ function rootReducer(state = initialState, action) {
       return Object.assign({}, state, {
         received: [...received, ...action.payload.received],
         receivedDate: action.payload.receivedDate,
-        connectionError: false
+        accessVerified: true
       })
     }
 
@@ -238,21 +237,28 @@ function rootReducer(state = initialState, action) {
       })
     }
     case DO_SNACK_ERROR: {
+      // also delete cookie, because we could not connect, so access object does not work
+      deleteCookie();
       return Object.assign({}, state, {
           newSnack: action.payload,
-          connectionError: true
+          accessObject : null,
+          accessVerified: false
       })
     }
 
     case LOGIN: {
+      // for testing only
       return Object.assign({}, state, {
-          isConnected: true
+        accessObject : {},
+        accessVerified: true
       })
     }
 
     case LOGOUT: {
+      // for testing only
       return Object.assign({}, state, {
-          isConnected: false
+        accessObject : null,
+        accessVerified: false
       })
     }
 

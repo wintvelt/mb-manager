@@ -7,14 +7,14 @@ import { Link } from 'react-router-dom';
 
 const mapStateToProps = state => {
   return { 
-  	isConnected : state.isConnected
+	  accessObject : state.accessObject,
+	  accessVerified : state.accessVerified
   };
 };
 
 const ConnectedNav = (props) => {
-	const isConnected = props.isConnected;
-	const iconLogin = "material-icons left small" + (isConnected? " teal-text" : "");
-	const menuShow = isConnected? "" : " hide";
+	const iconLogin = (props.accessObject) ? (props.accessVerified) ? "done_all" : "done" : "close"; 
+	const menuShow = (props.accessObject)? "" : " hide";
 	const menu = [
 		{ path: "/contacten", text: "Contacten" },
 		{ path: "/inkomend", text: "Inkomend" },
@@ -26,7 +26,7 @@ const ConnectedNav = (props) => {
 		    <div className="nav-wrapper">
 		      <ul className="right">
 		        <li><Link to="/connection">
-		          <i className={iconLogin}>account_circle</i>
+		          <i className="material-icons left small">{iconLogin}</i>
 		          <span>Connectie</span>
 		        </Link></li>
 		      </ul>
