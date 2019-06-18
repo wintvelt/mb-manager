@@ -244,3 +244,17 @@ table.small {
 .select__indicators div.select__dropdown-indicator {
 	padding: 0 8px;
 }
+.empty {
+	width: 100%;
+}
+.card-badge {
+	height: 20px;
+    width: 20px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 2px 7px;
+    background-color: lightslategrey;
+    border-radius: 24px;
+    font-size: 80%;
+}
