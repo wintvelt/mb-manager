@@ -13,13 +13,12 @@ const mapStateToProps = state => {
 };
 
 const ConnectedNav = (props) => {
-	const iconLogin = (props.accessObject) ? (props.accessVerified) ? "done_all" : "done" : "close"; 
+	const iconLogin = (props.accessObject) ? (props.accessVerified) ? "done_all" : "done" : "do_not_disturb"; 
 	const menuShow = (props.accessObject)? "" : " hide";
 	const menu = [
 		{ path: "/contacten", text: "Contacten" },
 		{ path: "/inkomend", text: "Inkomend" },
-		{ path: "/betalingen", text: "Betalingen" },
-		{ path: "/taken", text: "Taken" }
+		{ path: "/betalingen", text: "Betalingen" }
 	]
 	return (
 		<nav className="nav-extended" style={{marginBottom: "32px"}}>

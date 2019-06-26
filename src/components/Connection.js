@@ -69,7 +69,7 @@ class ConnectionInt extends Component {
 						{accessVerified ? <p>{IconOK} Login is ook geverifieerd voor deze sessie</p> : <div></div>}
 					</div>
 					:
-					(reqToken.length >0) ?
+					(reqToken && reqToken.length >0) ?
 						<div className="section">
 							<h4>{IconOK} Inlog moet nog geverifieerd worden</h4>
 								<div>

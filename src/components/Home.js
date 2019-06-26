@@ -20,8 +20,12 @@ const cards =
 			par: "Selecties exporteren naar een csv bestand. Handig voor.. maandelijkse summary aan elk management-lid van zijn/haar kosten."
 		},
 		{
-			title: "Connectie",
+			title: "Menu: Connectie",
 			par: "Het begint bij connectie. Via de link (rechtsboven) kun je connectie maken. Zodra je connectie hebt, zie je meer functies."
+		},
+		{
+			title: "Over Connectie",
+			par: "Moblybird heeft altijd connectie met Moneybird nodig. Als uitwisseling van data niet lukt, dan moet je de connectie opnieuw maken."
 		},
 		{
 			title: "Menu: Contacten",
@@ -47,7 +51,7 @@ const cardView = (card, clickFunc) => {
 				</div>
 				<div className="card-badge">{card.id+1}</div>
 				<div className="card-action">
-					<button className="btn-flat orange-text" onClick={e => clickFunc(card.id)}>Got it!</button>
+					<button className="btn-flat orange-text" onClick={e => clickFunc(card.id)}>Helder!</button>
 				</div>
 			</div>
 		</div>
