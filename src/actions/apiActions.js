@@ -27,6 +27,13 @@ const redir_url = () => {
 	return 'https://moblybird.com/connection';
 }
 
+const env = () => {
+	if (process.env.NODE_ENV !== 'production') {
+		return 'dev';
+	}
+	return 'prod';
+}
+
 
 // does NOT update state
 export function getRequestToken() {
@@ -45,10 +52,11 @@ export function getRequestToken() {
 // fetches Access Object + stores result (Access Object + reqToken) in store
 export function setAccess(reqToken) {
 	return function (dispatch) {
+
 		// const url = 'https://moneybird.com/oauth/token';
 		const url = 'https://60bl9ynygh.execute-api.eu-central-1.amazonaws.com/beta/mbGetAccess?code='
-			+ reqToken;
-		// const data = {
+			+ reqToken + '&env=' + env();
+			// const data = {
 		// 	client_id : clientID,
 		// 	client_secret : secretKey,
 		// 	code : reqToken,
