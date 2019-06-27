@@ -263,7 +263,8 @@ const patchFrom = (incomingId, newLedgerId, incoming) => {
 			ledger_account_id: newLedgerId 
 		};
 	});
-	const body = { "purchase_invoice" : { "details_attributes" : details }};
+	const body = {};
+	body[incomingSingle.type] = { "details_attributes" : details };
 	return body;
 }
 

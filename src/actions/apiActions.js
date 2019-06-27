@@ -121,21 +121,26 @@ export function getLedgers() {
 	}
 }
 
-export function getIncoming(page = 1) {
+export function getIncoming(incomingType, page = 1) {
 	return function (dispatch, getState) {
-		const url = base_url + '/documents/purchase_invoices.json';
+		const url = base_url + '/documents/'+incomingType+'s.json';
 		const { incoming, incomingLoaded, incomingLoading, accessObject } = getState();
-		if (incoming && incomingLoaded && accessObject.access_token) {
+		if (incoming && incomingLoaded[incomingType] && accessObject.access_token) {
 			return incoming;
 		}
-		if (!incomingLoading.includes(page)) {
-			dispatch(setIncomingLoading(page));
+		if (!incomingLoading[incomingType] || !incomingLoading[incomingType].includes(page)) {
+			dispatch(setIncomingLoading({ incomingType: incomingType, page: page }));
 			const filter = "period:201801..201912";
 			return getPagedList(url, accessObject.access_token, filter, page)
 				.then(resultList => {
-					dispatch(addIncoming({ incoming: resultList, incomingDate: Date.now(), page: page }));
+					dispatch(addIncoming({ 
+						incoming: resultList, 
+						incomingType: incomingType,
+						incomingDate: Date.now(), 
+						page: page 
+					}));
 					if (resultList.length > 0) {
-						dispatch(getIncoming(page + 1));
+						dispatch(getIncoming(incomingType, page + 1));
 					}
 				})
 				.catch(error => {
@@ -240,6 +245,7 @@ export function getReceived(idList) {
 export function patchIncomingLedger(batchId, incomingId, body, access_token) {
 	return function (dispatch) {
 		const type = Object.keys(body)[0];
+		console.log(type);
 		const url = base_url + '/documents/' + type + 's/' + incomingId + ".json";
 		return (
 			postData(url, body, "PATCH", access_token)

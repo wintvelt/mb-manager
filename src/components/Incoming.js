@@ -33,7 +33,7 @@ const mapStateToProps = state => {
 function mapDispatchToProps(dispatch) {
 	return {
 		getLedgers: () => dispatch(getLedgers()),
-		getIncoming: () => dispatch(getIncoming()),
+		getIncoming: (type) => dispatch(getIncoming(type)),
 		doSnack: (newSnack) => dispatch(doSnack(newSnack)),
 		batchLedgerUpdate: (patchList) => dispatch(batchLedgerUpdate(patchList)),
 		batchContactCustomUpdate: (patchList) => dispatch(batchContactCustomUpdate(patchList)),
@@ -50,7 +50,8 @@ class ConnectedIncoming extends Component {
 			this.props.getLedgers();
 		}
 		if (!this.props.incoming && !hasError) {
-			this.props.getIncoming();
+			this.props.getIncoming('receipt');
+			this.props.getIncoming('purchase_invoice');
 		}
 
 		this.state = {

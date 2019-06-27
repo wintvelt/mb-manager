@@ -24,8 +24,8 @@ export const initialState = {
   customFields: null,
   customFieldsDate: "",
   incoming: null,
-  incomingLoaded: false,
-  incomingLoading: [],
+  incomingLoaded: {},
+  incomingLoading: {},
   incomingDate: "",
   contacts: null,
   contactsLoaded: false,
@@ -75,18 +75,23 @@ function rootReducer(state = initialState, action) {
     }
 
     // from server
-    // payload = { incoming, incomingDate, page }
+    // payload = { incoming, incomingType, incomingDate, page }
     case ADD_INCOMING: {
       const incoming = state.incoming || [];
       // NB MUTABLE CHANGE - add type to incoming (purchase invoice or receipt)
       for (var i = 0, len = action.payload.incoming.length; i < len; i++) {
-        action.payload.incoming[i].type = 'purchase_invoice';
+        action.payload.incoming[i].type = action.payload.incomingType;
       }
+      const newIncomingLoaded = Object.assign({}, state.incomingLoaded);
+      newIncomingLoaded[action.payload.incomingType] = (action.payload.incoming.length === 0);
+      const newIncomingLoading = Object.assign({}, state.incomingLoading);
+      newIncomingLoading[action.payload.incomingType] = 
+        state.incomingLoading[action.payload.incomingType].filter(item => (item !== action.payload.page));
       return Object.assign({}, state, {
         incoming: [...incoming, ...action.payload.incoming],
         incomingDate: action.payload.incomingDate,
-        incomingLoaded: (action.payload.incoming.length === 0),
-        incomingLoading: state.incomingLoading.filter(item => (item !== action.payload.page)),
+        incomingLoaded: newIncomingLoaded,
+        incomingLoading: newIncomingLoading,
         accessVerified: true
       })
     }
@@ -144,9 +149,14 @@ function rootReducer(state = initialState, action) {
         });
     }
 
+    // payload = { incomingType, page }
     case SET_INCOMING_LOADING: {
+      const oldList = state.incomingLoading[action.payload.incomingType] || []
+      const newIncomingLoading = Object.assign({}, state.incomingLoading);
+      newIncomingLoading[action.payload.incomingType] = 
+        [...new Set([...oldList, action.payload.page])]
       return Object.assign({}, state, {
-        incomingLoading: [...new Set([...state.incomingLoading, action.payload])]
+        incomingLoading: newIncomingLoading
       })
     }
 
