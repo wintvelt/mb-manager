@@ -71,6 +71,7 @@ class ConnectedIncoming extends Component {
 		this.onDownload = this.onDownload.bind(this);
 	}
 	onChangeFilters(newFilters) {
+		const newList = newFilters.list || [];
 		switch (newFilters.type) {
 			case "catDelta": {
 				this.setState({
@@ -80,31 +81,31 @@ class ConnectedIncoming extends Component {
 			}
 			case "cat": {
 				this.setState({
-					catFilter: newFilters.list
+					catFilter: newList
 				})
 				break;
 			}
 			case "status": {
 				this.setState({
-					statusFilter: newFilters.list
+					statusFilter: newList
 				})
 				break;
 			}
 			case "pay": {
 				this.setState({
-					payFilter: newFilters.list
+					payFilter: newList
 				})
 				break;
 			}
 			case "owner": {
 				this.setState({
-					ownerFilter: newFilters.list
+					ownerFilter: newList
 				})
 				break;
 			}
 			case "supplier": {
 				this.setState({
-					supplierFilter: newFilters.list
+					supplierFilter: newList
 				})
 				break;
 			}
@@ -148,7 +149,8 @@ class ConnectedIncoming extends Component {
 		this.props.doSnack(patchList.message);
 		this.props.batchLedgerUpdate(patchList.batchList);
 		this.setState({
-			catFilter: false,
+			catDeltaFilter: false,
+			catFilter: [],
 			statusFilter: null,
 			ownerFilter: [],
 			payFilter: [],
@@ -161,7 +163,8 @@ class ConnectedIncoming extends Component {
 		this.props.doSnack(patchList.message);
 		this.props.batchContactCustomUpdate(patchList.batchList);
 		this.setState({
-			catFilter: false,
+			catDeltaFilter: false,
+			catFilter: [],
 			statusFilter: null,
 			ownerFilter: [],
 			payFilter: [],
@@ -174,7 +177,8 @@ class ConnectedIncoming extends Component {
 		this.props.doSnack(patchList.message);
 		this.props.batchPaymentUpdate(patchList.batchList);
 		this.setState({
-			catFilter: false,
+			catDeltaFilter: false,
+			catFilter: [],
 			statusFilter: null,
 			ownerFilter: [],
 			payFilter: [],

@@ -48,16 +48,17 @@ class ConnectedReceived extends Component {
         this.onDownload=this.onDownload.bind(this);
 	}
 	onChangeFilters(newFilters) {
+		const newList = newFilters.list || [];
 		switch (newFilters.type) {
 			case "month": {
 				this.setState({
-					monthFilter: newFilters.list
+					monthFilter: newList
 				});
 				break;
     		}
 			case "amount": {
 				this.setState({
-					amountFilter: newFilters.list
+					amountFilter: newList
 				})
 				break;
       		}
@@ -69,7 +70,7 @@ class ConnectedReceived extends Component {
       		}
     		case "search": {
 				this.setState({
-					searchFilter: newFilters.list
+					searchFilter: newList
 				})
 				break;
 			}

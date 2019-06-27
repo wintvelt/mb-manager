@@ -239,7 +239,8 @@ export function getReceived(idList) {
 // returns promise
 export function patchIncomingLedger(batchId, incomingId, body, access_token) {
 	return function (dispatch) {
-		const url = base_url + '/documents/purchase_invoices/' + incomingId + ".json";
+		const type = Object.keys(body)[0];
+		const url = base_url + '/documents/' + type + 's/' + incomingId + ".json";
 		return (
 			postData(url, body, "PATCH", access_token)
 				.then((res) => {

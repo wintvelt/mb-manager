@@ -78,6 +78,10 @@ function rootReducer(state = initialState, action) {
     // payload = { incoming, incomingDate, page }
     case ADD_INCOMING: {
       const incoming = state.incoming || [];
+      // NB MUTABLE CHANGE - add type to incoming (purchase invoice or receipt)
+      for (var i = 0, len = action.payload.incoming.length; i < len; i++) {
+        action.payload.incoming[i].type = 'purchase_invoice';
+      }
       return Object.assign({}, state, {
         incoming: [...incoming, ...action.payload.incoming],
         incomingDate: action.payload.incomingDate,

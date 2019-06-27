@@ -73,28 +73,29 @@ class ConnectedContacts extends Component {
 		this.onDownload=this.onDownload.bind(this);
 	}
 	onChangeFilters(newFilters) {
+		const newList = newFilters.list || [];
 		switch (newFilters.type) {
 			case "owner": {
 				this.setState({
-					ownerFilter: newFilters.list
+					ownerFilter: newList
 				})
 				break;
 			}
 			case "contact": {
 				this.setState({
-					contactFilter: newFilters.list
+					contactFilter: newList
 				})
 				break;
 			}
 			case "pay": {
 				this.setState({
-					payFilter: newFilters.list
+					payFilter: newList
 				})
 				break;
 			}
 			case "cat": {
 				this.setState({
-					stdLedgerFilter: newFilters.list
+					stdLedgerFilter: newList
 				})
 				break;
 			}
