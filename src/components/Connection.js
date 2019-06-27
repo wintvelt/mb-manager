@@ -27,7 +27,7 @@ function mapDispatchToProps(dispatch) {
 
 const IconOK = <i className="material-icons green-text">done</i>;
 const IconOKOK = <i className="material-icons green-text">done_all</i>;
-const IconNOK = <i className="material-icons grey-text">close</i>;
+const IconNOK = <i className="material-icons grey-text">do_not_disturb</i>;
 
 class ConnectionInt extends Component {
 	constructor(props) {

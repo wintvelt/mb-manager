@@ -14,16 +14,22 @@ const clientID = "2cb04d78d39dae63065ef873a1b909e8";
 export const adminCode = "243231934476453244";
 
 const base_url = 'https://moneybird.com/api/v2/' + adminCode;
-const redir_url = 'http://localhost:3000/connection';
-// const redir_url ='http://moblybird.com/connection';
 
-// const access_token = "5c871550f446b557d9f48e89e899dd46bb7d1e058cb76dfa000394143681a9ae";
+const redir_url = () => {
+	console.log(process.env);
+	if (process.env.NODE_ENV !== 'production') {
+		require('dotenv').config();
+		return 'http://localhost:3000/connection';
+	}
+	return 'https://moblybird.com/connection';
+}
+
 
 // does NOT update state
 export function getRequestToken() {
 	const url = 'https://moneybird.com/oauth/authorize?'
 		+ 'client_id=' + clientID
-		+ '&redirect_uri=' + redir_url
+		+ '&redirect_uri=' + redir_url()
 		+ '&response_type=code'
 		+ '&scope=sales_invoices documents estimates bank settings';
 	window.location.href = url;

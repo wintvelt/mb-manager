@@ -70,7 +70,7 @@ function PrivateRoute({ isConnected, component: Component, ...rest }) {
           <Redirect
             to={{
               pathname: "/connection",
-              state: { newSnack: "Jammer, je moet eerst connectie maken." }
+              state: { newSnack: "Sorry, je moet eerst connectie maken." }
             }}
           />
         )
