@@ -11,7 +11,6 @@ import { DO_SNACK, DO_SNACK_ERROR,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT, SET_CONTACTS_LOADING 
   } from "../constants/action-types";
 import { setLedgerInRow, setCustomFieldInRow, setPaymentInRow } from './reducer-helpers';
-import { deleteCookie } from '../actions/cookies';
 
 // initial state also exported to root (to set default when initializing)
 export const initialState = {
