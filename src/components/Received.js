@@ -8,7 +8,7 @@ import { getReceived, getAccounts } from "../actions/apiActions";
 import { doSnack } from "../actions/actions";
 import { SortableTable, tHeadAddSelect, toggleCell } from '../constants/table-helpers-2';
 import { receivedRows, receivedHeaders } from '../constants/data-helpers-received';
-import ReceivedFilters, { filterMonth, filterStatus, filterAmount, filterSearch } from './ReceivedFilters';
+import ReceivedFilters, { filterMonth, filterStatus, filterAmount, filterSearch, filterAccount } from './ReceivedFilters';
 import ReceivedActions from './ReceivedActions';
 import { downloadCsv } from '../constants/download-helpers';
 import { SideNavWrapper, SideNav, MainWithSideNav } from './SideNav';
@@ -41,6 +41,7 @@ class ConnectedReceived extends Component {
 			amountFilter: [],
 			statusFilter: true,
 			searchFilter: "",
+			accountFilter: [],
 			selected: [],
 			selFilter: false
 		}
@@ -83,6 +84,11 @@ class ConnectedReceived extends Component {
 					searchFilter: newList
 				})
 				break;
+			}
+			case "account": {
+				this.setState({
+					accountFilter: newList
+				})
 			}
 			case "sel": {
 				this.setState({
@@ -154,12 +160,16 @@ class ConnectedReceived extends Component {
 			const amountOptions =
 				["Alles", "Ontvangen", "Uitgegeven"]
 					.map(v => { return { value: v, label: v } });
+			const accountOptions =
+				this.props.accounts
+					.map(acc => { return { value: acc.name, label: acc.name } });
 
 			const rows = rowsRaw
 				.filter(row => filterMonth(row, this.state.monthFilter))
 				.filter(row => filterStatus(row, this.state.statusFilter))
 				.filter(row => filterAmount(row, this.state.amountFilter))
 				.filter(row => filterSearch(row, this.state.searchFilter))
+				.filter(row => filterAccount(row, this.state.accountFilter))
 				.filter(row => (!this.state.selFilter || this.state.selected.length === 0 ||
 					(this.state.selected.filter(i => (i === row[0].value)).length > 0)))
 				.map(row => {
@@ -197,6 +207,8 @@ class ConnectedReceived extends Component {
 							amountOptions={amountOptions}
 							amountFilter={this.state.amountFilter}
 							statusFilter={this.state.statusFilter}
+							accountOptions={accountOptions}
+							accountFilter={this.state.accountFilter}
 							selFilter={this.state.selFilter} />
 						<li><div className="divider"></div></li>
 						<ReceivedActions
