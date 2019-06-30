@@ -261,12 +261,9 @@ function rootReducer(state = initialState, action) {
       })
     }
     case DO_SNACK_ERROR: {
-      // also delete cookie, because we could not connect, so access object does not work
-      deleteCookie();
+      // for now, simply display message
       return Object.assign({}, state, {
-          newSnack: action.payload,
-          accessObject : null,
-          accessVerified: false
+          newSnack: action.payload
       })
     }
 
