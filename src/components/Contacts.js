@@ -20,7 +20,7 @@ import { since } from '../constants/helpers';
 
 const mapStateToProps = state => {
   return { 
-	accessObject: state.accessObject,
+	accessToken: state.accessToken,
   	ledgers: state.ledgers,
   	ledgerDate : state.ledgerDate,
   	contacts: state.contacts,
@@ -54,7 +54,7 @@ class ConnectedContacts extends Component {
 			selected: [],
 			selFilter: false
 		}
-		const hasError = (!props.accessObject);
+		const hasError = (!props.accessToken);
 		if (!props.ledgers && !hasError) {
 			props.getLedgers();
 		}
@@ -159,7 +159,7 @@ class ConnectedContacts extends Component {
 	}
 
 	render() {
-		const hasError = (!this.props.accessObject);
+		const hasError = (!this.props.accessToken);
 		const hasData = (!hasError && this.props.ledgers && this.props.contacts && this.props.customFields);
 		const hasLedgers = (this.props.ledgers)? 
 			<p className="flex"><i className="material-icons green-text">done</i>
@@ -292,7 +292,7 @@ class ConnectedContacts extends Component {
 					</MainWithSideNav>
 				</SideNavWrapper>
 			);	
-		} else if (this.props.accessObject) {
+		} else if (this.props.accessToken) {
 			return (
 				<div className="container"> 
 				    <div className="section">

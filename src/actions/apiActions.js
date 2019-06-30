@@ -1,12 +1,13 @@
 // voor actions die fetch enzo doen. Met middleware.
 import {
-	setAccessObject, passedTest, doSnackError,
+	setAccessToken,
+	passedTest, doSnackError,
 	setLedgers, setAccounts,
 	addIncoming, setIncomingLoading,
 	addContacts, setCustomFields, setContactsLoading,
 	addReceived
 } from './actions';
-import { setCookie } from './cookies';
+import { setCookie, deleteCookie } from './cookies';
 
 const PERPAGE = 50;
 
@@ -34,19 +35,16 @@ const env = () => {
 	return 'prod';
 }
 
-
-// does NOT update state
+// does not update store
 export function getRequestToken() {
+	// remove accessToken from cookie
+	deleteCookie();
 	const url = 'https://moneybird.com/oauth/authorize?'
 		+ 'client_id=' + clientID()
 		+ '&redirect_uri=' + redir_url()
 		+ '&response_type=code'
 		+ '&scope=sales_invoices documents estimates bank settings';
 	window.location.href = url;
-	// fetch(url, {mode: 'no-cors', redirect: 'follow'})
-	//   .then(res => {
-	//   	window.location.href=res.url;
-	//   });
 }
 
 // fetches Access Object + stores result (Access Object + reqToken) in store
@@ -56,7 +54,7 @@ export function setAccess(reqToken) {
 		// const url = 'https://moneybird.com/oauth/token';
 		const url = 'https://60bl9ynygh.execute-api.eu-central-1.amazonaws.com/beta/mbGetAccess?code='
 			+ reqToken + '&env=' + env();
-			// const data = {
+		// const data = {
 		// 	client_id : clientID,
 		// 	client_secret : secretKey,
 		// 	code : reqToken,
@@ -69,7 +67,7 @@ export function setAccess(reqToken) {
 			.then(handleError)
 			.then(res => {
 				setCookie(res);
-				dispatch(setAccessObject(res));
+				dispatch(setAccessToken(res));
 			})
 			.catch(error => {
 				const msg = "Verificatie van inlog mislukt. Server gaf foutmelding \""
@@ -82,9 +80,9 @@ export function setAccess(reqToken) {
 export function testAccess() {
 	return function (dispatch, getState) {
 		const url = base_url + '/ledger_accounts/243957415182075767.json';
-		const { accessObject } = getState();
-		if (accessObject && accessObject.access_token) {
-			return getData(url, accessObject.access_token)
+		const { accessToken } = getState();
+		if (accessToken) {
+			return getData(url, accessToken)
 				.then(contact => {
 					dispatch(passedTest());
 				}
@@ -104,11 +102,11 @@ export function testAccess() {
 export function getLedgers() {
 	return function (dispatch, getState) {
 		const url = base_url + '/ledger_accounts.json';
-		const { ledgers, accessObject } = getState();
-		if (ledgers && accessObject.access_token) {
+		const { ledgers, accessToken } = getState();
+		if (ledgers && accessToken) {
 			return ledgers;
 		} else {
-			return getData(url, accessObject.access_token)
+			return getData(url, accessToken)
 				.then(ledgers => {
 					dispatch(setLedgers({ ledgers: ledgers, ledgerDate: Date.now() }));
 				})
@@ -124,11 +122,11 @@ export function getLedgers() {
 export function getAccounts() {
 	return function (dispatch, getState) {
 		const url = base_url + '/financial_accounts.json';
-		const { accounts, accessObject } = getState();
-		if (accounts && accessObject.access_token) {
+		const { accounts, accessToken } = getState();
+		if (accounts && accessToken) {
 			return accounts;
 		} else {
-			return getData(url, accessObject.access_token)
+			return getData(url, accessToken)
 				.then(accounts => {
 					dispatch(setAccounts({ accounts: accounts, accountDate: Date.now() }));
 				})
@@ -142,21 +140,21 @@ export function getAccounts() {
 }
 export function getIncoming(incomingType, page = 1) {
 	return function (dispatch, getState) {
-		const url = base_url + '/documents/'+incomingType+'s.json';
-		const { incoming, incomingLoaded, incomingLoading, accessObject } = getState();
-		if (incoming && incomingLoaded[incomingType] && accessObject.access_token) {
+		const url = base_url + '/documents/' + incomingType + 's.json';
+		const { incoming, incomingLoaded, incomingLoading, accessToken } = getState();
+		if (incoming && incomingLoaded[incomingType] && accessToken) {
 			return incoming;
 		}
 		if (!incomingLoading[incomingType] || !incomingLoading[incomingType].includes(page)) {
 			dispatch(setIncomingLoading({ incomingType: incomingType, page: page }));
 			const filter = "period:201801..201912";
-			return getPagedList(url, accessObject.access_token, filter, page)
+			return getPagedList(url, accessToken, filter, page)
 				.then(resultList => {
-					dispatch(addIncoming({ 
-						incoming: resultList, 
+					dispatch(addIncoming({
+						incoming: resultList,
 						incomingType: incomingType,
-						incomingDate: Date.now(), 
-						page: page 
+						incomingDate: Date.now(),
+						page: page
 					}));
 					if (resultList.length > 0) {
 						dispatch(getIncoming(incomingType, page + 1));
@@ -174,13 +172,13 @@ export function getIncoming(incomingType, page = 1) {
 export function getContacts(page = 1) {
 	return function (dispatch, getState) {
 		const url = base_url + '/contacts';
-		const { contacts, contactsLoaded, contactsLoading, accessObject } = getState();
-		if (contacts && contactsLoaded && accessObject.access_token) {
+		const { contacts, contactsLoaded, contactsLoading, accessToken } = getState();
+		if (contacts && contactsLoaded && accessToken) {
 			return contacts;
 		}
 		if (!contactsLoading.includes(page)) {
 			dispatch(setContactsLoading(page));
-			return getPagedList(url, accessObject.access_token, "", page)
+			return getPagedList(url, accessToken, "", page)
 				.then(resultList => {
 					dispatch(addContacts({ contacts: resultList, contactsDate: Date.now(), page: page }));
 					if (resultList.length > 0) {
@@ -199,11 +197,11 @@ export function getContacts(page = 1) {
 export function getCustomFields() {
 	return function (dispatch, getState) {
 		const url = base_url + '/custom_fields.json';
-		const { customFields, accessObject } = getState();
-		if (customFields && accessObject.access_token) {
+		const { customFields, accessToken } = getState();
+		if (customFields && accessToken) {
 			return customFields;
 		} else {
-			return getData(url, accessObject.access_token)
+			return getData(url, accessToken)
 				.then(customFields => {
 					dispatch(setCustomFields({
 						customFields: customFields,
@@ -221,14 +219,14 @@ export function getCustomFields() {
 
 export function getReceived(idList) {
 	return function (dispatch, getState) {
-		const { received, accessObject } = getState();
-		if (received && accessObject.access_token && !idList) {
+		const { received, accessToken } = getState();
+		if (received && accessToken && !idList) {
 			return received;
 		}
 		if (!idList) {
 			// fetch payment ids
 			const url = base_url + '/financial_mutations/synchronization.json?filter=period:this_year';
-			return getData(url, accessObject.access_token)
+			return getData(url, accessToken)
 				.then(idListRaw => {
 					const idList = [...new Set(idListRaw.map(it => it.id))];
 					if (idList.length > 0) {
@@ -245,7 +243,7 @@ export function getReceived(idList) {
 		const newIdList = idList.slice(0, PERPAGE);
 		const nextIds = idList.slice(PERPAGE);
 		const newUrl = base_url + '/financial_mutations/synchronization.json';
-		return postData(newUrl, { ids: newIdList }, "POST", accessObject.access_token)
+		return postData(newUrl, { ids: newIdList }, "POST", accessToken)
 			.then(resultList => {
 				dispatch(addReceived({ received: resultList, receivedDate: Date.now() }));
 				if (nextIds.length > 0) {

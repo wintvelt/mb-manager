@@ -11,7 +11,7 @@ import moment from 'moment';
 
 const mapStateToProps = state => {
 	return {
-		accessObject: state.accessObject,
+		accessToken: state.accessToken,
 		accessVerified: state.accessVerified,
 		testOutput: state.testOutput
 	};
@@ -50,7 +50,7 @@ class ConnectionInt extends Component {
 
 	render() {
 		const reqToken = this.state.requestToken;
-		const hasAccess = (this.props.accessObject) ? true : false;
+		const hasAccess = (this.props.accessToken) ? true : false;
 		const accessVerified = this.props.accessVerified;
 		return (
 			<div className="container">
@@ -58,7 +58,7 @@ class ConnectionInt extends Component {
 					<div className="section">
 						<h4>{(accessVerified) ? IconOKOK : IconOK} Je bent ingelogd {'\u00A0'}
 							<span style={{ fontSize: "50%", color: "darkgrey" }}>
-								({moment.unix(this.props.accessObject.created_at).fromNow()})
+								{/* ({moment.unix(this.props.accessObject.created_at).fromNow()}) */}
 							</span>
 						</h4>
 						<p>

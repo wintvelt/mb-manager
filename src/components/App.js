@@ -15,7 +15,7 @@ import Home from './Home';
 function mapStateToProps(state) {
 	return {
 		newSnack : state.newSnack,
-		isConnected : (state.accessObject)? true : false
+		isConnected : (state.accessToken)? true : false
 	}
 }
 

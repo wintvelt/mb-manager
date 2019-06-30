@@ -20,8 +20,8 @@ export function batchLedgTest(batchList) {
 // batchList = [ { incomingId, newLedgerName } ]
 export function batchLedgerUpdate(batchList) {
 	return function(dispatch, getState) {
-		const { ledgers, incoming, accessObject } = getState();
-		if (ledgers && ledgers.length > 0 && incoming && incoming.length > 0 && accessObject) {
+		const { ledgers, incoming, accessToken } = getState();
+		if (ledgers && ledgers.length > 0 && incoming && incoming.length > 0 && accessToken) {
 			// we have data to process
 			const newBatchList = batchList.map( (item) => {
 				// gets LedgerId from ledgers from store
@@ -52,7 +52,7 @@ export function batchLedgerUpdate(batchList) {
 				// send single update to server + update batchMsg with response
 				const patchBody = patchFrom(item.incomingId, item.newLedgerId, incoming);
 				dispatch(
-					patchIncomingLedger("incoming", item.incomingId, patchBody, accessObject.access_token)
+					patchIncomingLedger("incoming", item.incomingId, patchBody, accessToken)
 				).then( payload => dispatch(setBatchCheckMsg(payload)));
 			});
 		} else {
@@ -66,8 +66,8 @@ export function batchLedgerUpdate(batchList) {
 // batchList = [ { incomingId, newLedgerName } ]
 export function batchPaymentUpdate(batchList) {
 	return function(dispatch, getState) {
-		const { incoming, accessObject } = getState();
-		if (incoming && incoming.length > 0 && accessObject) {
+		const { incoming, accessToken } = getState();
+		if (incoming && incoming.length > 0 && accessToken) {
 			// we have incoming
 			const incomingList = batchList.map( item => {
 				return getOneIncoming(incoming, item.incomingId)
@@ -93,7 +93,7 @@ export function batchPaymentUpdate(batchList) {
 				// send single update to server + update batchMsg with response
 				const patchBody = patchPayFrom(item);
 				dispatch(
-					patchPayment("payment", item.id, patchBody, accessObject.access_token)
+					patchPayment("payment", item.id, patchBody, accessToken)
 				).then( payload => {
 					dispatch(setBatchCheckMsg(payload));
 					//  update of store (incoming)
@@ -119,8 +119,8 @@ export function batchPaymentUpdate(batchList) {
 // batchList = [ { contactId, fieldId, customFieldValue } ]
 export function batchContactCustomUpdate(batchList) {
 	return function(dispatch, getState) {
-		const { batchError, accessObject } = getState();
-		if (accessObject) {
+		const { batchError, accessToken } = getState();
+		if (accessToken) {
 			// we have data to process - by default
 			dispatch(setBatchError(false));
 			// loop over cleaned list
@@ -138,7 +138,7 @@ export function batchContactCustomUpdate(batchList) {
 					// send single update to server + update batchMsg with response
 					const patchBody = makeCustomFieldBody(item.fieldId, item.newValue);
 					dispatch(
-						patchContactField("newCustom", item.contactId, patchBody, accessObject.access_token)
+						patchContactField("newCustom", item.contactId, patchBody, accessToken)
 					).then( payload => {
 						dispatch(setBatchCheckMsg(payload));
 						//  update of store (contacts, and incoming)
@@ -173,8 +173,8 @@ export function batchContactCustomUpdate(batchList) {
 // batchList = [ { contactId, fieldId, fieldValue } ]
 export function batchContactUpdate(batchList) {
 	return function(dispatch, getState) {
-		const { batchError, accessObject } = getState();
-		if (accessObject) {
+		const { batchError, accessToken } = getState();
+		if (accessToken) {
 			// we have data to process - by default
 			dispatch(setBatchError(false));
 			// loop over cleaned list
@@ -192,7 +192,7 @@ export function batchContactUpdate(batchList) {
 					// send single update to server + update batchMsg with response
 					const patchBody = makeContactFieldBody(item.fieldId, item.newValue);
 					dispatch(
-						patchContactField("newValue", item.contactId, patchBody, accessObject.access_token)
+						patchContactField("newValue", item.contactId, patchBody, accessToken)
 					).then( payload => {
 						dispatch(setBatchCheckMsg(payload));
 						//  update of store (contacts, and incoming)

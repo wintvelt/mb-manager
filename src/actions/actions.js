@@ -1,6 +1,7 @@
 // src/js/actions/actions.js
 import { DO_SNACK, DO_SNACK_ERROR,
-  SET_ACCESS_OBJECT, PASSED_TEST, SET_BATCH_ERROR,
+  SET_ACCESS_TOKEN, DELETE_ACCESS_TOKEN, 
+  PASSED_TEST, SET_BATCH_ERROR,
   SET_LEDGERS, SET_ACCOUNTS, SET_CUSTOM_FIELDS,
   ADD_INCOMING, SET_INCOMING_LEDGER, SET_INCOMING_CUSTOM_FIELD, SET_INCOMING_PAYMENT,
   SET_INCOMING_LOADING,
@@ -10,8 +11,11 @@ import { DO_SNACK, DO_SNACK_ERROR,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT 
   } from "../constants/action-types";
 
-export function setAccessObject(payload) {
-  return { type: SET_ACCESS_OBJECT, payload };
+export function setAccessToken(payload) {
+  return { type: SET_ACCESS_TOKEN, payload };
+}
+export function deleteAccessToken(payload) {
+  return { type: DELETE_ACCESS_TOKEN, payload };
 }
 export function passedTest(payload) {
   return { type: PASSED_TEST, payload };

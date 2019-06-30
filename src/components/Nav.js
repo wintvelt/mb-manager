@@ -7,14 +7,14 @@ import { Link } from 'react-router-dom';
 
 const mapStateToProps = state => {
   return { 
-	  accessObject : state.accessObject,
+	  accessToken : state.accessToken,
 	  accessVerified : state.accessVerified
   };
 };
 
 const ConnectedNav = (props) => {
-	const iconLogin = (props.accessObject) ? (props.accessVerified) ? "done_all" : "done" : "do_not_disturb"; 
-	const menuShow = (props.accessObject)? "" : " hide";
+	const iconLogin = (props.accessToken) ? (props.accessVerified) ? "done_all" : "done" : "do_not_disturb"; 
+	const menuShow = (props.accessToken)? "" : " hide";
 	const menu = [
 		{ path: "/contacten", text: "Contacten" },
 		{ path: "/inkomend", text: "Inkomend" },

@@ -17,7 +17,7 @@ import { since } from '../constants/helpers';
 
 const mapStateToProps = state => {
 	return {
-		accessObject: state.accessObject,
+		accessToken: state.accessToken,
 		received: state.received,
 		receivedDate: state.receivedDate,
 		accounts: state.accounts,
@@ -49,10 +49,10 @@ class ConnectedReceived extends Component {
 		this.onSelectAll = this.onSelectAll.bind(this);
 		this.onDownload = this.onDownload.bind(this);
 
-		if (!props.accounts && props.accessObject) {
+		if (!props.accounts && props.accessToken) {
 			props.getAccounts();
 		}
-		if (!props.received && props.accessObject) {
+		if (!props.received && props.accessToken) {
 			props.getReceived();
 		}
 
@@ -124,7 +124,7 @@ class ConnectedReceived extends Component {
 	}
 
 	render() {
-		const hasError = (!this.props.accessObject);
+		const hasError = (!this.props.accessToken);
 		const hasData = (!hasError && this.props.received);
 		const hasAccounts = (this.props.accounts) ?
 			<p className="flex"><i className="material-icons green-text">done</i>
@@ -210,7 +210,7 @@ class ConnectedReceived extends Component {
 					</MainWithSideNav>
 				</SideNavWrapper>
 			);
-		} else if (this.props.accessObject) {
+		} else if (this.props.accessToken) {
 			return (
 				<div className="container">
 					<div className="section">

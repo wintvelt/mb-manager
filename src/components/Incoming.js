@@ -21,7 +21,7 @@ import { since } from '../constants/helpers';
 
 const mapStateToProps = state => {
 	return {
-		accessObject: state.accessObject,
+		accessToken: state.accessToken,
 		ledgers: state.ledgers,
 		ledgerDate: state.ledgerDate,
 		incoming: state.incoming,
@@ -44,7 +44,7 @@ class ConnectedIncoming extends Component {
 	constructor(props) {
 		super(props);
 
-		const hasError = (!props.accessObject);
+		const hasError = (!props.accessToken);
 		if (!props.ledgers && !hasError) {
 			props.getLedgers();
 		}
@@ -201,7 +201,7 @@ class ConnectedIncoming extends Component {
 
 
 	render() {
-		const hasError = (!this.props.accessObject);
+		const hasError = (!this.props.accessToken);
 		const hasData = (!hasError && this.props.ledgers && this.props.incoming);
 
 		const hasLedgers = (this.props.ledgers) ?
@@ -319,7 +319,7 @@ class ConnectedIncoming extends Component {
 					</MainWithSideNav>
 				</SideNavWrapper>
 			);
-		} else if (this.props.accessObject) {
+		} else if (this.props.accessToken) {
 			return (
 				<div className="container">
 					<div className="section">

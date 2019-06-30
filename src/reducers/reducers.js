@@ -1,7 +1,8 @@
 // src/js/reducers/reducers.js
 
 import { DO_SNACK, DO_SNACK_ERROR,
-  SET_ACCESS_OBJECT, PASSED_TEST, SET_BATCH_ERROR,
+  SET_ACCESS_TOKEN, DELETE_ACCESS_TOKEN,
+  PASSED_TEST, SET_BATCH_ERROR,
   SET_LEDGERS, SET_ACCOUNTS, SET_CUSTOM_FIELDS,
   ADD_INCOMING, SET_INCOMING_LEDGER, SET_INCOMING_CUSTOM_FIELD, SET_INCOMING_PAYMENT,
   SET_INCOMING_LOADING,
@@ -15,7 +16,7 @@ import { setLedgerInRow, setCustomFieldInRow, setPaymentInRow } from './reducer-
 // initial state also exported to root (to set default when initializing)
 export const initialState = {
   newSnack: "",
-  accessObject: null,
+  accessToken: null,
   accessVerified: false,
   testOutput: "",
   ledgers: null,
@@ -40,11 +41,17 @@ export const initialState = {
 
 function rootReducer(state = initialState, action) {
   switch (action.type) {
-    // payload = accessObject
-    case SET_ACCESS_OBJECT: {
+    // payload = accessToken
+    case SET_ACCESS_TOKEN: {
       return Object.assign({}, state, {
-        accessObject: action.payload,
+        accessToken: action.payload,
         accessVerified: true
+      })
+    }
+    case DELETE_ACCESS_TOKEN: {
+      return Object.assign({}, state, {
+        accessToken: null,
+        accessVerified: false
       })
     }
     // payload = ()
@@ -269,7 +276,7 @@ function rootReducer(state = initialState, action) {
     case LOGIN: {
       // for testing only
       return Object.assign({}, state, {
-        accessObject : {},
+        accessToken : {},
         accessVerified: true
       })
     }
@@ -277,7 +284,7 @@ function rootReducer(state = initialState, action) {
     case LOGOUT: {
       // for testing only
       return Object.assign({}, state, {
-        accessObject : null,
+        accessToken : null,
         accessVerified: false
       })
     }
