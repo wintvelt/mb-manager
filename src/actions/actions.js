@@ -1,7 +1,7 @@
 // src/js/actions/actions.js
 import { DO_SNACK, DO_SNACK_ERROR,
   SET_ACCESS_OBJECT, PASSED_TEST, SET_BATCH_ERROR,
-  SET_LEDGERS, SET_CUSTOM_FIELDS,
+  SET_LEDGERS, SET_ACCOUNTS, SET_CUSTOM_FIELDS,
   ADD_INCOMING, SET_INCOMING_LEDGER, SET_INCOMING_CUSTOM_FIELD, SET_INCOMING_PAYMENT,
   SET_INCOMING_LOADING,
   ADD_CONTACTS, SET_CONTACT_FIELD, SET_CONTACT_CUSTOM_FIELD, SET_CONTACTS_LOADING,
@@ -21,6 +21,9 @@ export function setBatchError(payload) {
 }
 export function setLedgers(payload) {
   return { type: SET_LEDGERS, payload };
+}
+export function setAccounts(payload) {
+  return { type: SET_ACCOUNTS, payload };
 }
 export function setCustomFields(payload) {
   return { type: SET_CUSTOM_FIELDS, payload };

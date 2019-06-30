@@ -21,8 +21,7 @@ import { since } from '../constants/helpers';
 
 const mapStateToProps = state => {
 	return {
-		connectionError: state.connectionError,
-		isConnected: state.isConnected,
+		accessObject: state.accessObject,
 		ledgers: state.ledgers,
 		ledgerDate: state.ledgerDate,
 		incoming: state.incoming,
@@ -45,13 +44,13 @@ class ConnectedIncoming extends Component {
 	constructor(props) {
 		super(props);
 
-		const hasError = (this.props.connectionError || !this.props.isConnected);
-		if (!this.props.ledgers && !hasError) {
-			this.props.getLedgers();
+		const hasError = (!props.accessObject);
+		if (!props.ledgers && !hasError) {
+			props.getLedgers();
 		}
-		if (!this.props.incoming && !hasError) {
-			this.props.getIncoming('receipt');
-			this.props.getIncoming('purchase_invoice');
+		if (!props.incoming && !hasError) {
+			props.getIncoming('receipt');
+			props.getIncoming('purchase_invoice');
 		}
 
 		this.state = {
@@ -202,7 +201,7 @@ class ConnectedIncoming extends Component {
 
 
 	render() {
-		const hasError = (this.props.connectionError || !this.props.isConnected);
+		const hasError = (!this.props.accessObject);
 		const hasData = (!hasError && this.props.ledgers && this.props.incoming);
 
 		const hasLedgers = (this.props.ledgers) ?
@@ -229,34 +228,34 @@ class ConnectedIncoming extends Component {
 			const headers = tHeadAddSelect(incomingHeaders, this.onSelect, this.onSelectAll, 1);
 
 			const statusOptions =
-				[...new Set(rowsRaw.map(row => row[6].value))]
+				[...new Set(rowsRaw.map(row => row[7].value))]
 					.sort().map(v => { return { value: v, label: v } });
 			const catOptions =
-				[...new Set(rowsRaw.map(row => row[8].value))]
+				[...new Set(rowsRaw.map(row => row[9].value))]
 					.sort().map(v => { return { value: v, label: v } });
 			const payOptions =
-				[...new Set(rowsRaw.map(row => row[10].data))]
+				[...new Set(rowsRaw.map(row => row[11].data))]
 					.sort().map(v => { return { value: v, label: v } });
 			const supplierOptions =
 				[...new Set(rowsRaw.map(row => row[3].value))]
 					.sort().map(v => { return { value: v, label: v } });
 			const ownerOptions =
-				[...new Set(rowsRaw.map(row => row[7].value))]
+				[...new Set(rowsRaw.map(row => row[8].value))]
 					.sort().map(v => { return { value: v, label: v } });
 
 			const statusFilter = this.state.statusFilter ||
 				statusOptions.filter(item => (item.value !== "new"));
 
 			const rows = rowsRaw
-				.filter(row => (!this.state.catDeltaFilter || (row[9].value !== row[8].value)))
+				.filter(row => (!this.state.catDeltaFilter || (row[10].value !== row[9].value)))
 				.filter(row => (this.state.catFilter.length === 0 ||
-					(this.state.catFilter.filter(i => (i.value === row[8].value)).length > 0)))
+					(this.state.catFilter.filter(i => (i.value === row[9].value)).length > 0)))
 				.filter(row => (statusFilter.length === 0 ||
-					(statusFilter.filter(i => (i.value === row[6].value)).length > 0)))
+					(statusFilter.filter(i => (i.value === row[7].value)).length > 0)))
 				.filter(row => (this.state.ownerFilter.length === 0 ||
-					(this.state.ownerFilter.filter(i => (i.value === row[7].value)).length > 0)))
+					(this.state.ownerFilter.filter(i => (i.value === row[8].value)).length > 0)))
 				.filter(row => (this.state.payFilter.length === 0 ||
-					(this.state.payFilter.filter(i => (i.value === row[10].data)).length > 0)))
+					(this.state.payFilter.filter(i => (i.value === row[11].data)).length > 0)))
 				.filter(row => (this.state.supplierFilter.length === 0 ||
 					(this.state.supplierFilter.filter(i => (i.value === row[3].value)).length > 0)))
 				.filter(row => (!this.state.selFilter || this.state.selected.length === 0 ||
@@ -320,7 +319,7 @@ class ConnectedIncoming extends Component {
 					</MainWithSideNav>
 				</SideNavWrapper>
 			);
-		} else if (!this.props.connectionError) {
+		} else if (this.props.accessObject) {
 			return (
 				<div className="container">
 					<div className="section">

@@ -8,18 +8,22 @@ export const receivedHeaders = [
 	{ value: "check_box_outline_blank", align: "center", sortable: false, icon: true, width: "2em", column: 0 },
 	{ value: "Datum", width: "8em", column: 1 },
 	{ value: "Bedrag", align: "right", width: "5em", className: "large-text", amount: true, column: 2 },
+	{ value: "Valuta", align: "right", width: "100%", amount: false, column: 2 },
 	{ value: "Status", align: "center", label: true, width: "8em", column: 3 }, 
 	{ value : "Van/ aan", shorten: false, width: "15em", column: 1 },
-	{ value : "Omschrijving", shorten: false, className: "lowercase", column: 4 }
+	{ value : "Omschrijving", shorten: false, className: "lowercase", column: 4 },
+	{ value : "Rekening", shorten: false, column: 1 }
 ].map(tHead);
 
 const receivedIds = [ 
-	[ "id" ], null, [ "date" ], [ "amount" ], [ "state"], [ "message" ], [ "message"]
+	[ "id" ], null, [ "date" ], [ "amount" ], [ "currency" ], [ "state"], [ "message" ], [ "message"], [ "financial_account_id"]
 ];
 
-export const receivedRows = (receivedList) => {
+export const receivedRows = (accountList, receivedList) => {
+	const accounts = accountDict(accountList);
+	if (!accountDict || !receivedList || receivedList.length === 0) return null;
 	return receivedList.map( (item, i) => {
-		const rowValues = receivedIds.map( (idArr, j) => mapToVal(idArr, j, item));
+		const rowValues = receivedIds.map( (idArr, j) => mapToVal(idArr, j, item, accounts));
 		return rowValues.map( (val, k ) => valToCell(val, k));
 	});
 }
@@ -64,19 +68,28 @@ const makeStr = (initial, arr) => {
 
 const tryName = (value) => {
 	const arr = value.split(" ").slice(1,);
+	if (value.toLowerCase().includes('facebk')) return 'Facebook';
+	if (value.toLowerCase().includes('facebook')) return 'Facebook';
+	if (value.toLowerCase().includes('transip')) return 'TransIP';
+	if (value.toLowerCase().includes('skype.com')) return 'Skype';
+	if (value.toLowerCase().includes('atlassian')) return 'Atlassian';
+	if (value.toLowerCase().includes('totalfina belgium')) return 'TotalFina';
+	if (value.toLowerCase().includes('impact software')) return 'Impact Software';
+	if (value.toLowerCase().includes('msft')) return 'Microsoft';
 	return makeStr("", arr);
 }
 
 // returns formatted string or { value, href }
 // also room to change/ adapt any data in cell
-const mapToVal = (idArr, i, item) => {
+const mapToVal = (idArr, i, item, accounts) => {
 	if (!idArr) return "check_box_outline_blank"; // select field if no idArr
 	const value = getVal(idArr, item);
 	if (i === 3 && value) return formatter.format(value); // format amount
-	if (i === 4 && value) { // for status unprocessed/processed
+	if (i === 5 && value) { // for status unprocessed/processed
 		return (value === "processed")? "done" : "open";
 	}
-	if (i === 5 && value) return tryName(value); // try to extract name
+	if (i === 6 && value) return tryName(value); // try to extract name
+	if (i === 8) return accounts[value];
 
 	return value;
 }
@@ -84,4 +97,14 @@ const mapToVal = (idArr, i, item) => {
 const valToCell = (val, i) => {
     // this is the place to convert values to something else
     return tCell(val);
+}
+
+// to get account names from ID
+export const accountDict = (accountList = []) => {
+	if (!accountList) return {};
+	return accountList.reduce( (obj, account) => {
+		const newObj = Object.assign({},obj);
+		newObj[account.id] = account.name;
+		return newObj;
+	},{})
 }

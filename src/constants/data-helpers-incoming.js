@@ -22,6 +22,7 @@ export const incomingHeaders = [
 	{ value: "Leverancier", width: "20em", column: 1, shorten: false },
 	{ value: "Factuur-ref", width: "30em", column: 1, shorten: false },
 	{ value: "Bedrag", align: "right", width: "180px", column: 2, className: "large-text", amount: true }, 
+	{ value: "Valuta", align: "right", width: "180px", column: 2 }, 
 	{ value: "Status", align: "right", label: true, width: "180px", column: 2 }, 
 	{ value: "Owner", align: "center", width: "8em", column: 3 },
 	{ value: "Categorie factuur", width: "25em", column: 4, shorten: false },
@@ -31,7 +32,7 @@ export const incomingHeaders = [
 ].map(tHead);
 
 const incomingIds = [ 
-	[ "id" ], null, [ "date" ], [ "contact" ], [ "reference" ], [ "total_price_incl_tax" ],
+	[ "id" ], null, [ "date" ], [ "contact" ], [ "reference" ], [ "total_price_incl_tax" ], [ "currency" ],
 	[ "state" ], [ "contact", "custom_fields", 0, "value" ], [ "details", 0, "ledger_account_id" ],
 	[ "contact", "custom_fields", 2, "value" ], [ "contact", "custom_fields", 1, "value" ], 
 	[ "id" ]
@@ -69,8 +70,8 @@ var formatter = new Intl.NumberFormat('nl-NL', {
 const mapToVal = (idArr, i, incoming, ledgers) => {
 	if (!idArr) return "check_box_outline_blank"; // select field if no idArr
 	const value = getVal(idArr, incoming);
-	if (i === 8) return ledgers[value]; // get ledger name from id
-	if (i === 6 && value === "pending_payment") return "pending"; // shorten payment status
+	if (i === 9) return ledgers[value]; // get ledger name from id
+	if (i === 7 && value === "pending_payment") return "pending"; // shorten payment status
 	if (i === 5 && value) return formatter.format(value); // format amount
 	if (i === 3 && value && value.hasOwnProperty('id')) { // contact
 		const href = "https://moneybird.com/" + adminCode + "/contacts/" + value.id;
@@ -81,17 +82,17 @@ const mapToVal = (idArr, i, incoming, ledgers) => {
 }
 
 const valToCell = (val, i, stdLedger) => {
-	if (i === 8) { // ledger in incoming invoice, check against standard
+	if (i === 9) { // ledger in incoming invoice, check against standard
 		const cellObj = (val === stdLedger)? 
 			{ value: val, className: "green-text", data: val } 
 			: { value: val, className: "red-text text-lighten-2", data: val } ;
 		return tCell(cellObj);
 	}
-	if (i === 10) { // payment icon
+	if (i === 11) { // payment icon
 		const celVal = 	(val === "Bank")? "account_balance" : "credit_card";
 		return tCell({ value: celVal, data: val});
 	}
-	if (i === 11) { // return link
+	if (i === 12) { // return link
 		const href = "https://moneybird.com/"+adminCode+"/documents/"+val;
 		return tCell({ value: "arrow_forward", href: href })
 	}
@@ -169,7 +170,7 @@ export const makeContactList = (rows, selectedList) => {
 		return { 
 			contactId: r[3].data, 
 			fieldId: "243301268733298558",
-			newValue: r[8].value 
+			newValue: r[9].value 
 		}
 	});
 	const batchListUniq = uniqByKey(batchChanges, "contactId");

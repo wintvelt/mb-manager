@@ -1,7 +1,7 @@
 // voor actions die fetch enzo doen. Met middleware.
 import {
 	setAccessObject, passedTest, doSnackError,
-	setLedgers,
+	setLedgers, setAccounts,
 	addIncoming, setIncomingLoading,
 	addContacts, setCustomFields, setContactsLoading,
 	addReceived
@@ -121,6 +121,25 @@ export function getLedgers() {
 	}
 }
 
+export function getAccounts() {
+	return function (dispatch, getState) {
+		const url = base_url + '/financial_accounts.json';
+		const { accounts, accessObject } = getState();
+		if (accounts && accessObject.access_token) {
+			return accounts;
+		} else {
+			return getData(url, accessObject.access_token)
+				.then(accounts => {
+					dispatch(setAccounts({ accounts: accounts, accountDate: Date.now() }));
+				})
+				.catch(error => {
+					const msg = "Bankrekeningen ophalen helaas mislukt. Server gaf de fout \""
+						+ error.message + "\".";
+					dispatch(doSnackError(msg));
+				})
+		}
+	}
+}
 export function getIncoming(incomingType, page = 1) {
 	return function (dispatch, getState) {
 		const url = base_url + '/documents/'+incomingType+'s.json';

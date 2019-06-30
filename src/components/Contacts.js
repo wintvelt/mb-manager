@@ -20,8 +20,7 @@ import { since } from '../constants/helpers';
 
 const mapStateToProps = state => {
   return { 
-  	connectionError : state.connectionError,
-  	isConnected : state.isConnected,
+	accessObject: state.accessObject,
   	ledgers: state.ledgers,
   	ledgerDate : state.ledgerDate,
   	contacts: state.contacts,
@@ -55,15 +54,15 @@ class ConnectedContacts extends Component {
 			selected: [],
 			selFilter: false
 		}
-		const hasError = (this.props.connectionError || !this.props.isConnected);
-		if (!this.props.ledgers && !hasError) {
-			this.props.getLedgers();
+		const hasError = (!props.accessObject);
+		if (!props.ledgers && !hasError) {
+			props.getLedgers();
 		}
-		if (!this.props.contacts && !hasError) {
-			this.props.getContacts();
+		if (!props.contacts && !hasError) {
+			props.getContacts();
 		}
-		if (!this.props.customFields && !hasError) {
-			this.props.getCustomFields();
+		if (!props.customFields && !hasError) {
+			props.getCustomFields();
 		}
 
 		this.onChangeFilters=this.onChangeFilters.bind(this);
@@ -160,7 +159,7 @@ class ConnectedContacts extends Component {
 	}
 
 	render() {
-		const hasError = (this.props.connectionError || !this.props.isConnected);
+		const hasError = (!this.props.accessObject);
 		const hasData = (!hasError && this.props.ledgers && this.props.contacts && this.props.customFields);
 		const hasLedgers = (this.props.ledgers)? 
 			<p className="flex"><i className="material-icons green-text">done</i>
@@ -293,7 +292,7 @@ class ConnectedContacts extends Component {
 					</MainWithSideNav>
 				</SideNavWrapper>
 			);	
-		} else if (!this.props.connectionError) {
+		} else if (this.props.accessObject) {
 			return (
 				<div className="container"> 
 				    <div className="section">

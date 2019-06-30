@@ -2,7 +2,7 @@
 
 import { DO_SNACK, DO_SNACK_ERROR,
   SET_ACCESS_OBJECT, PASSED_TEST, SET_BATCH_ERROR,
-  SET_LEDGERS, SET_CUSTOM_FIELDS,
+  SET_LEDGERS, SET_ACCOUNTS, SET_CUSTOM_FIELDS,
   ADD_INCOMING, SET_INCOMING_LEDGER, SET_INCOMING_CUSTOM_FIELD, SET_INCOMING_PAYMENT,
   SET_INCOMING_LOADING,
   ADD_CONTACTS, SET_CONTACT_FIELD, SET_CONTACT_CUSTOM_FIELD,
@@ -21,6 +21,8 @@ export const initialState = {
   testOutput: "",
   ledgers: null,
   ledgerDate: "",
+  accounts: null,
+  accountDate: "",
   customFields: null,
   customFieldsDate: "",
   incoming: null,
@@ -63,6 +65,14 @@ function rootReducer(state = initialState, action) {
       return Object.assign({}, state, {
         ledgers: action.payload.ledgers,
         ledgerDate: action.payload.ledgerDate,
+        accessVerified: true
+      })
+    }
+    // payload = { ledgers, ledgerDate }
+    case SET_ACCOUNTS: {
+      return Object.assign({}, state, {
+        accounts: action.payload.accounts,
+        accountDate: action.payload.accountDate,
         accessVerified: true
       })
     }

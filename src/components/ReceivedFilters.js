@@ -42,7 +42,7 @@ export const filterMonth = (row, filter) => {
 
 export const filterSearch = (row, filter) => {
 	if (!filter || filter.length < 3) return true;
-	const desc = row[6].value;
+	const desc = row[7].value;
 	return desc.toLowerCase().includes(filter);
 }
 
@@ -63,7 +63,7 @@ export const filterAmount = (row, filter) => {
 
 export const filterStatus = (row, filter) => {
 	if (!filter) return true;
-	return (row[4].value === "open");
+	return (row[5].value === "open");
 }
 
 const ReceivedFilters = (props) => {
