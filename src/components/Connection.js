@@ -13,6 +13,7 @@ const mapStateToProps = state => {
 	return {
 		accessToken: state.accessToken,
 		accessVerified: state.accessVerified,
+		accessTime: state.accessTime,
 		testOutput: state.testOutput
 	};
 };
@@ -58,7 +59,7 @@ class ConnectionInt extends Component {
 					<div className="section">
 						<h4>{(accessVerified) ? IconOKOK : IconOK} Je bent ingelogd {'\u00A0'}
 							<span style={{ fontSize: "50%", color: "darkgrey" }}>
-								{/* ({moment.unix(this.props.accessObject.created_at).fromNow()}) */}
+								({moment(this.props.accessTime).fromNow()})
 							</span>
 						</h4>
 						<p>

@@ -47,7 +47,7 @@ export function getRequestToken() {
 	window.location.href = url;
 }
 
-// fetches Access Object + stores result (Access Object + reqToken) in store
+// fetches Access Object + save in cookie and store
 export function setAccess(reqToken) {
 	return function (dispatch) {
 

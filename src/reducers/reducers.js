@@ -18,6 +18,7 @@ export const initialState = {
   newSnack: "",
   accessToken: null,
   accessVerified: false,
+  accessTime: null,
   testOutput: "",
   ledgers: null,
   ledgerDate: "",
@@ -45,7 +46,8 @@ function rootReducer(state = initialState, action) {
     case SET_ACCESS_TOKEN: {
       return Object.assign({}, state, {
         accessToken: action.payload,
-        accessVerified: true
+        accessVerified: true,
+        accessTime : Date.now()
       })
     }
     case DELETE_ACCESS_TOKEN: {
