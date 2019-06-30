@@ -89,6 +89,7 @@ class ConnectedReceived extends Component {
 				this.setState({
 					accountFilter: newList
 				})
+				break;
 			}
 			case "sel": {
 				this.setState({

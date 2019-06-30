@@ -10,6 +10,7 @@ import Connection from './Connection';
 import Contacts from './Contacts';
 import Incoming from './Incoming';
 import Received from './Received';
+import Secret from './Secret';
 import Home from './Home';
 
 function mapStateToProps(state) {
@@ -21,6 +22,7 @@ function mapStateToProps(state) {
 
 const ConnectedApp = (props) => {
 	let snackFromStore = props.newSnack;
+	let secretPath = (process.env.NODE_ENV !== 'production')? '/secret' : '/';
 	return (
 		<Router>
 			<div>
@@ -36,6 +38,7 @@ const ConnectedApp = (props) => {
 				    <PrivateRoute path="/betalingen" component={Received} 
 				    	isConnected={props.isConnected}/>
 					<Route exact path="/connection" component={Connection} />
+					<Route exact path={secretPath} component={Secret} />
 			    	<Route render={(routeprops) => 
 			    		{ 
 			    			const newSnack = "De pagina \"" + 

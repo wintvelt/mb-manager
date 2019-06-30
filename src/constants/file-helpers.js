@@ -29,7 +29,9 @@ export class FileZone extends Component {
         e.stopPropagation();
         e.preventDefault();
         console.log("onFileDrop");
+        console.log(e.dataTransfer.files);
         alert("dropped");
+        this.setState({ dragOver : false });
     }
   
     render() {
