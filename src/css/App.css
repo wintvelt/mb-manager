@@ -234,6 +234,11 @@ table.small {
 	line-height: 16px;
 	flex: 1;
 }
+.sidenav-input > p.sub {
+	margin: 0;
+	font-size: 12px;
+	color: #333;
+}
 
 .select__value-container input[type=text] {
 	height: 16px;

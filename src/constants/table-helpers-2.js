@@ -30,7 +30,8 @@ export const tCell = (strOrObj) => {
 const defaultHead = {
     value: "",		// title
     withNext: false, // if the value of this cell is to be combined in next cell
-    column: 0,      // should always be specified
+	column: 0,      // should always be specified
+	hidden: false,  // if cell should be shown at all (to allow filter on invisible properties)
 	align: "left",	// of cell col
 	sortable: true,	// can column be sorted
 	icon: false,	// if all cells are icons
@@ -112,11 +113,13 @@ function hCell(item, onSort, sortValue, sortDirection) {
 
 // [ tHead ]
 // onSort(tHead.value) = function for sorting
+// hidden = hide if indicated
 // sortValue : if this matches tHead value, then this is the column used in sorting
 // sortDirection: up, down - used to show sorting icon
 // hideKey: true, *false for hiding first column with keys
 function hRow(headers, onSort, sortValue, sortDirection, hideKey) {
-	const headArr = (hideKey)? headers.slice(1,) : headers;
+	const headersWOHidden = headers.filter(h => !h.hidden);
+	const headArr = (hideKey)? headersWOHidden.slice(1,) : headersWOHidden;
     const row2D = makeRow2D(headArr, headArr);
 	return (
 		<li key="headers" className="headers">
@@ -142,11 +145,11 @@ function hRow(headers, onSort, sortValue, sortDirection, hideKey) {
 // head: tHead, used for styling
 // rowKey: key of the row, used for passing to item.OnSelect
 function cell(item, headers, rowKey, hideKey=false) {
-    const head = headers[item.index];
+	const head = headers[item.index];
     const i = (hideKey)? item.index + 1 : item.index;
     const onSelect = item.onSelect || head.onSelect;
     const value = (head.icon || !head.shorten)? 
-        (item.value.length > 30)? item.value.split('/').join('/ ') : item.value
+        (item.value && item.value.length > 30)? item.value.split('/').join('/ ') : item.value
         : short(item.value);
 	const styling = Object.assign({}, 	
         (head.align !== "left")? { textAlign : head.align } : {},
@@ -155,7 +158,7 @@ function cell(item, headers, rowKey, hideKey=false) {
 	var className = (onSelect)? head.className + " clickable" : head.className;
     className = (item.className)? className + " " + item.className : className;
     className = (head.amount)? 
-        (item.value[0] === '-')? className + " red-text text-lighten-2" 
+        (item.value && item.value[0] === '-')? className + " red-text text-lighten-2" 
         : className + " teal-text"
         : className;
 	const content = (head.icon)?
@@ -212,8 +215,10 @@ const makeRow2D = ( headers, arr ) => {
 function row(arr, headers, hideKey) {
 	const row = (hideKey)? arr.slice(1,) : arr;
 	const headArr = (hideKey)? headers.slice(1,) : headers;
+	const rowWOHidden = row.filter((c,i) => !headArr[i].hidden);
+	const headArrWOHidden = headArr.filter(h => !h.hidden);
     const rowKey = arr[0].value;
-    const row2D = makeRow2D(headArr, row);
+    const row2D = makeRow2D(headArrWOHidden, rowWOHidden);
 	return (
 		<li className="card" key={rowKey}>
 			<ul className="cell">
@@ -221,7 +226,7 @@ function row(arr, headers, hideKey) {
                     return <li key={i}>
                         <ul className="cell-col" >
                             {subArr.map( (item) => {
-                                return cell(item, headArr, rowKey, hideKey)
+                                return cell(item, headArrWOHidden, rowKey, hideKey)
                             })}
                         </ul>
                     </li>

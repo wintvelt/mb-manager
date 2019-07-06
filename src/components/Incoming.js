@@ -69,6 +69,7 @@ class ConnectedIncoming extends Component {
 		this.onPatch = this.onPatch.bind(this);
 		this.onPatchStd = this.onPatchStd.bind(this);
 		this.onDownload = this.onDownload.bind(this);
+		this.onDownload2 = this.onDownload2.bind(this);
 	}
 	onChangeFilters(newFilters) {
 		const newList = newFilters.list || [];
@@ -187,15 +188,27 @@ class ConnectedIncoming extends Component {
 		});
 	}
 	onDownload(rowsRaw, selected) {
-		const rowsFiltered = 
-				rowsRaw.filter( item => {
-						return (selected.indexOf(item[0].value) !== -1)
-				});
+		const rowsFiltered =
+			rowsRaw.filter(item => {
+				return (selected.indexOf(item[0].value) !== -1)
+			});
 		downloadCsv(
-			rowsFiltered, 
-			[0,2,3,5,6,7,8], 
-			["ID", "Datum", "Leverancier","Bedrag", "Status", "Owner", "Categorie"], 
+			rowsFiltered,
+			[0, 2, 3, 5, 6, 7, 8],
+			["ID", "Datum", "Leverancier", "Bedrag", "Status", "Owner", "Categorie"],
 			"Facturen Mobly"
+		);
+	}
+	onDownload2(rowsRaw, dateFrom) {
+		console.log(dateFrom);
+		const rowsFiltered = rowsRaw.filter(item => {
+			return (item[13].value >= dateFrom) && (item[7].value !== "new")
+		});
+		downloadCsv(
+			rowsFiltered,
+			[0, 13, 3, 5, 6, 7, 8, 9],
+			["ID", "Datum aangemaakt", "Leverancier", "Bedrag", "Valuta", "Status", "Owner", "Categorie"],
+			"Facturen Mobly na "+dateFrom
 		);
 	}
 
@@ -311,6 +324,8 @@ class ConnectedIncoming extends Component {
 							updateStdCat={() => this.onPatchStd(rowsRaw, this.state.selected)}
 							updatePayment={() => this.onPatchPay(rowsRaw, this.state.selected)}
 							onDownload={() => this.onDownload(rowsRaw, this.state.selected)}
+							newRows={rowsRaw.reduce( (count,item) => count+(item[7].value==="new"), 0)}
+							onDownload2={(date) => this.onDownload2(rowsRaw, date)}
 						/>
 					</SideNav>
 					<MainWithSideNav>

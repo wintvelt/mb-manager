@@ -22,6 +22,7 @@ function mapStateToProps(state) {
 
 const ConnectedApp = (props) => {
 	let snackFromStore = props.newSnack;
+	// only goes to /secret path in non-production environments
 	let secretPath = (process.env.NODE_ENV !== 'production')? '/secret' : '/';
 	return (
 		<Router>

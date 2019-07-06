@@ -17,11 +17,11 @@ const format = (string) => {
 }
 
 const flattenRows = ( rows, indexArr ) => {
-    return rows.map( row => {
+    return rows.map( (row, j) => {
         var newRow = [];
         indexArr.forEach( (item,i) => {
             const newValue = (i===0)? "=\""+row[item].value+"\"" : row[item].value;
-            newRow.push( format(newValue) );
+            if (newValue) newRow.push( format(newValue) );
         });
         return newRow;
     });

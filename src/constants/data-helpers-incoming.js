@@ -28,14 +28,15 @@ export const incomingHeaders = [
 	{ value: "Categorie factuur", width: "25em", column: 4, shorten: false },
 	{ value: "Standaard categorie",width: "25em", column: 4, shorten: false },
 	{ value: "Betaling", align: "center", sortable: true, icon: true, width: "8em", column: 3 },
-	{ value: "Link", align: "right", sortable: false, icon: true, column: 5 }
+	{ value: "Link", align: "right", sortable: false, icon: true, column: 5 },
+	{ value: "CreateDate", hidden: false, column: 1 }
 ].map(tHead);
 
 const incomingIds = [ 
 	[ "id" ], null, [ "date" ], [ "contact" ], [ "reference" ], [ "total_price_incl_tax" ], [ "currency" ],
 	[ "state" ], [ "contact", "custom_fields", 0, "value" ], [ "details", 0, "ledger_account_id" ],
 	[ "contact", "custom_fields", 2, "value" ], [ "contact", "custom_fields", 1, "value" ], 
-	[ "id" ]
+	[ "id" ], [ "created_at" ]
 ];
 
 export const incomingRows = (ledgerList, incomingList) => {
