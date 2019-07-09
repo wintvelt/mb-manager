@@ -44,7 +44,7 @@ export const incomingRows = (ledgerList, incomingList) => {
 	if (!ledgerDict || !incomingList || incomingList.length === 0) return null;
 	return incomingList.map( (incoming, i) => {
 		const rowValues = incomingIds.map( (idArr, j) => mapToVal(idArr, j, incoming, ledgers));
-		return rowValues.map( (val, k ) => valToCell(val, k, rowValues[9]));
+		return rowValues.map( (val, k ) => valToCell(val, k, rowValues[10]));
 	});
 }
 
