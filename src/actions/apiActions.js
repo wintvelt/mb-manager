@@ -244,6 +244,46 @@ export function getIncomingSums() {
 	}
 }
 
+export function exportDocs(ids, access_token) {
+	return function (dispatch) {
+		const url = (process.env.NODE_ENV === 'development') ?
+			'http://localhost:3030/export'
+			: 'https://';
+		const body = { ids: ids };
+		return postData(url, body, "POST", access_token)
+			.then(res => {
+				dispatch(setIncomingSums({
+					incomingSums: res
+				}));
+			})
+			.catch(error => {
+				const msg = "Export helaas mislukt met fout \""
+					+ error.message + "\".";
+				dispatch(doSnackError(msg));
+			})
+	}
+}
+
+export function deleteFile(filename, access_token) {
+	return function (dispatch) {
+		const url = (process.env.NODE_ENV === 'development') ?
+			'http://localhost:3030/export'
+			: 'https://';
+		const body = { filename: filename };
+		return postData(url, body, "DELETE", access_token)
+			.then(res => {
+				dispatch(setIncomingSums({
+					incomingSums: res
+				}));
+			})
+			.catch(error => {
+				const msg = "File deleten helaas mislukt met fout \""
+					+ error.message + "\".";
+				dispatch(doSnackError(msg));
+			})
+	}
+}
+
 export function getReceived(idList) {
 	return function (dispatch, getState) {
 		const { received, accessToken } = getState();

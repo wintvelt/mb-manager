@@ -8,8 +8,10 @@ import { getLedgers, getContacts, getCustomFields } from "../actions/apiActions"
 import { batchContactUpdate, batchContactCustomUpdate } from '../actions/batchActions';
 import { doSnack } from "../actions/actions";
 import { SortableTable, tHeadAddSelect, toggleCell } from '../constants/table-helpers';
-import { contactRows, contactHeaders, 
-	makeContactPatchList } from '../constants/data-helpers-contacts';
+import {
+	contactRows, contactHeaders,
+	makeContactPatchList
+} from '../constants/data-helpers-contacts';
 import ContactFilters from './ContactFilters';
 import ContactActions from './ContactActions';
 import { downloadCsv } from '../constants/download-helpers';
@@ -19,26 +21,26 @@ import { SideNavWrapper, SideNav, MainWithSideNav } from './SideNav';
 import { since } from '../constants/helpers';
 
 const mapStateToProps = state => {
-  return { 
-	accessToken: state.accessToken,
-  	ledgers: state.ledgers,
-  	ledgerDate : state.ledgerDate,
-  	contacts: state.contacts,
-  	contactsDate : state.contactsDate,
-  	customFields : state.customFields,
-  	customFieldsDate : state.customFieldsDate
-  };
+	return {
+		accessToken: state.accessToken,
+		ledgers: state.ledgers,
+		ledgerDate: state.ledgerDate,
+		contacts: state.contacts,
+		contactsDate: state.contactsDate,
+		customFields: state.customFields,
+		customFieldsDate: state.customFieldsDate
+	};
 };
 
 function mapDispatchToProps(dispatch) {
-  return {
-    getLedgers: () => dispatch(getLedgers()),
-    getContacts: () => dispatch(getContacts()),
-    getCustomFields: () => dispatch(getCustomFields()),
-    doSnack: (newSnack) => dispatch(doSnack(newSnack)),
-    batchContactUpdate: (patchList) => dispatch(batchContactUpdate(patchList)),
-    batchContactCustomUpdate: (patchList) => dispatch(batchContactCustomUpdate(patchList))
-  };
+	return {
+		getLedgers: () => dispatch(getLedgers()),
+		getContacts: () => dispatch(getContacts()),
+		getCustomFields: () => dispatch(getCustomFields()),
+		doSnack: (newSnack) => dispatch(doSnack(newSnack)),
+		batchContactUpdate: (patchList) => dispatch(batchContactUpdate(patchList)),
+		batchContactCustomUpdate: (patchList) => dispatch(batchContactCustomUpdate(patchList))
+	};
 }
 
 class ConnectedContacts extends Component {
@@ -65,11 +67,11 @@ class ConnectedContacts extends Component {
 			props.getCustomFields();
 		}
 
-		this.onChangeFilters=this.onChangeFilters.bind(this);
-		this.onSelect=this.onSelect.bind(this);
-		this.onSelectAll=this.onSelectAll.bind(this);
-		this.onPatch=this.onPatch.bind(this);
-		this.onDownload=this.onDownload.bind(this);
+		this.onChangeFilters = this.onChangeFilters.bind(this);
+		this.onSelect = this.onSelect.bind(this);
+		this.onSelectAll = this.onSelectAll.bind(this);
+		this.onPatch = this.onPatch.bind(this);
+		this.onDownload = this.onDownload.bind(this);
 	}
 	onChangeFilters(newFilters) {
 		const newList = newFilters.list || [];
@@ -121,9 +123,9 @@ class ConnectedContacts extends Component {
 		}
 	}
 	onSelect(id) {
-		const selectedWithout = this.state.selected.filter( i => (i !== id));
-		const newSelected = (this.state.selected.length > 0 
-			&& selectedWithout.length !== this.state.selected.length)?
+		const selectedWithout = this.state.selected.filter(i => (i !== id));
+		const newSelected = (this.state.selected.length > 0
+			&& selectedWithout.length !== this.state.selected.length) ?
 			selectedWithout
 			: [...this.state.selected, id];
 		this.setState({
@@ -151,108 +153,108 @@ class ConnectedContacts extends Component {
 		}
 	}
 	onDownload(rowsRaw, selected) {
-		const rowsFiltered = 
-				rowsRaw.filter( item => {
-						return (selected.indexOf(item[0].value) !== -1)
-				});
-		downloadCsv(rowsFiltered, [0,2,3,4,7], ["ID", "Naam", "Stad","Land", "Owner"], "Contacten Mobly");
+		const rowsFiltered =
+			rowsRaw.filter(item => {
+				return (selected.indexOf(item[0].value) !== -1)
+			});
+		downloadCsv(rowsFiltered, [0, 2, 3, 4, 7], ["ID", "Naam", "Stad", "Land", "Owner"], "Contacten Mobly");
 	}
 
 	render() {
 		const hasError = (!this.props.accessToken);
 		const hasData = (!hasError && this.props.ledgers && this.props.contacts && this.props.customFields);
-		const hasLedgers = (this.props.ledgers)? 
+		const hasLedgers = (this.props.ledgers) ?
 			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.ledgers.length + " ledgers opgehaald - "+ 
-				since(this.props.ledgerDate)}</span></p>
-			: 
+				<span>{this.props.ledgers.length + " ledgers opgehaald - " +
+					since(this.props.ledgerDate)}</span></p>
+			:
 			<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
 				<span>Legders (nog) niet gevonden</span></p>;
-		const hasContacts = (this.props.contacts)? 
+		const hasContacts = (this.props.contacts) ?
 			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.contacts.length + " contacten opgehaald - "+ 
-				since(this.props.contactsDate)}</span></p>
-			: 
+				<span>{this.props.contacts.length + " contacten opgehaald - " +
+					since(this.props.contactsDate)}</span></p>
+			:
 			<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
 				<span>Contacten (nog) niet gevonden</span></p>;
-		const hasCustomFields = (this.props.customFields)? 
+		const hasCustomFields = (this.props.customFields) ?
 			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.customFields.length + " custom velden opgehaald - "+ 
-				since(this.props.customFieldsDate)}</span></p>
-			: 
+				<span>{this.props.customFields.length + " custom velden opgehaald - " +
+					since(this.props.customFieldsDate)}</span></p>
+			:
 			<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
 				<span>Custom velden (nog) niet gevonden</span></p>;
 		const rowsRaw = (hasData
-				&& this.props.ledgers.length > 0
-				&& this.props.contacts.length > 0 
-				&& this.props.customFields.length >0 )?
-				contactRows(this.props.contacts)
-				: null;
+			&& this.props.ledgers.length > 0
+			&& this.props.contacts.length > 0
+			&& this.props.customFields.length > 0) ?
+			contactRows(this.props.contacts)
+			: null;
 
 		if (rowsRaw) {
 			const headers = tHeadAddSelect(contactHeaders, this.onSelect, this.onSelectAll, 1);
 
-			const contactOptions = 
-				[...new Set(rowsRaw.map( row => row[2].value ))]
-				.sort().map( v => { return {value: v, label: v} });
+			const contactOptions =
+				[...new Set(rowsRaw.map(row => row[2].value))]
+					.sort().map(v => { return { value: v, label: v } });
 
-			const ownerOptions = 
-				[...new Set(rowsRaw.map( row => row[7].value ))]
-				.sort().map( v => { return {value: v, label: v} });
+			const ownerOptions =
+				[...new Set(rowsRaw.map(row => row[7].value))]
+					.sort().map(v => { return { value: v, label: v } });
 
-			const stdLedgerOptions = 
-				[...new Set(rowsRaw.map( row => row[9].value ))]
-				.sort().map( v => { return {value: v, label: v} });
+			const stdLedgerOptions =
+				[...new Set(rowsRaw.map(row => row[9].value))]
+					.sort().map(v => { return { value: v, label: v } });
 
-			const payOptions = 
-				[...new Set(rowsRaw.map( row => row[8].value ))]
-				.sort().map( v => { return {value: v, label: v} });
+			const payOptions =
+				[...new Set(rowsRaw.map(row => row[8].value))]
+					.sort().map(v => { return { value: v, label: v } });
 
-			const EOLOptions = 
-				[ "Alles", "Bekend", "Onbekend" ]
-				.map( v => { return {value: v, label: v} });
+			const EOLOptions =
+				["Alles", "Bekend", "Onbekend"]
+					.map(v => { return { value: v, label: v } });
 
 			const stdLedgerAllOptions = // for actions
 				[...new Set(this.props.ledgers
-					.filter( l => (l.account_type === "non_current_assets" || l.account_type === "expenses"))
-					.map( l => l.name))]
-				.sort().map( v => { return {value: v, label: v} });
+					.filter(l => (l.account_type === "non_current_assets" || l.account_type === "expenses"))
+					.map(l => l.name))]
+					.sort().map(v => { return { value: v, label: v } });
 
 			const rows = rowsRaw
-					.filter( row => (this.state.ownerFilter.length === 0 ||
-						(this.state.ownerFilter.filter( i => (i.value === row[7].value)).length > 0) ))
-					.filter( row => (this.state.contactFilter.length === 0 ||
-						(this.state.contactFilter.filter( i => (i.value === row[2].value)).length > 0) ))
-					.filter( row => (this.state.payFilter.length === 0 ||
-						(this.state.payFilter.filter( i => (i.value === row[8].value)).length > 0) ))
-					.filter( row => (this.state.stdLedgerFilter.length === 0 ||
-						(this.state.stdLedgerFilter.filter( i => (i.value === row[9].value)).length > 0) ))
-					.filter( row => (!this.state.EOLfilter ||
-						(this.state.EOLfilter === "Alles") ||
-						(this.state.EOLfilter === "Bekend" && row[5].value !== "NA" ) ||
-						(this.state.EOLfilter === "Onbekend" && row[5].value === "NA" )))
-					.filter( row => (!this.state.MBFilter ||
-							(row[5].value !== row[6].value) ))
-					.filter( row => (!this.state.selFilter || this.state.selected.length === 0 ||
-						(this.state.selected.filter( i => (i === row[0].value)).length > 0) ))
-						.map( row => {
-						if (this.state.selected.length === 0 ||
-							(this.state.selected.filter( i => (i === row[0].value)).length === 0) ) {
-							// set to deselected
-							return [ ...row.slice(0,1), toggleCell(row[1], "check_box_outline_blank"), 
-								...row.slice(2,)]
-						} else {
-							// set to selected
-							return [ ...row.slice(0,1), toggleCell(row[1], "check_box"), 
-								...row.slice(2,)]
-						}
-					});
+				.filter(row => (this.state.ownerFilter.length === 0 ||
+					(this.state.ownerFilter.filter(i => (i.value === row[7].value)).length > 0)))
+				.filter(row => (this.state.contactFilter.length === 0 ||
+					(this.state.contactFilter.filter(i => (i.value === row[2].value)).length > 0)))
+				.filter(row => (this.state.payFilter.length === 0 ||
+					(this.state.payFilter.filter(i => (i.value === row[8].value)).length > 0)))
+				.filter(row => (this.state.stdLedgerFilter.length === 0 ||
+					(this.state.stdLedgerFilter.filter(i => (i.value === row[9].value)).length > 0)))
+				.filter(row => (!this.state.EOLfilter ||
+					(this.state.EOLfilter === "Alles") ||
+					(this.state.EOLfilter === "Bekend" && row[5].value !== "NA") ||
+					(this.state.EOLfilter === "Onbekend" && row[5].value === "NA")))
+				.filter(row => (!this.state.MBFilter ||
+					(row[5].value !== row[6].value)))
+				.filter(row => (!this.state.selFilter || this.state.selected.length === 0 ||
+					(this.state.selected.filter(i => (i === row[0].value)).length > 0)))
+				.map(row => {
+					if (this.state.selected.length === 0 ||
+						(this.state.selected.filter(i => (i === row[0].value)).length === 0)) {
+						// set to deselected
+						return [...row.slice(0, 1), toggleCell(row[1], "check_box_outline_blank"),
+						...row.slice(2)]
+					} else {
+						// set to selected
+						return [...row.slice(0, 1), toggleCell(row[1], "check_box"),
+						...row.slice(2)]
+					}
+				});
 
-			const selectIcon = (this.state.selected.length === 0)?
+			const selectIcon = (this.state.selected.length === 0) ?
 				"check_box_outline_blank"
-				: (rows.filter( row => (
-						this.state.selected.filter( sel => (sel === row[0].value) )
-					)).length === this.state.selected.length )?
+				: (rows.filter(row => (
+					this.state.selected.filter(sel => (sel === row[0].value))
+				)).length === this.state.selected.length) ?
 					"check_box"
 					: "indeterminate_check_box";
 			// store select icon and list of all visible IDs (used in select all)
@@ -260,71 +262,71 @@ class ConnectedContacts extends Component {
 			headers[1].visibleIds = rows.map(row => row[0].value); // NB MUTABLE CHANGE!
 
 			return (
-				<SideNavWrapper> 
+				<SideNavWrapper>
 					<SideNav>
-						<ContactFilters 
-								onChange={this.onChangeFilters} 
-								chip={rows.length + " van " + rowsRaw.length}
-								contactOptions={contactOptions}
-								contactFilter={this.state.contactFilter} 
-								stdLedgerOptions={stdLedgerOptions}
-								stdLedgerFilter={this.state.stdLedgerFilter}
-								EOLOptions={EOLOptions}
-								EOLfilter={this.state.EOLfilter}
-								payOptions={payOptions}
-								payFilter={this.state.payFilter}
-								ownerOptions={ownerOptions}
-								ownerFilter={this.state.ownerFilter} 
-								selFilter={this.state.selFilter}/>
+						<ContactFilters
+							onChange={this.onChangeFilters}
+							chip={rows.length + " van " + rowsRaw.length}
+							contactOptions={contactOptions}
+							contactFilter={this.state.contactFilter}
+							stdLedgerOptions={stdLedgerOptions}
+							stdLedgerFilter={this.state.stdLedgerFilter}
+							EOLOptions={EOLOptions}
+							EOLfilter={this.state.EOLfilter}
+							payOptions={payOptions}
+							payFilter={this.state.payFilter}
+							ownerOptions={ownerOptions}
+							ownerFilter={this.state.ownerFilter}
+							selFilter={this.state.selFilter} />
 						<li><div className="divider"></div></li>
 						<ContactActions
-							chips={this.state.selected.length} 
-							stdLedgerOptions ={stdLedgerAllOptions}
+							chips={this.state.selected.length}
+							stdLedgerOptions={stdLedgerAllOptions}
 							onPatch={(action) => this.onPatch(rowsRaw, this.state.selected, action)}
 							onDownload={() => this.onDownload(rowsRaw, this.state.selected)}
-							/>
+						/>
 					</SideNav>
 					<MainWithSideNav>
 						<div className="section">
-							<SortableTable headers={headers} rows={rows} 
-								onSelect={this.onSelect} hideKey={true}/>
+							<SortableTable headers={headers} rows={rows}
+								onSelect={this.onSelect} hideKey={true} />
 						</div>
 					</MainWithSideNav>
 				</SideNavWrapper>
-			);	
+			);
 		} else if (this.props.accessToken) {
 			return (
-				<div className="container"> 
-				    <div className="section">
+				<div className="container">
+					<div className="section">
 						<h4>Contacten</h4>
 						{hasLedgers}
 						{hasContacts}
 						{hasCustomFields}
 					</div>
 					<div className="divider"></div>
-			    	<div className="section center">
-			    		<div className="progress">
-						    <div className="indeterminate"></div>
-					  	</div>
-			    	</div>
+					<div className="section center">
+						<div className="progress">
+							<div className="indeterminate"></div>
+						</div>
+					</div>
 				</div>
 			);
 		}
 		return (
-			<div className="container"> 
-		    	<div className="section center">
-		    		<h5>Helaas, er is geen verbinding..</h5>
-		    		<p>Probeer anders eerst connectie te maken..</p>
+			<div className="container">
+				<div className="section center">
+					<h5>Helaas, er is geen verbinding..</h5>
+					<p>Probeer anders eerst connectie te maken..</p>
 					<div>
 						<Link to="/connection" className="flex flex-center">
-					        <i className="material-icons">account_circle</i>
-					        <span>Connectie</span>
-				        </Link>
-			        </div>
-		    	</div>
+							<i className="material-icons">account_circle</i>
+							<span>Connectie</span>
+						</Link>
+					</div>
+				</div>
 			</div>
 		);
-	}	
+	}
 }
 
 const Contacts = connect(mapStateToProps, mapDispatchToProps)(ConnectedContacts);

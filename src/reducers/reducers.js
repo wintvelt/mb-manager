@@ -97,7 +97,7 @@ function rootReducer(state = initialState, action) {
     case SET_INCOMING_SUMS: {
       return Object.assign({}, state, {
         incomingSums: action.payload.incomingSums,
-        lastSync: action.payload.lastSync
+        lastSync: action.payload.lastSync || state.lastSync
       })
     }
 

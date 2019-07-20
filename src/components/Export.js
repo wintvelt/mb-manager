@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Select from 'react-select';
 import moment from 'moment';
 
-import { getIncomingSums } from '../actions/apiActions';
+import { getIncomingSums, exportDocs, deleteFile } from '../actions/apiActions';
 import { exportRows, exportHeaders } from '../constants/data-helpers-export';
 import { SortableTable, tHeadAddSelect } from '../constants/table-helpers';
 
@@ -20,7 +20,9 @@ const mapStateToProps = state => {
 
 function mapDispatchToProps(dispatch) {
     return {
-        getIncomingSums: () => dispatch(getIncomingSums())
+        getIncomingSums: () => dispatch(getIncomingSums()),
+        exportDocs: (ids, accessToken) => dispatch(exportDocs(ids, accessToken)),
+        deleteFile: (filename) => dispatch(deleteFile(filename))
     };
 }
 
@@ -34,9 +36,13 @@ class ConnectedExport extends Component {
             invoiceFrom: "",
             invoiceTo: "",
             mutSelected: false,
+            selectedForDelete: ""
         };
         this.setYear = this.setYear.bind(this);
         this.sync = this.sync.bind(this);
+        this.onDelete = this.onDelete.bind(this);
+        this.onClearDelete = this.onClearDelete.bind(this);
+        this.onExport = this.onExport.bind(this);
         this.onChangeInput = this.onChangeInput.bind(this);
         if (props.accessToken && !props.incomingSums) props.getIncomingSums();
     }
@@ -45,6 +51,16 @@ class ConnectedExport extends Component {
     }
     sync() {
         alert('syncing');
+    }
+    onDelete(filename) {
+        if (filename === this.state.selectedForDelete) this.props.deleteFile(filename);
+        this.setState({ selectedForDelete: filename });
+    }
+    onClearDelete() {
+        this.setState({ selectedForDelete: '' });
+    }
+    onExport(selection, accessToken) {
+        this.props.onExport(selection, accessToken)
     }
     onChangeInput(field, value) {
         switch (field) {
@@ -99,6 +115,13 @@ class ConnectedExport extends Component {
                 return (selection.filter(sel => sel === item.id).length > 0)
             }).map(item => item.id);
             const exportBtnClass = (selection.length > 0) ? 'btn-small' : 'btn-small disabled';
+            const headers = tHeadAddSelect(exportHeaders, this.onDelete, this.onClearDelete, 7);
+            const rows = exportRows(fileStats).map(row => {
+                if (row[0].value !== this.state.selectedForDelete) return row;
+                const newDeleteCell = Object.assign({}, row[7],
+                    { className: 'red white-text', value: 'delete_forever' })
+                return [...row.slice(0, 7), newDeleteCell];
+            });
             return (
                 <div className="container">
                     <h4>Inkomende facturen uit {yearComp}</h4>
@@ -171,16 +194,19 @@ class ConnectedExport extends Component {
                         <p className="col s12 input-line">
                             <span>In selectie: </span>
                             <span className="chip">{selection.length}</span>
-                            <span className={exportBtnClass}><i className='material-icons right'>cloud_download</i>Export</span>
+                            <span className={exportBtnClass} 
+                                onClick={() => this.onExport(selection, this.props.accessToken)}>
+                                <i className='material-icons right'>cloud_download</i>Export
+                            </span>
                         </p>
                         <pre className='col s12'>{JSON.stringify(selected)}</pre>
                     </div>
                     <div className="row">
                         <h5>Eerdere export-bestanden</h5>
-						<div className="section">
-							<SortableTable headers={exportHeaders} rows={exportRows(fileStats)} 
-								onSelect={() => {}} hideKey={false}/>
-						</div>
+                        <div className="section">
+                            <SortableTable headers={headers} rows={rows}
+                                onSelect={() => { }} hideKey={false} />
+                        </div>
                         <pre>{JSON.stringify(selected, null, 2)}</pre>
                         <pre>filestats{JSON.stringify(fileStats, null, 2)}</pre>
                         <pre>{JSON.stringify(this.props.incomingSums, null, 2)}</pre>
