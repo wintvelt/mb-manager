@@ -60,7 +60,7 @@ class ConnectedExport extends Component {
         this.setState({ selectedForDelete: '' });
     }
     onExport(selection, accessToken) {
-        this.props.onExport(selection, accessToken)
+        this.props.exportDocs(selection, accessToken)
     }
     onChangeInput(field, value) {
         switch (field) {

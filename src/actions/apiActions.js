@@ -329,7 +329,6 @@ export function getReceived(idList) {
 export function patchIncomingLedger(batchId, incomingId, body, access_token) {
 	return function (dispatch) {
 		const type = Object.keys(body)[0];
-		console.log(type);
 		const url = base_url + '/documents/' + type + 's/' + incomingId + ".json";
 		return (
 			postData(url, body, "PATCH", access_token)
