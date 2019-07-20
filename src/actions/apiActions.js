@@ -220,22 +220,20 @@ export function getCustomFields() {
 
 export function getIncomingSums() {
 	return function (dispatch) {
-		const url = 'https://moblybird-export-files.s3.eu-central-1.amazonaws.com/incoming-summary-list.json';
+		const url = (process.env.NODE_ENV === 'development') ?
+			'http://localhost:3030/export?method=GET&filename=incoming-summary-list.json'
+			: 'https://moblybird-export-files.s3.eu-central-1.amazonaws.com/incoming-summary-list.json';
 		var myHeaders = new Headers();
-		myHeaders.append('pragma', 'no-cache');
-		myHeaders.append('cache-control', 'no-cache');
-
+		if (process.env.NODE_ENV !== 'development') {
+			myHeaders.append('pragma', 'no-cache');
+			myHeaders.append('cache-control', 'no-cache');
+		}
 		return fetch(url, { mode: "cors", headers: myHeaders })
-			.then(res => {
-				return Promise.all([
-					res.json(),
-					res.headers.get('last-modified')
-				])
-			})
+			.then(res => res.json())
 			.then(res => {
 				dispatch(setIncomingSums({
-					incomingSums: res[0],
-					lastSync: res[1]
+					incomingSums: res.list,
+					lastSync: res.syncDate
 				}));
 			})
 			.catch(error => {
