@@ -5,7 +5,8 @@ import {
 	setLedgers, setAccounts,
 	addIncoming, setIncomingLoading,
 	addContacts, setCustomFields, setContactsLoading,
-	addReceived
+	addReceived,
+	setIncomingSums
 } from './actions';
 import { setCookie, deleteCookie } from './cookies';
 
@@ -214,6 +215,34 @@ export function getCustomFields() {
 					dispatch(doSnackError(msg));
 				})
 		}
+	}
+}
+
+export function getIncomingSums() {
+	return function (dispatch) {
+		const url = 'https://moblybird-export-files.s3.eu-central-1.amazonaws.com/incoming-summary-list.json';
+		var myHeaders = new Headers();
+		myHeaders.append('pragma', 'no-cache');
+		myHeaders.append('cache-control', 'no-cache');
+
+		return fetch(url, { mode: "cors", headers: myHeaders })
+			.then(res => {
+				return Promise.all([
+					res.json(),
+					res.headers.get('last-modified')
+				])
+			})
+			.then(res => {
+				dispatch(setIncomingSums({
+					incomingSums: res[0],
+					lastSync: res[1]
+				}));
+			})
+			.catch(error => {
+				const msg = "Ophalen van Moneybird documenten helaas mislukt met fout \""
+					+ error.message + "\".";
+				dispatch(doSnackError(msg));
+			})
 	}
 }
 

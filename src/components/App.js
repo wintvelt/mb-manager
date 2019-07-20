@@ -10,6 +10,7 @@ import Connection from './Connection';
 import Contacts from './Contacts';
 import Incoming from './Incoming';
 import Received from './Received';
+import Export from './Export';
 import Secret from './Secret';
 import Home from './Home';
 
@@ -37,6 +38,8 @@ const ConnectedApp = (props) => {
 				    <PrivateRoute path="/inkomend" component={Incoming} 
 				    	isConnected={props.isConnected}/>
 				    <PrivateRoute path="/betalingen" component={Received} 
+				    	isConnected={props.isConnected}/>
+				    <PrivateRoute path="/export" component={Export} 
 				    	isConnected={props.isConnected}/>
 					<Route exact path="/connection" component={Connection} />
 					<Route exact path={secretPath} component={Secret} />

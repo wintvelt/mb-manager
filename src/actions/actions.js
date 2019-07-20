@@ -6,7 +6,7 @@ import { DO_SNACK, DO_SNACK_ERROR,
   ADD_INCOMING, SET_INCOMING_LEDGER, SET_INCOMING_CUSTOM_FIELD, SET_INCOMING_PAYMENT,
   SET_INCOMING_LOADING,
   ADD_CONTACTS, SET_CONTACT_FIELD, SET_CONTACT_CUSTOM_FIELD, SET_CONTACTS_LOADING,
-  ADD_RECEIVED, 
+  ADD_RECEIVED, SET_INCOMING_SUMS,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT 
   } from "../constants/action-types";
@@ -60,6 +60,10 @@ export function setContactCustomField(payload) {
 export function setContactsLoading(payload) {
   return { type: SET_CONTACTS_LOADING, payload }
 }
+export function setIncomingSums(payload) {
+  return { type: SET_INCOMING_SUMS, payload }
+}
+
 export function addReceived(payload) {
   return { type: ADD_RECEIVED, payload }
 }

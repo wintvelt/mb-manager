@@ -6,36 +6,37 @@ import { Link } from 'react-router-dom';
 
 
 const mapStateToProps = state => {
-  return { 
-	  accessToken : state.accessToken,
-	  accessVerified : state.accessVerified
-  };
+	return {
+		accessToken: state.accessToken,
+		accessVerified: state.accessVerified
+	};
 };
 
 const ConnectedNav = (props) => {
-	const iconLogin = (props.accessToken) ? (props.accessVerified) ? "done_all" : "done" : "do_not_disturb"; 
-	const menuShow = (props.accessToken)? "" : " hide";
+	const iconLogin = (props.accessToken) ? (props.accessVerified) ? "done_all" : "done" : "do_not_disturb";
+	const menuShow = (props.accessToken) ? "" : " hide";
 	const menu = [
 		{ path: "/contacten", text: "Contacten" },
 		{ path: "/inkomend", text: "Inkomend" },
-		{ path: "/betalingen", text: "Betalingen" }
+		{ path: "/betalingen", text: "Betalingen" },
+		{ path: "/export", text: "Export", badge: "NIEUW" }
 	]
 	return (
-		<nav className="nav-extended" style={{marginBottom: "32px"}}>
-		    <div className="nav-wrapper">
-		      <ul className="right">
-		        <li><Link to="/connection">
-		          <i className="material-icons left small">{iconLogin}</i>
-		          <span>Connectie</span>
-		        </Link></li>
-		      </ul>
-		      <ul id="nav_mobile" className="left">
-		      	<li><Link to = "/"><i className="material-icons">home</i></Link></li>
-		      	{menu.map((link) => {
-		      		return ActiveLink(link, menuShow, props.activePath)
-		      	})}
-		      </ul>
-		    </div>
+		<nav className="nav-extended" style={{ marginBottom: "32px" }}>
+			<div className="nav-wrapper">
+				<ul className="right">
+					<li><Link to="/connection">
+						<i className="material-icons left small">{iconLogin}</i>
+						<span>Connectie</span>
+					</Link></li>
+				</ul>
+				<ul id="nav_mobile" className="left">
+					<li><Link to="/"><i className="material-icons">home</i></Link></li>
+					{menu.map((link) => {
+						return ActiveLink(link, menuShow, props.activePath)
+					})}
+				</ul>
+			</div>
 		</nav>
 	);
 };
@@ -53,12 +54,20 @@ const ConnectedNav = (props) => {
 */
 
 const ActiveLink = (link, className, activePath) => {
-	var linkClass = (className)? (className) + " " : "";
-	linkClass = (link.path === activePath)? linkClass+"active" : linkClass;
-	return <li key={link.path} className={linkClass}><Link to ={link.path}>{link.text}</Link></li> 
-
-}
-
-const Nav = connect(mapStateToProps)(ConnectedNav);
-
+	var linkClass = (className) ? (className) + " " : "";
+	linkClass = (link.path === activePath) ? linkClass + "active" : linkClass;
+	return (
+		<li key={link.path} className={linkClass}>
+			{(link.badge) ?
+				<Link to={link.path}>{link.text}<span className="new badge" data-badge-caption={link.badge}></span></Link>
+				:
+				<Link to={link.path}>{link.text}</Link>
+			}
+		</li>
+		);
+	
+	}
+	
+	const Nav = connect(mapStateToProps)(ConnectedNav);
+	
 export default Nav;
