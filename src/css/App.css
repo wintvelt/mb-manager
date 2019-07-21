@@ -294,3 +294,20 @@ p.input-line > .text {
 .whitespace-vert {
 	height: 32px;
 }
+
+.small-card .card {
+	font-size: 14px;
+	height: 112px;
+}
+.small-card .card .card-content {
+	padding: 12px;
+}
+.small-card .card .card-title {
+	font-size: 18px;
+	line-height: 24px;
+}
+.small-card .card .btn-small {
+	position: absolute;
+    bottom: 1px;
+    right: 1px;
+}

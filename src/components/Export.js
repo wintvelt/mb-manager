@@ -5,7 +5,7 @@ import Select from 'react-select';
 import moment from 'moment';
 
 import { getIncomingSums, exportDocs, deleteFile } from '../actions/apiActions';
-import { exportRows, exportHeaders } from '../constants/data-helpers-export';
+import { exportRows, exportHeaders, getFromSums } from '../constants/data-helpers-export';
 import { SortableTable, tHeadAddSelect } from '../constants/table-helpers';
 
 
@@ -94,26 +94,22 @@ class ConnectedExport extends Component {
 
         if (hasData) {
             // main view with data
-            const { yearOptions, createFromTo, invoiceFromTo, docCount, unexportedCount,
-                mutatedCount, fileStats, selection
+            const { yearOptions, createFromTo, invoiceFromTo, unexportedCount, docCount,
+                mutatedCount, fileStats, selection, selectedYear
             } = getFromSums(this.props.incomingSums, this.state);
-            const selectedYear = this.state.year || yearOptions[0];
             const yearComp = (yearOptions.length > 0) ?
                 <div style={{ display: "inline-block" }}>
                     <Select
-                        options={[2019, 2018].map(i => { return { value: i, label: i } })}
+                        options={["2019", "2018"].map(i => { return { value: i, label: i } })}
                         styles={customStyles}
                         defaultValue={selectedYear}
-                        onChange={(list, action) => this.setYear(list.value)}
+                        onChange={(list, action) => this.setYear(list)}
                         name="jaar"
                         className='inline_select'
                         classNamePrefix='inline_select'
                     />
                 </div>
                 : yearOptions[0];
-            const selected = this.props.incomingSums.filter(item => {
-                return (selection.filter(sel => sel === item.id).length > 0)
-            }).map(item => item.id);
             const exportBtnClass = (selection.length > 0) ? 'btn-small' : 'btn-small disabled';
             const headers = tHeadAddSelect(exportHeaders, this.onDelete, this.onClearDelete, 7);
             const rows = exportRows(fileStats).map(row => {
@@ -126,8 +122,21 @@ class ConnectedExport extends Component {
                 <div className="container">
                     <h4>Inkomende facturen uit {yearComp}</h4>
                     <div className="row">
+                        {[
+                            {
+                                title: moment(this.props.lastSync).format('D MMM YYYY'), 
+                                text: 'Datum van laatste sync',
+                                icon: 'sync', btnFunc: this.sync
+                            },
+                            { title: docCount, text: 'Documenten totaal' },
+                            { title: unexportedCount, text: 'Nieuwe verwerkte documenten' },
+                            { title: mutatedCount, text: 'Documenten met mutaties sinds laatste export' },
+                            { title: invoiceFromTo.min, text: 'Oudste factuurdatum' },
+                            { title: invoiceFromTo.max, text: 'Laatste factuurdatum' },
+                            { title: createFromTo.min, text: 'Eerste opvoerdatum' },
+                            { title: createFromTo.max, text: 'Laatste opvoerdatum' },
+                        ].map(Widget)}
                         <h5>
-                            {docCount}&nbsp; documenten totaal &nbsp;
                             <span style={{ fontSize: '60%' }}>
                                 (laatste sync op {moment(this.props.lastSync).format('D MMM YYYY')}
                                 <span className="btn-flat waves-effect waves-teal teal-text"
@@ -137,12 +146,6 @@ class ConnectedExport extends Component {
                                 </span>)
                             </span>
                         </h5>
-                        <ul>
-                            <li className="col s12 m4 l3">toegevoegd tussen {createFromTo.min} en {createFromTo.max}</li>
-                            <li className="col s12 m4 l3">facturatiedatum van {invoiceFromTo.min} t/m {invoiceFromTo.max}</li>
-                            <li className="col s12 m4 l3">{unexportedCount} nieuwe verwerkte documenten</li>
-                            <li className="col s12 m4 l3">{mutatedCount} met mutaties sinds export</li>
-                        </ul>
                     </div>
                     <div className="row">
                         <h5>Selectie voor export</h5>
@@ -194,12 +197,12 @@ class ConnectedExport extends Component {
                         <p className="col s12 input-line">
                             <span>In selectie: </span>
                             <span className="chip">{selection.length}</span>
-                            <span className={exportBtnClass} 
+                            <span className={exportBtnClass}
                                 onClick={() => this.onExport(selection, this.props.accessToken)}>
                                 <i className='material-icons right'>cloud_download</i>Export
                             </span>
                         </p>
-                        <pre className='col s12'>{JSON.stringify(selected)}</pre>
+                        <pre className='col s12'>{JSON.stringify(selection)}</pre>
                     </div>
                     <div className="row">
                         <h5>Eerdere export-bestanden</h5>
@@ -207,7 +210,6 @@ class ConnectedExport extends Component {
                             <SortableTable headers={headers} rows={rows}
                                 onSelect={() => { }} hideKey={false} />
                         </div>
-                        <pre>{JSON.stringify(selected, null, 2)}</pre>
                         <pre>filestats{JSON.stringify(fileStats, null, 2)}</pre>
                         <pre>{JSON.stringify(this.props.incomingSums, null, 2)}</pre>
                     </div>
@@ -241,73 +243,26 @@ class ConnectedExport extends Component {
 
 }
 
-// to extract info from incomingSums
-// USES MUTABLES INSIDE
-function getFromSums(incomingSums, state) {
-    var yearOptions = [];
-    var createFromTo = { min: "", max: "" };
-    var invoiceFromTo = { min: "", max: "" };
-    var unexportedCount = 0;
-    var mutatedCount = 0;
-    var fileStats = {}; // uses fileName as key
-    var selection = incomingSums.filter(item => {
-        const inState = (state.mutSelected && item.mutations.length > 0) || (!state.mutSelected && !item.fileName);
-        const inCreatedFrom = (!state.createFrom || state.createFrom.length < 7) ||
-            (item.createDate >= state.createFrom);
-        const inCreatedTo = (!state.createTo || state.createTo.length < 7) ||
-            (item.createDate.slice(0, state.createTo.length) <= state.createTo);
-        const inInvoiceFrom = (!state.invoiceFrom || state.invoiceFrom.length < 7) ||
-            (item.invoiceDate >= state.invoiceFrom);
-        const inInvoiceTo = (!state.invoiceTo || state.invoiceTo.length < 7) ||
-            (item.invoiceDate.slice(0, state.invoiceTo.length) <= state.invoiceTo);
-        return inState && inCreatedFrom && inCreatedTo && inInvoiceFrom && inInvoiceTo;
-    }).map(item => item.id);
-    for (let i = 0; i < incomingSums.length; i++) {
-        const el = incomingSums[i];
-        if (el.invoiceDate) { yearOptions.push(el.invoiceDate.slice(0, 4)) }
-        setMinMax(createFromTo, el.createDate.slice(0, 10));
-        setMinMax(invoiceFromTo, el.invoiceDate);
-        if (el.fileName) {
-            // update filestats
-            var fileStatObj = fileStats[el.fileName] ||
-                {
-                    fileName: el.fileName, mutatedCount: 0, docCount: 0,
-                    createFromTo: { min: "", max: "" },
-                    invoiceFromTo: { min: "", max: "" }
-                };
-            fileStatObj.docCount++;
-            setMinMax(fileStatObj.createFromTo, el.createDate.slice(0, 10));
-            setMinMax(fileStatObj.invoiceFromTo, el.invoiceDate);
-            // updated fileStat and overall mutated count if needed
-            if (el.mutations && el.mutations.length > 0) {
-                mutatedCount++;
-                fileStatObj.mutatedCount++;
-            }
-            // add file to stats if needed
-            if (!fileStats[el.fileName]) { fileStats[el.fileName] = fileStatObj }
-        } else {
-            unexportedCount++;
-        }
-    }
-    return {
-        yearOptions: [...new Set(yearOptions)].sort().reverse()
-            .map(i => { return { value: i, label: i } }),
-        createFromTo: createFromTo,
-        invoiceFromTo: invoiceFromTo,
-        docCount: incomingSums.length,
-        unexportedCount: unexportedCount,
-        mutatedCount: mutatedCount,
-        fileStats: Object.keys(fileStats).map(key => fileStats[key]).sort().reverse(),
-        selection: selection
-    }
+// stat widget
+function Widget({ title, text, icon, btnFunc }) {
+    return (
+        <div key={text} className="col s6 m3 l2 small-card">
+            <div className="card blue-grey darken-1">
+                <div className="card-content white-text">
+                    <span className="card-title">{title}</span>
+                    <p>{text}</p>
+                </div>
+                {(icon)? 
+                <span className='btn-small btn-floating' onClick={btnFunc}>
+                    <i className="material-icons">{icon}</i>
+                </span>
+                : <div></div>
+                }
+            </div>
+        </div>
+    );
 }
 
-// helper to update min and max dates
-// MUTABLE FUNCTION
-function setMinMax(updatable = { min: "", max: "" }, dateValue) {
-    if (!updatable.min || dateValue < updatable.min) { updatable.min = dateValue }
-    if (!updatable.max || dateValue > updatable.max) { updatable.max = dateValue }
-}
 
 // styling for select
 const customStyles = {
