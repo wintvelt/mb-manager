@@ -270,44 +270,57 @@ h4.inline_select {
     font-size: 80%;
 }
 
-p.input-line {
+.input-line {
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
     font-size: 16px;
 	margin: 2px 0;
 }
-p.input-line > .text {
-	margin-top: 4px;
+.input-line > .text {
+	flex: 1;
+	margin-top: 0px;
     font-size: 16px;
     padding-right: 6px;
 }
-.input-line .input-field {
+.input-line .input-field input[type=text], .input-line .input-field  {
 	width: 108px;
 	margin-bottom: 0;
+	margin-top: 0;
+	height: 2rem;
 }
-.input-line label {
+.input-line label, .input-line label .text {
 	font-size: 16px;
 	color: teal;
-	margin-top: -3px;
 }
 .whitespace-vert {
 	height: 32px;
 }
+.whitespace-vert.small {
+	height: 8px;
+}
 
 .small-card .card {
 	font-size: 14px;
+}
+.small-card.min .card {
 	height: 112px;
 }
 .small-card .card .card-content {
 	padding: 12px;
 }
 .small-card .card .card-title {
-	font-size: 18px;
+	font-size: 24px;
 	line-height: 24px;
 }
-.small-card .card .btn-small {
+.small-card .card .btn-floating {
 	position: absolute;
-    bottom: 1px;
-    right: 1px;
+    bottom: 4px;
+    right: 4px;
+}
+.small-card .card.export {
+	height: 260px;
+}
+.card.export .chip {
+	margin-left: 0;
 }

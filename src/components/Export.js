@@ -7,6 +7,7 @@ import moment from 'moment';
 import { getIncomingSums, exportDocs, deleteFile } from '../actions/apiActions';
 import { exportRows, exportHeaders, getFromSums } from '../constants/data-helpers-export';
 import { SortableTable, tHeadAddSelect } from '../constants/table-helpers';
+import { doSnack } from "../actions/actions";
 
 
 
@@ -14,15 +15,18 @@ const mapStateToProps = state => {
     return {
         accessToken: state.accessToken,
         incomingSums: state.incomingSums,
-        lastSync: state.lastSync
+        exportPending: state.exportPending,
+        lastSync: state.lastSync,
+        optDeleted: state.optDeleted
     };
 };
 
 function mapDispatchToProps(dispatch) {
     return {
         getIncomingSums: () => dispatch(getIncomingSums()),
-        exportDocs: (ids, accessToken) => dispatch(exportDocs(ids, accessToken)),
-        deleteFile: (filename) => dispatch(deleteFile(filename))
+        exportDocs: (body, accessToken) => dispatch(exportDocs(body, accessToken)),
+        deleteFile: (filename) => dispatch(deleteFile(filename)),
+        doSnack: ((msg) => dispatch(doSnack(msg)))
     };
 }
 
@@ -53,14 +57,25 @@ class ConnectedExport extends Component {
         alert('syncing');
     }
     onDelete(filename) {
-        if (filename === this.state.selectedForDelete) this.props.deleteFile(filename);
-        this.setState({ selectedForDelete: filename });
+        if (filename === this.state.selectedForDelete) {
+            this.props.doSnack('exportbestand "' + filename + '" verwijderd.');
+            this.props.deleteFile(filename);
+            this.setState({
+                selectedForDelete: ''
+            })
+        } else {
+            this.setState({ selectedForDelete: filename });
+        }
     }
     onClearDelete() {
         this.setState({ selectedForDelete: '' });
     }
     onExport(selection, accessToken) {
-        this.props.exportDocs(selection, accessToken)
+        const body = {
+            ids: selection,
+            ext: (this.state.mutSelected) ? 'mutaties' : 'new'
+        }
+        this.props.exportDocs(body, accessToken)
     }
     onChangeInput(field, value) {
         switch (field) {
@@ -81,7 +96,7 @@ class ConnectedExport extends Component {
                 break;
 
             case 'mutSelected':
-                this.setState({ mutSelected: !this.state.mutSelected })
+                this.setState({ mutSelected: (value === 'true') })
                 break;
 
             default:
@@ -96,7 +111,7 @@ class ConnectedExport extends Component {
             // main view with data
             const { yearOptions, createFromTo, invoiceFromTo, unexportedCount, docCount,
                 mutatedCount, fileStats, selection, selectedYear
-            } = getFromSums(this.props.incomingSums, this.state);
+            } = getFromSums(this.props.incomingSums, this.state, this.props.optDeleted);
             const yearComp = (yearOptions.length > 0) ?
                 <div style={{ display: "inline-block" }}>
                     <Select
@@ -110,7 +125,7 @@ class ConnectedExport extends Component {
                     />
                 </div>
                 : yearOptions[0];
-            const exportBtnClass = (selection.length > 0) ? 'btn-small' : 'btn-small disabled';
+            const exportBtnClass = (selection.length > 0 && this.props.exportPending === 0) ? 'btn-small' : 'btn-small disabled';
             const headers = tHeadAddSelect(exportHeaders, this.onDelete, this.onClearDelete, 7);
             const rows = exportRows(fileStats).map(row => {
                 if (row[0].value !== this.state.selectedForDelete) return row;
@@ -124,88 +139,85 @@ class ConnectedExport extends Component {
                     <div className="row">
                         {[
                             {
-                                title: moment(this.props.lastSync).format('D MMM YYYY'), 
+                                title: moment(this.props.lastSync).format('D MMM YYYY'),
                                 text: 'Datum van laatste sync',
                                 icon: 'sync', btnFunc: this.sync
                             },
-                            { title: docCount, text: 'Documenten totaal' },
-                            { title: unexportedCount, text: 'Nieuwe verwerkte documenten' },
-                            { title: mutatedCount, text: 'Documenten met mutaties sinds laatste export' },
+                            {
+                                title: docCount + ' / ' + unexportedCount + ' / ' + mutatedCount,
+                                text: 'Documenten totaal / nieuw / met mutaties'
+                            },
                             { title: invoiceFromTo.min, text: 'Oudste factuurdatum' },
                             { title: invoiceFromTo.max, text: 'Laatste factuurdatum' },
                             { title: createFromTo.min, text: 'Eerste opvoerdatum' },
                             { title: createFromTo.max, text: 'Laatste opvoerdatum' },
                         ].map(Widget)}
-                        <h5>
-                            <span style={{ fontSize: '60%' }}>
-                                (laatste sync op {moment(this.props.lastSync).format('D MMM YYYY')}
-                                <span className="btn-flat waves-effect waves-teal teal-text"
-                                    style={{ zIndex: "0" }}
-                                    onClick={this.sync}>
-                                    <i className="material-icons">sync</i>
-                                </span>)
-                            </span>
-                        </h5>
                     </div>
                     <div className="row">
-                        <h5>Selectie voor export</h5>
-                        <p className='col l12 input-line'>
-                            <span className="switch">
-                                <label>
-                                    Nieuwe verwerkte documenten
-										<input type="checkbox"
-                                        checked={this.state.mutSelected}
-                                        onChange={() => this.onChangeInput('mutSelected')} />
-                                    <span className="lever"></span>
-                                    Documenten met mutaties sinds export
-									</label>
-                            </span>
-                        </p>
-                        <p className='col l6 input-line'>
-                            <span className='text'>Aangemaakt van</span>
-                            <span className="input-field">
-                                <input id="createFrom" type="text"
-                                    value={this.state.createFrom}
-                                    onChange={(e) => this.onChangeInput("createFrom", e.target.value)} />
-                                <label htmlFor="createFrom">JJJJ-MM-DD</label>
-                            </span>
-                            <span className='text'>tot en met</span>
-                            <span className="input-field">
-                                <input id="createTo" type="text"
-                                    value={this.state.createTo}
-                                    onChange={(e) => this.onChangeInput("createTo", e.target.value)} />
-                                <label htmlFor="createTo">JJJJ-MM-DD</label>
-                            </span>
-                        </p>
-                        <p className='col l6 input-line'>
-                            <span className='text'>Factuurdatum van</span>
-                            <span className="input-field">
-                                <input id="invoiceFrom" type="text"
-                                    value={this.state.invoiceFrom}
-                                    onChange={(e) => this.onChangeInput("invoiceFrom", e.target.value)} />
-                                <label htmlFor="invoiceFrom">JJJJ-MM-DD</label>
-                            </span>
-                            <span className='text'>tot en met</span>
-                            <span className="input-field">
-                                <input id="invoiceTo" type="text"
-                                    value={this.state.invoiceTo}
-                                    onChange={(e) => this.onChangeInput("invoiceTo", e.target.value)} />
-                                <label htmlFor="invoiceTo">JJJJ-MM-DD</label>
-                            </span>
-                        </p>
-                        <div className='col s12 whitespace-vert'></div>
-                        <p className="col s12 input-line">
-                            <span>In selectie: </span>
-                            <span className="chip">{selection.length}</span>
-                            <span className={exportBtnClass}
-                                onClick={() => this.onExport(selection, this.props.accessToken)}>
-                                <i className='material-icons right'>cloud_download</i>Export
-                            </span>
-                        </p>
-                        <pre className='col s12'>{JSON.stringify(selection)}</pre>
+                        <div className='col l6 m6 small-card'>
+                            <div className='card export'>
+                                <div className='card-content'>
+                                    <div className='card-title'>Filters voor export</div>
+                                    <div className='input-line'>
+                                        <label>
+                                            <input className="with-gap" name="group1" type="radio"
+                                                value={false}
+                                                checked={!this.state.mutSelected}
+                                                onChange={(e) => this.onChangeInput('mutSelected', e.target.value)} />
+                                            <span className='text'>Nieuwe verwerkte documenten</span>
+                                        </label>
+                                    </div>
+                                    <div className='input-line'>
+                                        <label>
+                                            <input className="with-gap" name="group1" type="radio"
+                                                value={true}
+                                                checked={this.state.mutSelected}
+                                                onChange={(e) => this.onChangeInput('mutSelected', e.target.value)} />
+                                            <span className='text'>Met mutaties sinds export</span>
+                                        </label>
+                                    </div>
+                                    <div className='whitespace-vert small'></div>
+                                    {InputLine('Aangemaakt', 'van', 'createFrom', this.state.createFrom, this.onChangeInput)}
+                                    {InputLine(null, 'tot en met', 'createTo', this.state.createTo, this.onChangeInput)}
+                                    <div className='whitespace-vert small'></div>
+                                    {InputLine('Factuurdatum', 'van', 'invoiceFrom', this.state.invoiceFrom, this.onChangeInput)}
+                                    {InputLine(null, 'tot en met', 'invoiceTo', this.state.invoiceTo, this.onChangeInput)}
+                                </div>
+                            </div>
+                        </div>
+                        <div className='col l6 m6 small-card'>
+                            <div className='card export'>
+                                <div className='card-content'>
+                                    <div className='card-title'>
+                                        Documenten in selectie
+                                    </div>
+                                    <p className='input-line'>
+                                        <span className="chip">{selection.length}</span>
+                                        {(this.state.mutSelected) ? 'met mutaties' : 'nieuw te exporteren'}
+                                    </p>
+                                    <div className='whitespace-vert'></div>
+                                    <p>
+                                        <span className={exportBtnClass}
+                                            onClick={() => this.onExport(selection, this.props.accessToken)}>
+                                            <i className='material-icons right'>cloud_download</i>Export
+                                        </span>
+                                    </p>
+                                    <div className='whitespace-vert small'></div>
+                                    {(this.props.exportPending > 0) ?
+                                        <div>
+                                            <p className='input-line'>Export-bestand aan het maken..</p>
+                                            <div className="progress">
+                                                <div className="indeterminate"></div>
+                                            </div>
+                                        </div>
+                                        : <div></div>
+                                    }
+                                    <p>{JSON.stringify(selection, null, 2)}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div className="row">
-                        <h5>Eerdere export-bestanden</h5>
                         <div className="section">
                             <SortableTable headers={headers} rows={rows}
                                 onSelect={() => { }} hideKey={false} />
@@ -246,18 +258,35 @@ class ConnectedExport extends Component {
 // stat widget
 function Widget({ title, text, icon, btnFunc }) {
     return (
-        <div key={text} className="col s6 m3 l2 small-card">
-            <div className="card blue-grey darken-1">
-                <div className="card-content white-text">
+        <div key={text} className="col s6 m3 l2 small-card min">
+            <div className="card blue-grey lighten-4">
+                <div className="card-content">
                     <span className="card-title">{title}</span>
                     <p>{text}</p>
                 </div>
-                {(icon)? 
-                <span className='btn-small btn-floating' onClick={btnFunc}>
-                    <i className="material-icons">{icon}</i>
-                </span>
-                : <div></div>
+                {(icon) ?
+                    <span className='btn-small btn-floating' onClick={btnFunc}>
+                        <i className="material-icons">{icon}</i>
+                    </span>
+                    : <div></div>
                 }
+            </div>
+        </div>
+    );
+}
+
+function InputLine(text1, text2, fieldId, value, changeFunc) {
+    return (
+        <div className='input-line'>
+            {(text1) ?
+                <div className='text'>{text1}</div>
+                : <div></div>
+            }
+            <div className='text right-align'>{text2}</div>
+            <div className="input-field">
+                <input id={fieldId} type="text"
+                    value={value} placeholder='JJJJ-MM-DD'
+                    onChange={(e) => changeFunc(fieldId, e.target.value)} />
             </div>
         </div>
     );

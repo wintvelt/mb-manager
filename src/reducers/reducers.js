@@ -7,9 +7,9 @@ import { DO_SNACK, DO_SNACK_ERROR,
   ADD_INCOMING, SET_INCOMING_LEDGER, SET_INCOMING_CUSTOM_FIELD, SET_INCOMING_PAYMENT,
   SET_INCOMING_LOADING,
   ADD_CONTACTS, SET_CONTACT_FIELD, SET_CONTACT_CUSTOM_FIELD,
-  ADD_RECEIVED, SET_INCOMING_SUMS,
+  ADD_RECEIVED, SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
-  LOGIN, LOGOUT, TEST, SET_TEST_RESULT, SET_CONTACTS_LOADING 
+  LOGIN, LOGOUT, TEST, SET_TEST_RESULT, SET_CONTACTS_LOADING, 
   } from "../constants/action-types";
 import { setLedgerInRow, setCustomFieldInRow, setPaymentInRow } from './reducer-helpers';
 
@@ -37,6 +37,8 @@ export const initialState = {
   received: null,
   receivedDate: "",
   incomingSums: null,
+  exportPending: 0,
+  optDeleted: [],
   lastSync: "",
   batchMsg: {},
   batchError: false
@@ -98,6 +100,18 @@ function rootReducer(state = initialState, action) {
       return Object.assign({}, state, {
         incomingSums: action.payload.incomingSums,
         lastSync: action.payload.lastSync || state.lastSync
+      })
+    }
+
+    case SET_EXPORT_PENDING: {
+      return Object.assign({}, state, {
+        exportPending: action.payload
+      })
+    }
+
+    case SET_OPT_DELETED: {
+      return Object.assign({}, state, {
+        optDeleted: action.payload
       })
     }
 

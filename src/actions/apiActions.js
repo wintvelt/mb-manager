@@ -6,7 +6,8 @@ import {
 	addIncoming, setIncomingLoading,
 	addContacts, setCustomFields, setContactsLoading,
 	addReceived,
-	setIncomingSums
+	setIncomingSums, setExportPending, setOptDeleted,
+	doSnack
 } from './actions';
 import { setCookie, deleteCookie } from './cookies';
 
@@ -244,14 +245,17 @@ export function getIncomingSums() {
 	}
 }
 
-export function exportDocs(ids, access_token) {
+export function exportDocs(body, access_token) {
 	return function (dispatch) {
 		const url = (process.env.NODE_ENV === 'development') ?
 			'http://localhost:3030/export'
 			: 'https://';
-		const body = { ids: ids };
-		return postData(url, body, "POST", access_token)
+		dispatch(setExportPending(body.ids.length));
+		dispatch(doSnack('Export wordt gemaakt voor ' + body.ids.length + ' document(en)'));
+		postData(url, body, "POST", access_token)
 			.then(res => {
+				dispatch(setExportPending(0));
+				dispatch(doSnack('Export met ' + body.ids.length + ' documenten klaar voor download'));
 				dispatch(setIncomingSums({
 					incomingSums: res
 				}));
@@ -259,6 +263,7 @@ export function exportDocs(ids, access_token) {
 			.catch(error => {
 				const msg = "Export helaas mislukt met fout \""
 					+ error.message + "\".";
+				dispatch(setExportPending(0));
 				dispatch(doSnackError(msg));
 			})
 	}
@@ -270,13 +275,16 @@ export function deleteFile(filename, access_token) {
 			'http://localhost:3030/export'
 			: 'https://';
 		const body = { filename: filename };
-		return postData(url, body, "DELETE", access_token)
+		dispatch(setOptDeleted([filename]));
+		postData(url, body, "DELETE", access_token)
 			.then(res => {
+				dispatch(setOptDeleted([]));
 				dispatch(setIncomingSums({
 					incomingSums: res
 				}));
 			})
 			.catch(error => {
+				dispatch(setOptDeleted([]));
 				const msg = "File deleten helaas mislukt met fout \""
 					+ error.message + "\".";
 				dispatch(doSnackError(msg));

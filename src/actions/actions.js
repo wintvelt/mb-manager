@@ -6,7 +6,7 @@ import { DO_SNACK, DO_SNACK_ERROR,
   ADD_INCOMING, SET_INCOMING_LEDGER, SET_INCOMING_CUSTOM_FIELD, SET_INCOMING_PAYMENT,
   SET_INCOMING_LOADING,
   ADD_CONTACTS, SET_CONTACT_FIELD, SET_CONTACT_CUSTOM_FIELD, SET_CONTACTS_LOADING,
-  ADD_RECEIVED, SET_INCOMING_SUMS,
+  ADD_RECEIVED, SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT 
   } from "../constants/action-types";
@@ -62,6 +62,12 @@ export function setContactsLoading(payload) {
 }
 export function setIncomingSums(payload) {
   return { type: SET_INCOMING_SUMS, payload }
+}
+export function setExportPending(payload) {
+  return { type: SET_EXPORT_PENDING, payload }
+}
+export function setOptDeleted(payload) {
+  return { type: SET_OPT_DELETED, payload }
 }
 
 export function addReceived(payload) {
