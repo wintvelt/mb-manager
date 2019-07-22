@@ -6,7 +6,7 @@ import {
 	addIncoming, setIncomingLoading,
 	addContacts, setCustomFields, setContactsLoading,
 	addReceived,
-	setIncomingSums, setExportPending, setOptDeleted,
+	setIncomingSums, setExportPending, setSyncPending, setOptDeleted,
 	doSnack
 } from './actions';
 import { setCookie, deleteCookie } from './cookies';
@@ -265,6 +265,29 @@ export function exportDocs(body, access_token) {
 					+ error.message + "\".";
 				dispatch(setExportPending(0));
 				dispatch(doSnackError(msg));
+			})
+	}
+}
+
+export function syncFiles(access_token) {
+	return function (dispatch) {
+		const url = (process.env.NODE_ENV === 'development') ?
+			'http://localhost:3030/sync'
+			: 'https://';
+		dispatch(setSyncPending(true));
+		dispatch(doSnack('Laatste stand van zaken van Moneybird ophalen'));
+		getData(url, access_token)
+			.then(res => {
+				dispatch(setSyncPending(false));
+				dispatch(setIncomingSums({
+					incomingSums: res
+				}));
+			})
+			.catch(error => {
+				const msg = "Export helaas mislukt met fout \""
+					+ error.message + "\".";
+				dispatch(doSnackError(msg));
+				dispatch(setSyncPending(false));
 			})
 	}
 }

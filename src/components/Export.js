@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Select from 'react-select';
 import moment from 'moment';
 
-import { getIncomingSums, exportDocs, deleteFile } from '../actions/apiActions';
+import { getIncomingSums, exportDocs, deleteFile, syncFiles } from '../actions/apiActions';
 import { exportRows, exportHeaders, getFromSums } from '../constants/data-helpers-export';
 import { SortableTable, tHeadAddSelect } from '../constants/table-helpers';
 import { doSnack } from "../actions/actions";
@@ -17,7 +17,8 @@ const mapStateToProps = state => {
         incomingSums: state.incomingSums,
         exportPending: state.exportPending,
         lastSync: state.lastSync,
-        optDeleted: state.optDeleted
+        optDeleted: state.optDeleted,
+        syncPending: state.syncPending
     };
 };
 
@@ -25,6 +26,7 @@ function mapDispatchToProps(dispatch) {
     return {
         getIncomingSums: () => dispatch(getIncomingSums()),
         exportDocs: (body, accessToken) => dispatch(exportDocs(body, accessToken)),
+        syncFiles: (accessToken) => dispatch(syncFiles(accessToken)),
         deleteFile: (filename) => dispatch(deleteFile(filename)),
         doSnack: ((msg) => dispatch(doSnack(msg)))
     };
@@ -53,8 +55,8 @@ class ConnectedExport extends Component {
     setYear(value) {
         this.setState({ selectedYear: value });
     }
-    sync() {
-        alert('syncing');
+    sync(accessToken) {
+        this.props.syncFiles(accessToken);
     }
     onDelete(filename) {
         if (filename === this.state.selectedForDelete) {
@@ -141,7 +143,8 @@ class ConnectedExport extends Component {
                             {
                                 title: moment(this.props.lastSync).format('D MMM YYYY'),
                                 text: 'Datum van laatste sync',
-                                icon: 'sync', btnFunc: this.sync
+                                icon: 'sync', btnFunc: (() => this.sync(this.props.accessToken)),
+                                pending: this.props.syncPending
                             },
                             {
                                 title: docCount + ' / ' + unexportedCount + ' / ' + mutatedCount,
@@ -256,15 +259,21 @@ class ConnectedExport extends Component {
 }
 
 // stat widget
-function Widget({ title, text, icon, btnFunc }) {
+function Widget({ title, text, icon, btnFunc, pending }) {
     return (
         <div key={text} className="col s6 m3 l2 small-card min">
             <div className="card blue-grey lighten-4">
                 <div className="card-content">
                     <span className="card-title">{title}</span>
                     <p>{text}</p>
+                    {(icon && pending) ?
+                        <div className="progress small">
+                            <div className="indeterminate"></div>
+                        </div>
+                        : <div></div>
+                    }
                 </div>
-                {(icon) ?
+                {(icon && !pending) ?
                     <span className='btn-small btn-floating' onClick={btnFunc}>
                         <i className="material-icons">{icon}</i>
                     </span>
