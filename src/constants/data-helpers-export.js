@@ -64,7 +64,7 @@ const valToCell = (val, i) => {
 // to extract info from incomingSums
 // USES MUTABLES INSIDE
 export function getFromSums(incomingSums, state, optDeleted) {
-    const yearOptions = [...new Set(incomingSums.map(item => { return item.invoiceDate.slice(0,4) }))].sort().reverse()
+    const yearOptions = [...new Set(incomingSums.map(item => { return item.createDate.slice(0,4) }))].sort().reverse()
         .map(i => { return { value: i, label: i } });
     const selectedYear = state.selectedYear || yearOptions[0];
     var createFromTo = { min: "", max: "" };
@@ -74,7 +74,7 @@ export function getFromSums(incomingSums, state, optDeleted) {
     var docCount = 0;
     var fileStats = {}; // uses fileName as key
     var selection = incomingSums.filter(item => {
-        if (item.invoiceDate.slice(0, 4) !== selectedYear.value) return false;
+        if (item.createDate.slice(0, 4) !== selectedYear.value) return false;
         const inState = (state.mutSelected && item.mutations.length > 0) || 
             (!state.mutSelected && (!item.fileName || optDeleted.includes(item.fileName)));
         const inCreatedFrom = (!state.createFrom || state.createFrom.length < 7) ||
@@ -89,7 +89,7 @@ export function getFromSums(incomingSums, state, optDeleted) {
     }).map(item => item.id);
     for (let i = 0; i < incomingSums.length; i++) {
         const el = incomingSums[i];
-        if (el.invoiceDate.slice(0, 4) === selectedYear.value) {
+        if (el.createDate.slice(0, 4) === selectedYear.value) {
             setMinMax(createFromTo, el.createDate.slice(0, 10));
             setMinMax(invoiceFromTo, el.invoiceDate);
             if (el.fileName && !optDeleted.includes(el.fileName)) {

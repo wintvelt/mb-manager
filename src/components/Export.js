@@ -114,10 +114,10 @@ class ConnectedExport extends Component {
             const { yearOptions, createFromTo, invoiceFromTo, unexportedCount, docCount,
                 mutatedCount, fileStats, selection, selectedYear
             } = getFromSums(this.props.incomingSums, this.state, this.props.optDeleted);
-            const yearComp = (yearOptions.length > 0) ?
+            const yearComp = (yearOptions.length > 1) ?
                 <div style={{ display: "inline-block" }}>
                     <Select
-                        options={["2019", "2018"].map(i => { return { value: i, label: i } })}
+                        options={yearOptions}
                         styles={customStyles}
                         defaultValue={selectedYear}
                         onChange={(list, action) => this.setYear(list)}
@@ -126,7 +126,7 @@ class ConnectedExport extends Component {
                         classNamePrefix='inline_select'
                     />
                 </div>
-                : yearOptions[0];
+                : yearOptions[0].value;
             const exportBtnClass = (selection.length > 0 && this.props.exportPending === 0) ? 'btn-small' : 'btn-small disabled';
             const headers = tHeadAddSelect(exportHeaders, this.onDelete, this.onClearDelete, 7);
             const rows = exportRows(fileStats).map(row => {
