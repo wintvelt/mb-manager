@@ -215,7 +215,6 @@ class ConnectedExport extends Component {
                                         </div>
                                         : <div></div>
                                     }
-                                    <p>{JSON.stringify(selection, null, 2)}</p>
                                 </div>
                             </div>
                         </div>
@@ -225,8 +224,6 @@ class ConnectedExport extends Component {
                             <SortableTable headers={headers} rows={rows}
                                 onSelect={() => { }} hideKey={false} />
                         </div>
-                        <pre>filestats{JSON.stringify(fileStats, null, 2)}</pre>
-                        <pre>{JSON.stringify(this.props.incomingSums, null, 2)}</pre>
                     </div>
                 </div>
             );
