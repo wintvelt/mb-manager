@@ -24,7 +24,7 @@ const mapStateToProps = state => {
 
 function mapDispatchToProps(dispatch) {
     return {
-        getIncomingSums: () => dispatch(getIncomingSums()),
+        getIncomingSums: (accessToken) => dispatch(getIncomingSums(accessToken)),
         exportDocs: (body, accessToken) => dispatch(exportDocs(body, accessToken)),
         syncFiles: (accessToken) => dispatch(syncFiles(accessToken)),
         deleteFile: (filename) => dispatch(deleteFile(filename)),
@@ -41,7 +41,7 @@ class ConnectedExport extends Component {
             createTo: "",
             invoiceFrom: "",
             invoiceTo: "",
-            mutSelected: false,
+            mutSelected: 'new',
             selectedForDelete: ""
         };
         this.setYear = this.setYear.bind(this);
@@ -50,7 +50,7 @@ class ConnectedExport extends Component {
         this.onClearDelete = this.onClearDelete.bind(this);
         this.onExport = this.onExport.bind(this);
         this.onChangeInput = this.onChangeInput.bind(this);
-        if (props.accessToken && !props.incomingSums) props.getIncomingSums();
+        if (props.accessToken && !props.incomingSums) props.getIncomingSums(this.props.accessToken);
     }
     setYear(value) {
         this.setState({ selectedYear: value });
@@ -73,9 +73,22 @@ class ConnectedExport extends Component {
         this.setState({ selectedForDelete: '' });
     }
     onExport(selection, accessToken) {
-        const body = {
+        var body = {
             ids: selection,
-            ext: (this.state.mutSelected) ? 'mutaties' : 'new'
+        }
+        switch (this.state.mutSelected) {
+            case 'new':
+                body.ext = 'new';
+                break;
+
+            case 'mut':
+                body.ext = 'mutaties';
+                break;
+
+            default:
+                body.ext = 'all';
+                body.noLog = true;
+                break;
         }
         this.props.exportDocs(body, accessToken)
     }
@@ -98,7 +111,7 @@ class ConnectedExport extends Component {
                 break;
 
             case 'mutSelected':
-                this.setState({ mutSelected: (value === 'true') })
+                this.setState({ mutSelected: value })
                 break;
 
             default:
@@ -112,7 +125,7 @@ class ConnectedExport extends Component {
         if (hasData) {
             // main view with data
             const { yearOptions, createFromTo, invoiceFromTo, unexportedCount, docCount,
-                mutatedCount, fileStats, selection, selectedYear
+                mutatedCount, fileStats, selection, selStats, selectedYear
             } = getFromSums(this.props.incomingSums, this.state, this.props.optDeleted);
             const yearComp = (yearOptions.length > 1) ?
                 <div style={{ display: "inline-block" }}>
@@ -130,10 +143,19 @@ class ConnectedExport extends Component {
             const exportBtnClass = (selection.length > 0 && this.props.exportPending === 0) ? 'btn-small' : 'btn-small disabled';
             const headers = tHeadAddSelect(exportHeaders, this.onDelete, this.onClearDelete, 7);
             const rows = exportRows(fileStats).map(row => {
+                if (row[0].value.includes('initial')) {
+                    return [...row.slice(0,7), 
+                        Object.assign({}, row[7], { value: 'do_not_disturb', disabled: true })]
+                }
                 if (row[0].value !== this.state.selectedForDelete) return row;
                 const newDeleteCell = Object.assign({}, row[7],
                     { className: 'red white-text', value: 'delete_forever' })
                 return [...row.slice(0, 7), newDeleteCell];
+            }).sort((a, b) => {
+                var x = 0;
+                if (a[0].value > b[0].value) x = 1;
+                if (a[0].value < b[0].value) x = -1;
+                return x;
             });
             return (
                 <div className="container">
@@ -150,82 +172,103 @@ class ConnectedExport extends Component {
                                 title: docCount + ' / ' + unexportedCount + ' / ' + mutatedCount,
                                 text: 'Documenten totaal / nieuw / met mutaties'
                             },
-                            { title: invoiceFromTo.min, text: 'Oudste factuurdatum' },
-                            { title: invoiceFromTo.max, text: 'Laatste factuurdatum' },
-                            { title: createFromTo.min, text: 'Eerste opvoerdatum' },
-                            { title: createFromTo.max, text: 'Laatste opvoerdatum' },
+                            { title: moment(invoiceFromTo.min).format('D MMM YYYY'), text: 'Oudste factuurdatum' },
+                            { title: moment(invoiceFromTo.max).format('D MMM YYYY'), text: 'Laatste factuurdatum' },
+                            { title: moment(createFromTo.min).format('D MMM YYYY'), text: 'Eerste opvoerdatum' },
+                            { title: moment(createFromTo.max).format('D MMM YYYY'), text: 'Laatste opvoerdatum' },
                         ].map(Widget)}
                     </div>
                     <div className="row">
-                        <div className='col l6 m6 small-card'>
+                        <div className='col l6 m6 s12 small-card'>
                             <div className='card export'>
                                 <div className='card-content'>
                                     <div className='card-title'>Filters voor export</div>
-                                    <div className='input-line'>
-                                        <label>
-                                            <input className="with-gap" name="group1" type="radio"
-                                                value={false}
-                                                checked={!this.state.mutSelected}
-                                                onChange={(e) => this.onChangeInput('mutSelected', e.target.value)} />
-                                            <span className='text'>Nieuwe verwerkte documenten</span>
-                                        </label>
+                                    <div className="row" style={{ marginBottom: '0' }}>
+                                        <div className="col l6 m6">
+                                            {Radio('new', 'Nieuwe verwerkte documenten', 'Nieuw',
+                                                this.state.mutSelected, this.onChangeInput)}
+                                            {Radio('mut', 'Met mutaties sinds export', 'Gemuteerd',
+                                                this.state.mutSelected, this.onChangeInput)}
+                                        </div>
+                                        <div className="col l6 m6">
+                                            {Radio('all', 'Archief (alle documenten, zonder log)', 'Archief',
+                                                this.state.mutSelected, this.onChangeInput)}
+                                        </div>
                                     </div>
-                                    <div className='input-line'>
-                                        <label>
-                                            <input className="with-gap" name="group1" type="radio"
-                                                value={true}
-                                                checked={this.state.mutSelected}
-                                                onChange={(e) => this.onChangeInput('mutSelected', e.target.value)} />
-                                            <span className='text'>Met mutaties sinds export</span>
-                                        </label>
-                                    </div>
+                                    {InputLine('Factuurdatum', 'van', 'invoiceFrom', this.state.invoiceFrom, this.onChangeInput)}
+                                    {InputLine(null, 'tot en met', 'invoiceTo', this.state.invoiceTo, this.onChangeInput)}
                                     <div className='whitespace-vert small'></div>
                                     {InputLine('Aangemaakt', 'van', 'createFrom', this.state.createFrom, this.onChangeInput)}
                                     {InputLine(null, 'tot en met', 'createTo', this.state.createTo, this.onChangeInput)}
-                                    <div className='whitespace-vert small'></div>
-                                    {InputLine('Factuurdatum', 'van', 'invoiceFrom', this.state.invoiceFrom, this.onChangeInput)}
-                                    {InputLine(null, 'tot en met', 'invoiceTo', this.state.invoiceTo, this.onChangeInput)}
                                 </div>
                             </div>
                         </div>
-                        <div className='col l6 m6 small-card'>
+                        <div className='col l6 m6 s12 small-card'>
                             <div className='card export'>
                                 <div className='card-content'>
                                     <div className='card-title'>
                                         Documenten in selectie
                                     </div>
-                                    <p className='input-line'>
-                                        <span className="chip">{selection.length}</span>
-                                        {(this.state.mutSelected) ? 'met mutaties' : 'nieuw te exporteren'}
-                                    </p>
-                                    <div className='whitespace-vert'></div>
-                                    <p>
-                                        <span className={exportBtnClass}
-                                            onClick={() => this.onExport(selection, this.props.accessToken)}>
-                                            <i className='material-icons right'>cloud_download</i>Export
-                                        </span>
-                                    </p>
-                                    <div className='whitespace-vert small'></div>
-                                    {(this.props.exportPending > 0) ?
-                                        <div>
-                                            <p className='input-line'>Export-bestand aan het maken..</p>
-                                            <div className="progress">
-                                                <div className="indeterminate"></div>
-                                            </div>
+                                    <div className='row' style={{ marginBottom: '0' }}>
+                                        <div className='col l6 m12 s12'>
+                                            <p className='input-line'>
+                                                <span className="chip">{selection.length}</span>
+                                                {(this.state.mutSelected === 'mut') ? 'met mutaties' :
+                                                    (this.state.mutSelected === 'new') ?
+                                                        'nieuw te exporteren' : 'archief (zonder log)'}
+                                            </p>
+                                            <div className='whitespace-vert'></div>
+                                            <p>
+                                                <span className={exportBtnClass}
+                                                    onClick={() => this.onExport(selection, this.props.accessToken)}>
+                                                    <i className='material-icons right'>cloud_download</i>Maak xlsx export
+                                            </span>
+                                            </p>
+                                            <div className='whitespace-vert small'></div>
+                                            {(this.props.exportPending > 0) ?
+                                                <div>
+                                                    <p className='input-line'>Export-bestand aan het maken..</p>
+                                                    <div className="progress">
+                                                        <div className="indeterminate"></div>
+                                                    </div>
+                                                </div>
+                                                : <div></div>
+                                            }
                                         </div>
-                                        : <div></div>
-                                    }
+                                        <div className='col l6 hide-on-med-and-down'>
+                                            <p>
+                                                <span className='export-stats'>{selStats.docCount}</span>
+                                                documenten</p>
+                                            <p><span className='export-stats'>{selStats.mutatedCount}</span>met mutaties</p>
+                                            <p><span className='export-stats'>{selStats.unexportedCount}</span>nieuw</p>
+                                            <p><span className='export-stats'>
+                                                {moment(selStats.invoiceFromTo.min).format('D MMM YYYY')}
+                                            </span>
+                                                eerste factuurdatum
+                                                </p>
+                                            <p><span className='export-stats'>
+                                                {moment(selStats.invoiceFromTo.max).format('D MMM YYYY')}</span>
+                                                laatste factuurdatum</p>
+                                            <p><span className='export-stats'>
+                                                {moment(selStats.createFromTo.min).format('D MMM YYYY')}</span>eerst opgevoerd
+                                                </p>
+                                            <p><span className='export-stats'>
+                                                {moment(selStats.createFromTo.max).format('D MMM YYYY')}</span>
+                                                laatst opgevoerd</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div >
                     <div className="row">
                         <div className="section">
                             <SortableTable headers={headers} rows={rows}
-                                onSelect={() => { }} hideKey={false} />
+                                onSelect={() => { }} hideKey={false}
+                                sortValue='Bestand' sortDirection='down' />
                         </div>
                     </div>
-                </div>
+                </div >
             );
         }
         if (hasToken) {
@@ -277,6 +320,23 @@ function Widget({ title, text, icon, btnFunc, pending }) {
                     : <div></div>
                 }
             </div>
+        </div>
+    );
+}
+
+function Radio(option, fullText, smallText, checked, changeFunc) {
+    return (
+        <div className='input-line'>
+            <label>
+                <input className="with-gap" name="group1" type="radio"
+                    value={option}
+                    checked={(checked === option)}
+                    onChange={(e) => changeFunc('mutSelected', e.target.value)} />
+                <span className='text'>
+                    <span className='hide-on-med-and-down'>{fullText}</span>
+                    <span className='hide-on-large-only'>{smallText}</span>
+                </span>
+            </label>
         </div>
     );
 }

@@ -15,6 +15,7 @@ const defaultCell = {
 	value: "",
 	href: "",
 	onSelect: null, // for clicking individual cells, will pass row key + colIndex
+	disabled: false, // for disabling individual rows from clicking
 	className: "",
 	data: "" // in case value is the icon name
 }
@@ -129,7 +130,7 @@ function cell(item, i, head, rowKey) {
 		(head.align !== "left")? { textAlign : head.align } : {},
 		(head.icon)? { width: "1em" } : {}
 	);
-	var className = (onSelect)? head.className + " clickable" : head.className;
+	var className = (onSelect && !item.disabled)? head.className + " clickable" : head.className;
 	className = (item.className)? className + " " + item.className : className;
 	const content = (head.icon)?
 		<i className="material-icons">{value}</i>
@@ -139,7 +140,7 @@ function cell(item, i, head, rowKey) {
 	const contentWrapped = (item.href)?
 		<a href={item.href} target="_blank" rel="noopener noreferrer">{content}</a> 
 		: content;
-	return ( (onSelect)? 
+	return ( (onSelect && !item.disabled)? 
 		<td className={className} key={i} style={styling} onClick={()=> {onSelect(rowKey,i)}}>
 			{contentWrapped}</td>
 		: <td className={className} key={i} style={styling}>{contentWrapped}</td>

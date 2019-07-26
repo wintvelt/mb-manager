@@ -219,17 +219,20 @@ export function getCustomFields() {
 	}
 }
 
-export function getIncomingSums() {
+export function getIncomingSums(access_token) {
 	return function (dispatch) {
-		const url = (process.env.NODE_ENV === 'development') ?
-			'http://localhost:3030/export?method=GET&filename=incoming-summary-list.json'
-			: 'https://moblybird-export-files.s3.eu-central-1.amazonaws.com/incoming-summary-list.json';
-		var myHeaders = new Headers();
-		if (process.env.NODE_ENV !== 'development') {
-			myHeaders.append('pragma', 'no-cache');
-			myHeaders.append('cache-control', 'no-cache');
-		}
-		return fetch(url, { mode: "cors", headers: myHeaders })
+		// const url = (process.env.NODE_ENV === 'development') ?
+		// 	'http://localhost:3030/export?method=GET&filename=incoming-summary-list.json'
+		// 	: '';
+		const url = 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export?filename=incoming-summary-list.json';
+
+		return fetch(url, {
+			mode: "cors", cache: 'no-cache', 
+			// credentials: 'include',
+			// headers: {
+			// 	Authorization: "Bearer " + access_token // ACCESS_TOKEN
+			// }
+		})
 			.then(res => res.json())
 			.then(res => {
 				dispatch(setIncomingSums({
@@ -247,9 +250,10 @@ export function getIncomingSums() {
 
 export function exportDocs(body, access_token) {
 	return function (dispatch) {
-		const url = (process.env.NODE_ENV === 'development') ?
-			'http://localhost:3030/export'
-			: 'https://';
+		// const url = (process.env.NODE_ENV === 'development') ?
+		// 	'http://localhost:3030/export'
+		// 	: 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export/';
+		const url = 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export';
 		dispatch(setExportPending(body.ids.length));
 		dispatch(doSnack('Export wordt gemaakt voor ' + body.ids.length + ' document(en)'));
 		postData(url, body, "POST", access_token)
@@ -271,9 +275,11 @@ export function exportDocs(body, access_token) {
 
 export function syncFiles(access_token) {
 	return function (dispatch) {
-		const url = (process.env.NODE_ENV === 'development') ?
-			'http://localhost:3030/sync'
-			: 'https://';
+		// const url = (process.env.NODE_ENV === 'development') ?
+		// 	'http://localhost:3030/sync'
+		// 	: 'https://';
+		const url = 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/sync';
+
 		dispatch(setSyncPending(true));
 		dispatch(doSnack('Laatste stand van zaken van Moneybird ophalen'));
 		getData(url, access_token)
@@ -294,9 +300,11 @@ export function syncFiles(access_token) {
 
 export function deleteFile(filename, access_token) {
 	return function (dispatch) {
-		const url = (process.env.NODE_ENV === 'development') ?
-			'http://localhost:3030/export'
-			: 'https://';
+		// const url = (process.env.NODE_ENV === 'development') ?
+		// 	'http://localhost:3030/export'
+		// 	: 'https://';
+		const url = 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export';
+
 		const body = { filename: filename };
 		dispatch(setOptDeleted([filename]));
 		postData(url, body, "DELETE", access_token)

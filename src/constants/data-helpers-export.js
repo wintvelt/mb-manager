@@ -4,17 +4,18 @@
 import { tHead, tCell } from '../constants/table-helpers';
 
 export const exportHeaders = [
-    { value: "Bestand", shorten: false}, 
+    { value: "Bestand", shorten: false },
     { value: "Docs in bestand", align: "center" },
-    "Documenten vanaf", "tot aan",
-    "met Factuurdatum vanaf", "tot en met",
+    "Factuurdatum vanaf", "tot en met",
+    "Aangemaakt vanaf", "tot aan",
     { value: "Mutaties sinds export", align: "center" },
     { value: "clear", align: "center", sortable: false, icon: true }
 ].map(tHead);
 
 const dataMap = [
-    ["fileName"], ["docCount"], [ "createFromTo", "min" ], [ "createFromTo", "max" ],
-    [ "invoiceFromTo", "min" ], [ "invoiceFromTo", "max" ],    
+    ["fileName"], ["docCount"], 
+    ["invoiceFromTo", "min"], ["invoiceFromTo", "max"],
+    ["createFromTo", "min"], ["createFromTo", "max"],
     ["mutatedCount"],
     null
 ];
@@ -64,7 +65,9 @@ const valToCell = (val, i) => {
 // to extract info from incomingSums
 // USES MUTABLES INSIDE
 export function getFromSums(incomingSums, state, optDeleted) {
-    const yearOptions = [...new Set(incomingSums.map(item => { return item.createDate.slice(0,4) }))].sort().reverse()
+    console.log('into getfromsums');
+    const yearOptions = [...new Set(incomingSums.map(item => { 
+        return item.createDate.slice(0, 4) }))].sort().reverse()
         .map(i => { return { value: i, label: i } });
     const selectedYear = state.selectedYear || yearOptions[0];
     var createFromTo = { min: "", max: "" };
@@ -73,10 +76,18 @@ export function getFromSums(incomingSums, state, optDeleted) {
     var mutatedCount = 0;
     var docCount = 0;
     var fileStats = {}; // uses fileName as key
+    var selStatObj = {
+        mutatedCount: 0, docCount: 0, unexportedCount: 0,
+        createFromTo: { min: "", max: "" },
+        invoiceFromTo: { min: "", max: "" }
+    };
+
     var selection = incomingSums.filter(item => {
         if (item.createDate.slice(0, 4) !== selectedYear.value) return false;
-        const inState = (state.mutSelected && item.mutations.length > 0) || 
-            (!state.mutSelected && (!item.fileName || optDeleted.includes(item.fileName)));
+        const inState =
+            (state.mutSelected === 'mut' && item.mutations.length > 0) ||
+            (state.mutSelected === 'new' && (!item.fileName || optDeleted.includes(item.fileName))) ||
+            (state.mutSelected === 'all');
         const inCreatedFrom = (!state.createFrom || state.createFrom.length < 7) ||
             (item.createDate >= state.createFrom);
         const inCreatedTo = (!state.createTo || state.createTo.length < 7) ||
@@ -92,26 +103,44 @@ export function getFromSums(incomingSums, state, optDeleted) {
         if (el.createDate.slice(0, 4) === selectedYear.value) {
             setMinMax(createFromTo, el.createDate.slice(0, 10));
             setMinMax(invoiceFromTo, el.invoiceDate);
-            if (el.fileName && !optDeleted.includes(el.fileName)) {
-                // update filestats
-                var fileStatObj = fileStats[el.fileName] ||
-                    {
-                        fileName: el.fileName, mutatedCount: 0, docCount: 0,
-                        createFromTo: { min: "", max: "" },
-                        invoiceFromTo: { min: "", max: "" }
-                    };
-                fileStatObj.docCount++;
-                setMinMax(fileStatObj.createFromTo, el.createDate.slice(0, 10));
-                setMinMax(fileStatObj.invoiceFromTo, el.invoiceDate);
-                // updated fileStat and overall mutated count if needed
-                if (el.mutations && el.mutations.length > 0) {
-                    mutatedCount++;
-                    fileStatObj.mutatedCount++;
-                }
-                // add file to stats if needed
-                if (!fileStats[el.fileName]) { fileStats[el.fileName] = fileStatObj }
-            } else {
+            if (el.mutations && el.mutations.length > 0) {
+                mutatedCount++;
+            }
+            if (!el.fileName) {
                 unexportedCount++;
+            }
+            const fileList = el.allFiles || [];
+            for (let j = 0; j < fileList.length; j++) {
+                const expFileName = fileList[j];
+                if (expFileName && !optDeleted.includes(expFileName)) {
+                    // update filestats
+                    var fileStatObj = fileStats[expFileName] ||
+                        {
+                            fileName: expFileName, mutatedCount: 0, docCount: 0,
+                            createFromTo: { min: "", max: "" },
+                            invoiceFromTo: { min: "", max: "" }
+                        };
+                    fileStatObj.docCount++;
+                    setMinMax(fileStatObj.createFromTo, el.createDate.slice(0, 10));
+                    setMinMax(fileStatObj.invoiceFromTo, el.invoiceDate);
+                    // updated fileStat mutated count if needed
+                    if (el.mutations && el.mutations.length > 0) {
+                        fileStatObj.mutatedCount++;
+                    }
+                    // add file to stats if needed
+                    if (!fileStats[expFileName]) { fileStats[expFileName] = fileStatObj }
+                }
+            }
+            if (selection.includes(el.id)) {
+                // update selStats
+                selStatObj.docCount++;
+                setMinMax(selStatObj.createFromTo, el.createDate.slice(0, 10));
+                setMinMax(selStatObj.invoiceFromTo, el.invoiceDate);
+                // updated fileStat mutated count if needed
+                if (el.mutations && el.mutations.length > 0) {
+                    selStatObj.mutatedCount++;
+                }
+                if (!el.fileName) selStatObj.unexportedCount++;
             }
             docCount++;
         }
@@ -123,8 +152,9 @@ export function getFromSums(incomingSums, state, optDeleted) {
         docCount: docCount,
         unexportedCount: unexportedCount,
         mutatedCount: mutatedCount,
-        fileStats: Object.keys(fileStats).map(key => fileStats[key]).sort().reverse(),
+        fileStats: Object.keys(fileStats).map(key => fileStats[key]),
         selection: selection,
+        selStats: selStatObj,
         selectedYear: selectedYear
     }
 }

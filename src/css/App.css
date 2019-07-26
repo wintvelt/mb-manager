@@ -324,3 +324,9 @@ h4.inline_select {
 .card.export .chip {
 	margin-left: 0;
 }
+span.export-stats {
+	width: 7em;
+    display: inline-block;
+    text-align: right;
+	padding-right: 8px;
+}
