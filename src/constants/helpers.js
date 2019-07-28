@@ -28,7 +28,8 @@ export const uniqByKey = (arr, key) => {
 export const paramToObj = (str) => {
     if (str) {
         var search = str.substring(1);
-        return JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value) })
+        return JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g, '":"') + '"}',
+            function (key, value) { return key === "" ? value : decodeURIComponent(value) });
     }
     return {}
 }

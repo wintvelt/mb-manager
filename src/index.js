@@ -15,7 +15,6 @@ const initFromCookie = () => {
 	return Object.assign({}, initialState, 
 		{ 
 			accessToken : accessFromCookie, 
-			isConnected : (accessFromCookie)? true : false,
 			accessTime : timeFromCookie
 		})
 }
