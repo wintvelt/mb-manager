@@ -33,3 +33,26 @@ export const paramToObj = (str) => {
     }
     return {}
 }
+
+
+// helper for better loading experience
+// test voor classes
+export class dataState {
+    constructor(newData) {
+        this._state = (newData)? 'HASDATA' : 'NOTASKED';
+        this.data = newData;
+    }
+    setState({ state, data }) {
+        this._state = state;
+        this.data = data;
+        return this;
+    }
+    hasData() {
+        return (this._state === 'HASDATA' && this.data)
+    }
+}
+
+dataState.ERROR = 'ERROR';
+dataState.LOADING = 'LOADING';
+dataState.NOTASKED = 'NOTASKED';
+dataState.HASDATA = 'HASDATA';

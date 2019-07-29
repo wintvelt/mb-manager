@@ -1,6 +1,7 @@
 // src/js/reducers/reducers.js
 
-import { DO_SNACK, DO_SNACK_ERROR,
+import {
+  DO_SNACK, DO_SNACK_ERROR,
   SET_ACCESS_TOKEN, DELETE_ACCESS_TOKEN,
   PASSED_TEST, SET_BATCH_ERROR,
   SET_LEDGERS, SET_ACCOUNTS, SET_CUSTOM_FIELDS,
@@ -9,14 +10,17 @@ import { DO_SNACK, DO_SNACK_ERROR,
   ADD_CONTACTS, SET_CONTACT_FIELD, SET_CONTACT_CUSTOM_FIELD,
   ADD_RECEIVED, SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
-  LOGIN, LOGOUT, TEST, SET_TEST_RESULT, SET_CONTACTS_LOADING, 
-  } from "../constants/action-types";
-import { setLedgerInRow, setCustomFieldInRow, setPaymentInRow } from './reducer-helpers';
+  LOGIN, LOGOUT, TEST, SET_TEST_RESULT, SET_CONTACTS_LOADING,
+} from "../constants/action-types";
+import {
+  setLedgerInRow, setCustomFieldInRow, setPaymentInRow
+} from './reducer-helpers';
+import { dataState } from '../constants/helpers';
 
 // initial state also exported to root (to set default when initializing)
 export const initialState = {
   newSnack: "",
-  accessToken: null,
+  accessToken: new dataState(),
   accessVerified: false,
   accessTime: null,
   testOutput: "",
@@ -50,14 +54,14 @@ function rootReducer(state = initialState, action) {
     // payload = accessToken
     case SET_ACCESS_TOKEN: {
       return Object.assign({}, state, {
-        accessToken: action.payload,
-        accessVerified: true,
-        accessTime : Date.now()
+        accessToken: state.accessToken.setState(action.payload),
+        accessVerified: (action.payload.state === dataState.HASDATA),
+        accessTime: Date.now()
       })
     }
     case DELETE_ACCESS_TOKEN: {
       return Object.assign({}, state, {
-        accessToken: null,
+        accessToken: state.accessToken.setState(dataState.NOTASKED),
         accessVerified: false
       })
     }
@@ -133,7 +137,7 @@ function rootReducer(state = initialState, action) {
       const newIncomingLoaded = Object.assign({}, state.incomingLoaded);
       newIncomingLoaded[action.payload.incomingType] = (action.payload.incoming.length === 0);
       const newIncomingLoading = Object.assign({}, state.incomingLoading);
-      newIncomingLoading[action.payload.incomingType] = 
+      newIncomingLoading[action.payload.incomingType] =
         state.incomingLoading[action.payload.incomingType].filter(item => (item !== action.payload.page));
       return Object.assign({}, state, {
         incoming: [...incoming, ...action.payload.incoming],
@@ -147,61 +151,61 @@ function rootReducer(state = initialState, action) {
     // payload = { incomingId, newLedgerId }
     case SET_INCOMING_LEDGER: {
       if (!state.incoming || state.incoming.length === 0) return state;
-      const incomingList = state.incoming.filter( (incoming) => (incoming.id === action.payload.incomingId) );
+      const incomingList = state.incoming.filter((incoming) => (incoming.id === action.payload.incomingId));
       if (incomingList.length === 0) return state;
       const incomingToUpdate = incomingList[0];
       const newIncoming = setLedgerInRow(incomingToUpdate, action.payload.newLedgerId);
       if (newIncoming === incomingToUpdate) return state;
-      const newIncomingList = state.incoming.map( (incoming, i) => {
-        if (incoming.id === action.payload.incomingId) { 
+      const newIncomingList = state.incoming.map((incoming, i) => {
+        if (incoming.id === action.payload.incomingId) {
           return newIncoming;
         } else return incoming;
       });
-        return Object.assign({}, state, {
-            incoming: newIncomingList
-        });
+      return Object.assign({}, state, {
+        incoming: newIncomingList
+      });
     }
 
     // payload = { contactId, fieldId, newValue }
     case SET_INCOMING_CUSTOM_FIELD: {
       if (!state.incoming || state.incoming.length === 0) return state;
-      const newIncomingList = state.incoming.map( (incoming) => {
+      const newIncomingList = state.incoming.map((incoming) => {
         if (incoming.contact && incoming.contact.id === action.payload.contactId &&
           incoming.contact.custom_fields && incoming.contact.custom_fields.length > 2
-          && incoming.contact.custom_fields[2].value !== action.payload.newStdLedgerName ) {
+          && incoming.contact.custom_fields[2].value !== action.payload.newStdLedgerName) {
           return setCustomFieldInRow(incoming, action.payload.fieldId, action.payload.newValue);
         } else {
           return incoming;
         }
       });
       return Object.assign({}, state, {
-          incoming: newIncomingList
+        incoming: newIncomingList
       });
     }
 
     // payload = { incomingId }
     case SET_INCOMING_PAYMENT: {
       if (!state.incoming || state.incoming.length === 0) return state;
-      const incomingList = state.incoming.filter( (incoming) => (incoming.id === action.payload.incomingId) );
+      const incomingList = state.incoming.filter((incoming) => (incoming.id === action.payload.incomingId));
       if (incomingList.length === 0) return state;
       const incomingToUpdate = incomingList[0];
       const newIncoming = setPaymentInRow(incomingToUpdate);
       if (newIncoming === incomingToUpdate) return state;
-      const newIncomingList = state.incoming.map( (incoming, i) => {
-        if (incoming.id === action.payload.incomingId) { 
+      const newIncomingList = state.incoming.map((incoming, i) => {
+        if (incoming.id === action.payload.incomingId) {
           return newIncoming;
         } else return incoming;
       });
-        return Object.assign({}, state, {
-            incoming: newIncomingList
-        });
+      return Object.assign({}, state, {
+        incoming: newIncomingList
+      });
     }
 
     // payload = { incomingType, page }
     case SET_INCOMING_LOADING: {
       const oldList = state.incomingLoading[action.payload.incomingType] || []
       const newIncomingLoading = Object.assign({}, state.incomingLoading);
-      newIncomingLoading[action.payload.incomingType] = 
+      newIncomingLoading[action.payload.incomingType] =
         [...new Set([...oldList, action.payload.page])]
       return Object.assign({}, state, {
         incomingLoading: newIncomingLoading
@@ -237,19 +241,19 @@ function rootReducer(state = initialState, action) {
       })
     }
 
-     // payload = { contactId, fieldId, newValue }
-     case SET_CONTACT_CUSTOM_FIELD: {
+    // payload = { contactId, fieldId, newValue }
+    case SET_CONTACT_CUSTOM_FIELD: {
       if (!state.contacts || state.contacts.length === 0) return state;
       const newContacts = state.contacts.map((contact) => {
         if (contact.id === action.payload.contactId && contact.custom_fields) {
-          const newCustomFields = contact.custom_fields.map( (field) => {
+          const newCustomFields = contact.custom_fields.map((field) => {
             if (field.id === action.payload.fieldId) {
               return Object.assign({}, field, { value: action.payload.newValue })
             } else {
               return field;
             }
           });
-          return Object.assign({}, contact, { custom_fields : newCustomFields });
+          return Object.assign({}, contact, { custom_fields: newCustomFields });
         } else {
           return contact;
         }
@@ -279,36 +283,36 @@ function rootReducer(state = initialState, action) {
     case SET_BATCH_MSG: {
       const batchMsgList = state.batchMsg[action.payload.batchId] || [];
       const newMsg = { fetchId: action.payload.fetchId, res: action.payload.res, msg: action.payload.msg };
-      const newBatchMsgList = [...batchMsgList.filter( m => (m.fetchId !== action.payload.fetchId)), newMsg];
+      const newBatchMsgList = [...batchMsgList.filter(m => (m.fetchId !== action.payload.fetchId)), newMsg];
       const newBatchMsg = Object.assign({}, state.batchMsg);
       newBatchMsg[action.payload.batchId] = newBatchMsgList;
-      return Object.assign({}, state, { batchMsg: newBatchMsg});
+      return Object.assign({}, state, { batchMsg: newBatchMsg });
     }
     // payload = batchId
     case CLEAR_BATCH_MSG: {
       if (!state.batchMsg[action.payload]) return state;
       const newBatchMsg = Object.assign({}, state.batchMsg);
       delete newBatchMsg[action.payload];
-      return Object.assign({}, state, { batchMsg : newBatchMsg });
+      return Object.assign({}, state, { batchMsg: newBatchMsg });
     }
 
     // payload = msg
     case DO_SNACK: {
       return Object.assign({}, state, {
-          newSnack: action.payload
+        newSnack: action.payload
       })
     }
     case DO_SNACK_ERROR: {
       // for now, simply display message
       return Object.assign({}, state, {
-          newSnack: action.payload
+        newSnack: action.payload
       })
     }
 
     case LOGIN: {
       // for testing only
       return Object.assign({}, state, {
-        accessToken : {},
+        accessToken: {},
         accessVerified: true
       })
     }
@@ -316,26 +320,26 @@ function rootReducer(state = initialState, action) {
     case LOGOUT: {
       // for testing only
       return Object.assign({}, state, {
-        accessToken : null,
+        accessToken: new dataState(),
         accessVerified: false
       })
     }
 
     case TEST: {
       return Object.assign({}, state, {
-          testOutput: "Test geslaagd"
+        testOutput: "Test geslaagd"
       })
     }
 
     case SET_TEST_RESULT: {
       return Object.assign({}, state, {
-          testOutput: action.payload
+        testOutput: action.payload
       })
     }
 
-    default: 
-  		return state;
-	}
+    default:
+      return state;
+  }
 }
 
 export default rootReducer;

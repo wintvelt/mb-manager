@@ -51,7 +51,7 @@ class ConnectionInt extends Component {
 
 	render() {
 		const reqToken = this.state.requestToken;
-		const hasAccess = (this.props.accessToken) ? true : false;
+		const hasAccess = (this.props.accessToken.hasData()) ? true : false;
 		const accessVerified = this.props.accessVerified;
 		return (
 			<div className="container">

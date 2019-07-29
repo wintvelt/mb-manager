@@ -8,13 +8,14 @@ import * as serviceWorker from './serviceWorker';
 
 import { getCookie } from "./actions/cookies";
 import { initialState } from './reducers/reducers';
+import { dataState } from './constants/helpers';
 
 const initFromCookie = () => {
 	const accessFromCookie = getCookie('MB_access');
 	const timeFromCookie = getCookie('MB_time');
 	return Object.assign({}, initialState, 
 		{ 
-			accessToken : accessFromCookie, 
+			accessToken : new dataState(accessFromCookie), 
 			accessTime : timeFromCookie
 		})
 }

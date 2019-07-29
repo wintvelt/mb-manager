@@ -10,6 +10,7 @@ import {
 	doSnack
 } from './actions';
 import { setCookie, deleteCookie } from './cookies';
+import { dataState } from '../constants/helpers';
 
 const PERPAGE = 50;
 
@@ -69,9 +70,10 @@ export function setAccess(reqToken) {
 			.then(handleError)
 			.then(res => {
 				setCookie(res);
-				dispatch(setAccessToken(res));
+				dispatch(setAccessToken({ state: dataState.HASDATA, data: res }));
 			})
 			.catch(error => {
+				dispatch(setAccessToken({ state: dataState.ERROR, data: 'error' }));
 				const msg = "Verificatie van inlog mislukt. Server gaf foutmelding \""
 					+ error.message + "\".";
 				dispatch(doSnackError(msg));
@@ -83,8 +85,8 @@ export function testAccess() {
 	return function (dispatch, getState) {
 		const url = base_url + '/ledger_accounts/243957415182075767.json';
 		const { accessToken } = getState();
-		if (accessToken) {
-			return getData(url, accessToken)
+		if (accessToken.hasData()) {
+			return getData(url, accessToken.data)	
 				.then(contact => {
 					dispatch(passedTest());
 				}
