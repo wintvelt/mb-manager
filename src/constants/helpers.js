@@ -38,21 +38,55 @@ export const paramToObj = (str) => {
 // helper for better loading experience
 // test voor classes
 export class dataState {
-    constructor(newData) {
-        this._state = (newData)? 'HASDATA' : 'NOTASKED';
+    constructor(newData, time) {
+        this._state = (newData) ? 'DONE' : 'NOTASKED';
+        this._loading = [];
         this.data = newData;
+        this.time = (newData) ? Date.now() : time;
     }
-    setState({ state, data }) {
-        this._state = state;
-        this.data = data;
+    setLoading(page = 1) {
+        this._state = 'LOADING';
+        this.data = (this._loading.length === 0) ? null : this.data;
+        this._loading = [...this._loading, page];
         return this;
     }
+    add(data, page = 1) {
+        this._loading = this._loading.filter(it => (it !== page));
+        this._state = (this._loading.length === 0) ? 'DONE' : 'LOADING';
+        this.data = (this.data) ? [...this.data, ...data] : [...data];
+        this.time = Date.now();
+        return this;
+    }
+    setNew(data, time) {
+        this._state = 'DONE';
+        this._loading = [];
+        this.data = data;
+        this._time = (time)? time : Date.now();
+        return this;
+    }
+    setError() {
+        this._state = 'ERROR';
+        return this;
+    }
+    set(something) {
+        if (something.LOADING) return this.setLoading();
+        if (something.ERROR) return this.setError();
+        return this.setNew(something);
+    }
+    // check for state
     hasData() {
-        return (this._state === 'HASDATA' && this.data)
+        return (this.data);
+    }
+    hasAllData() {
+        return (this._state === 'DONE')
+    }
+    hasError() {
+        return (this._state === 'ERROR')
+    }
+    isLoading() {
+        return (this._state === 'LOADING')
+    }
+    notAsked() {
+        return (this._state === 'NOTASKED')
     }
 }
-
-dataState.ERROR = 'ERROR';
-dataState.LOADING = 'LOADING';
-dataState.NOTASKED = 'NOTASKED';
-dataState.HASDATA = 'HASDATA';

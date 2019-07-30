@@ -50,7 +50,7 @@ class ConnectedExport extends Component {
         this.onClearDelete = this.onClearDelete.bind(this);
         this.onExport = this.onExport.bind(this);
         this.onChangeInput = this.onChangeInput.bind(this);
-        if (props.accessToken && !props.incomingSums) props.getIncomingSums(this.props.accessToken);
+        if (props.accessToken.hasData() && !props.incomingSums) props.getIncomingSums(this.props.accessToken.data);
     }
     setYear(value) {
         this.setState({ selectedYear: value });
@@ -119,7 +119,7 @@ class ConnectedExport extends Component {
         }
     }
     render() {
-        const hasToken = (this.props.accessToken);
+        const hasToken = (this.props.accessToken.hasData());
         const hasData = (hasToken && this.props.incomingSums);
 
         if (hasData) {
@@ -165,7 +165,7 @@ class ConnectedExport extends Component {
                             {
                                 title: moment(this.props.lastSync).format('D MMM YYYY'),
                                 text: 'Datum van laatste sync',
-                                icon: 'sync', btnFunc: (() => this.sync(this.props.accessToken)),
+                                icon: 'sync', btnFunc: (() => this.sync(this.props.accessToken.data)),
                                 pending: this.props.syncPending
                             },
                             {
@@ -220,7 +220,7 @@ class ConnectedExport extends Component {
                                             <div className='whitespace-vert'></div>
                                             <p>
                                                 <span className={exportBtnClass}
-                                                    onClick={() => this.onExport(selection, this.props.accessToken)}>
+                                                    onClick={() => this.onExport(selection, this.props.accessToken.data)}>
                                                     <i className='material-icons right'>cloud_download</i>Maak xlsx export
                                             </span>
                                             </p>

@@ -1,6 +1,6 @@
 // voor actions die fetch enzo doen. Met middleware.
 import {
-	setAccessToken,
+	setAccessToken, deleteAccessToken,
 	passedTest, doSnackError,
 	setLedgers, setAccounts,
 	addIncoming, setIncomingLoading,
@@ -10,7 +10,6 @@ import {
 	doSnack
 } from './actions';
 import { setCookie, deleteCookie } from './cookies';
-import { dataState } from '../constants/helpers';
 
 const PERPAGE = 50;
 
@@ -70,10 +69,10 @@ export function setAccess(reqToken) {
 			.then(handleError)
 			.then(res => {
 				setCookie(res);
-				dispatch(setAccessToken({ state: dataState.HASDATA, data: res }));
+				dispatch(setAccessToken(res));
 			})
 			.catch(error => {
-				dispatch(setAccessToken({ state: dataState.ERROR, data: 'error' }));
+				dispatch(deleteAccessToken());
 				const msg = "Verificatie van inlog mislukt. Server gaf foutmelding \""
 					+ error.message + "\".";
 				dispatch(doSnackError(msg));
@@ -86,7 +85,7 @@ export function testAccess() {
 		const url = base_url + '/ledger_accounts/243957415182075767.json';
 		const { accessToken } = getState();
 		if (accessToken.hasData()) {
-			return getData(url, accessToken.data)	
+			return getData(url, accessToken.data)
 				.then(contact => {
 					dispatch(passedTest());
 				}
@@ -107,14 +106,16 @@ export function getLedgers() {
 	return function (dispatch, getState) {
 		const url = base_url + '/ledger_accounts.json';
 		const { ledgers, accessToken } = getState();
-		if (ledgers && accessToken) {
+		if (ledgers.hasData() && accessToken.hasData()) {
 			return ledgers;
 		} else {
-			return getData(url, accessToken)
-				.then(ledgers => {
-					dispatch(setLedgers({ ledgers: ledgers, ledgerDate: Date.now() }));
+			dispatch(setLedgers({ LOADING: true }));
+			return getData(url, accessToken.data)
+				.then(ledgerData => {
+					dispatch(setLedgers(ledgerData));
 				})
 				.catch(error => {
+					dispatch(setLedgers({ ERROR: true }));
 					const msg = "Rekeningen ophalen helaas mislukt. Server gaf de fout \""
 						+ error.message + "\".";
 					dispatch(doSnackError(msg));
@@ -177,12 +178,12 @@ export function getContacts(page = 1) {
 	return function (dispatch, getState) {
 		const url = base_url + '/contacts';
 		const { contacts, contactsLoaded, contactsLoading, accessToken } = getState();
-		if (contacts && contactsLoaded && accessToken) {
+		if (contacts && contactsLoaded && accessToken.hasData()) {
 			return contacts;
 		}
 		if (!contactsLoading.includes(page)) {
 			dispatch(setContactsLoading(page));
-			return getPagedList(url, accessToken, "", page)
+			return getPagedList(url, accessToken.data, "", page)
 				.then(resultList => {
 					dispatch(addContacts({ contacts: resultList, contactsDate: Date.now(), page: page }));
 					if (resultList.length > 0) {
@@ -202,17 +203,16 @@ export function getCustomFields() {
 	return function (dispatch, getState) {
 		const url = base_url + '/custom_fields.json';
 		const { customFields, accessToken } = getState();
-		if (customFields && accessToken) {
+		if (customFields.hasData() && accessToken.hasData()) {
 			return customFields;
 		} else {
-			return getData(url, accessToken)
+			dispatch(setCustomFields({ LOADING: true }))
+			return getData(url, accessToken.data)
 				.then(customFields => {
-					dispatch(setCustomFields({
-						customFields: customFields,
-						customFieldsDate: Date.now()
-					}));
+					dispatch(setCustomFields(customFields));
 				})
 				.catch(error => {
+					dispatch(setCustomFields({ ERROR: true }))
 					const msg = "Custom velden ophalen helaas mislukt. Server gaf de fout \""
 						+ error.message + "\".";
 					dispatch(doSnackError(msg));
@@ -229,7 +229,7 @@ export function getIncomingSums(access_token) {
 		const url = 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export?filename=incoming-summary-list.json';
 
 		return fetch(url, {
-			mode: "cors", cache: 'no-cache', 
+			mode: "cors", cache: 'no-cache',
 			// credentials: 'include',
 			// headers: {
 			// 	Authorization: "Bearer " + access_token // ACCESS_TOKEN

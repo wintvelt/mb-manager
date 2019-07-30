@@ -22,13 +22,12 @@ export const initialState = {
   newSnack: "",
   accessToken: new dataState(),
   accessVerified: false,
-  accessTime: null,
   testOutput: "",
-  ledgers: null,
+  ledgers: new dataState(),
   ledgerDate: "",
   accounts: null,
   accountDate: "",
-  customFields: null,
+  customFields: new dataState(),
   customFieldsDate: "",
   incoming: null,
   incomingLoaded: {},
@@ -54,14 +53,13 @@ function rootReducer(state = initialState, action) {
     // payload = accessToken
     case SET_ACCESS_TOKEN: {
       return Object.assign({}, state, {
-        accessToken: state.accessToken.setState(action.payload),
-        accessVerified: (action.payload.state === dataState.HASDATA),
-        accessTime: Date.now()
+        accessToken: state.accessToken.set(action.payload),
+        accessVerified: true,
       })
     }
     case DELETE_ACCESS_TOKEN: {
       return Object.assign({}, state, {
-        accessToken: state.accessToken.setState(dataState.NOTASKED),
+        accessToken: new dataState(),
         accessVerified: false
       })
     }
@@ -79,13 +77,13 @@ function rootReducer(state = initialState, action) {
     }
     // payload = { ledgers, ledgerDate }
     case SET_LEDGERS: {
+      const newLedgers = state.ledgers.set(action.payload);
       return Object.assign({}, state, {
-        ledgers: action.payload.ledgers,
-        ledgerDate: action.payload.ledgerDate,
+        ledgers: newLedgers,
         accessVerified: true
       })
     }
-    // payload = { ledgers, ledgerDate }
+    // payload = { accounts, accountDate }
     case SET_ACCOUNTS: {
       return Object.assign({}, state, {
         accounts: action.payload.accounts,
@@ -95,8 +93,7 @@ function rootReducer(state = initialState, action) {
     }
     case SET_CUSTOM_FIELDS: {
       return Object.assign({}, state, {
-        customFields: action.payload.customFields,
-        customFieldsDate: action.payload.customFieldsDate,
+        customFields: state.customFields.set(action.payload),
         accessVerified: true
       })
     }

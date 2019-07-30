@@ -15,8 +15,7 @@ const initFromCookie = () => {
 	const timeFromCookie = getCookie('MB_time');
 	return Object.assign({}, initialState, 
 		{ 
-			accessToken : new dataState(accessFromCookie), 
-			accessTime : timeFromCookie
+			accessToken : new dataState(accessFromCookie, timeFromCookie)
 		})
 }
 
