@@ -24,11 +24,8 @@ const mapStateToProps = state => {
 	return {
 		accessToken: state.accessToken,
 		ledgers: state.ledgers,
-		ledgerDate: state.ledgerDate,
 		contacts: state.contacts,
-		contactsDate: state.contactsDate,
-		customFields: state.customFields,
-		customFieldsDate: state.customFieldsDate
+		customFields: state.customFields
 	};
 };
 
@@ -56,14 +53,14 @@ class ConnectedContacts extends Component {
 			selected: [],
 			selFilter: false
 		}
-		const hasError = (!props.accessToken.hasData());
-		if (!props.ledgers.hasData() && !hasError) {
+		const hasError = (!props.accessToken.hasData);
+		if (!props.ledgers.hasData && !hasError) {
 			props.getLedgers();
 		}
-		if (!props.contacts && !hasError) {
+		if (!props.contacts.hasData && !hasError) {
 			props.getContacts();
 		}
-		if (!props.customFields.hasData() && !hasError) {
+		if (!props.customFields.hasData && !hasError) {
 			props.getCustomFields();
 		}
 
@@ -161,38 +158,41 @@ class ConnectedContacts extends Component {
 	}
 
 	render() {
-		const hasError = (!this.props.accessToken.hasData());
-		const hasData = (!hasError && this.props.ledgers.hasData()
-			&& this.props.contacts && this.props.customFields.hasData());
-		const hasLedgers = (this.props.ledgers.hasData()) ?
+		const hasError = (!this.props.accessToken.hasData);
+		const hasData = (!hasError && this.props.ledgers.hasData
+			&& this.props.contacts.hasData && this.props.customFields.hasData);
+		const hasLedgers = (this.props.ledgers.hasData) ?
 			<p className="flex"><i className="material-icons green-text">done</i>
 				<span>{this.props.ledgers.data.length + " ledgers opgehaald - " +
 					since(this.props.ledgers.time)}</span></p>
-			: (this.props.ledgers.hasError()) ?
+			: (this.props.ledgers.hasError) ?
 				<p className="flex"><i className="material-icons red-text">warning</i>
 					<span>Legders ophalen is helaas mislukt</span></p>
 				:
 				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
 					<span>Legders (nog) niet gevonden</span></p>;
-		const hasContacts = (this.props.contacts) ?
+		const hasContacts = (this.props.contacts.hasData) ?
 			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.contacts.length + " contacten opgehaald - " +
-					since(this.props.contactsDate)}</span></p>
-			:
-			<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-				<span>Contacten (nog) niet gevonden</span></p>;
-		const hasCustomFields = (this.props.customFields.hasData()) ?
+				<span>{this.props.contacts.data.length + " contacten opgehaald - " +
+					since(this.props.contacts.time)}</span></p>
+			: (this.props.contacts.hasError) ?
+				<p className="flex"><i className="material-icons red-text">warning</i>
+					<span>Ophalen van contacten is mislukt</span></p>
+				:
+				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
+					<span>Contacten (nog) niet gevonden</span></p>;
+		const hasCustomFields = (this.props.customFields.hasData) ?
 			<p className="flex"><i className="material-icons green-text">done</i>
 				<span>{this.props.customFields.data.length + " custom velden opgehaald - " +
 					since(this.props.customFields.time)}</span></p>
-			: (this.props.customFields.hasError()) ?
+			: (this.props.customFields.hasError) ?
 				<p className="flex"><i className="material-icons red-text">warning</i>
 					<span>Ophalen van Custom velden is mislukt</span></p>
 				:
 				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
 					<span>Custom velden (nog) niet gevonden</span></p>;
-		const rowsRaw = (hasData && this.props.contacts.length > 0) ?
-			contactRows(this.props.contacts)
+		const rowsRaw = (hasData && this.props.contacts.hasData) ?
+			contactRows(this.props.contacts.data)
 			: null;
 
 		if (rowsRaw) {
@@ -298,9 +298,9 @@ class ConnectedContacts extends Component {
 					</MainWithSideNav>
 				</SideNavWrapper>
 			);
-		} else if (this.props.accessToken.hasData()) {
-			const isLoading = (this.props.ledgers.isLoading() ||
-				this.props.customFields.isLoading());
+		} else if (this.props.accessToken.hasData) {
+			const isLoading = (this.props.ledgers.isLoading ||
+				this.props.customFields.isLoading || this.props.contacts.isLoading);
 			return (
 				<div className="container">
 					<div className="section">

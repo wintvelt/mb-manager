@@ -44,11 +44,11 @@ class ConnectedIncoming extends Component {
 	constructor(props) {
 		super(props);
 
-		const hasError = (!props.accessToken);
-		if (!props.ledgers && !hasError) {
+		const hasError = (!props.accessToken.hasData);
+		if (!props.ledgers.hasAllData && !hasError) {
 			props.getLedgers();
 		}
-		if (!props.incoming && !hasError) {
+		if (!props.incoming.hasData && !hasError) {
 			props.getIncoming('receipt');
 			props.getIncoming('purchase_invoice');
 		}
@@ -208,33 +208,39 @@ class ConnectedIncoming extends Component {
 			rowsFiltered,
 			[0, 13, 3, 5, 6, 7, 8, 9],
 			["ID", "Datum aangemaakt", "Leverancier", "Bedrag", "Valuta", "Status", "Owner", "Categorie"],
-			"Facturen Mobly na "+dateFrom
+			"Facturen Mobly na " + dateFrom
 		);
 	}
 
 
 	render() {
-		const hasError = (!this.props.accessToken);
-		const hasData = (!hasError && this.props.ledgers && this.props.incoming);
+		const hasError = (!this.props.accessToken.hasData);
+		const hasData = (!hasError && this.props.ledgers.hasData && this.props.incoming.hasData);
 
-		const hasLedgers = (this.props.ledgers) ?
+		const hasLedgers = (this.props.ledgers.hasData) ?
 			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.ledgers.length + " ledgers opgehaald - " +
-					since(this.props.ledgerDate)}</span></p>
-			:
-			<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-				<span>Legders (nog) niet gevonden</span></p>;
-		const hasIncoming = (this.props.incoming) ?
+				<span>{this.props.ledgers.data.length + " ledgers opgehaald - " +
+					since(this.props.ledgers.time)}</span></p>
+			: (this.props.ledgers.hasError) ?
+				<p className="flex"><i className="material-icons red-text">warning</i>
+					<span>Legders ophalen is helaas mislukt</span></p>
+				:
+				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
+					<span>Legders (nog) niet gevonden</span></p>;
+		const hasIncoming = (this.props.incoming.hasData) ?
 			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.incoming.length + " inkomende facturen opgehaald - " +
-					since(this.props.incomingDate)}</span></p>
-			:
-			<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-				<span>Inkomende facturen (nog) niet gevonden</span></p>;
+				<span>{this.props.incoming.data.length + " facturen en bonnetjes opgehaald - " +
+					since(this.props.incoming.time)}</span></p>
+			: (this.props.incoming.hasError) ?
+				<p className="flex"><i className="material-icons red-text">warning</i>
+					<span>Facturen en bonnetjes ophalen is helaas mislukt</span></p>
+				:
+				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
+					<span>Facturen en bonnetjes (nog) niet gevonden</span></p>;
 		const rowsRaw = (hasData
-			&& this.props.ledgers.length > 0
-			&& this.props.incoming.length > 0) ?
-			incomingRows(this.props.ledgers, this.props.incoming)
+			&& this.props.ledgers.data.length > 0
+			&& this.props.incoming.data.length > 0) ?
+			incomingRows(this.props.ledgers.data, this.props.incoming.data)
 			: null;
 
 		if (rowsRaw) {
@@ -324,7 +330,7 @@ class ConnectedIncoming extends Component {
 							updateStdCat={() => this.onPatchStd(rowsRaw, this.state.selected)}
 							updatePayment={() => this.onPatchPay(rowsRaw, this.state.selected)}
 							onDownload={() => this.onDownload(rowsRaw, this.state.selected)}
-							newRows={rowsRaw.reduce( (count,item) => count+(item[7].value==="new"), 0)}
+							newRows={rowsRaw.reduce((count, item) => count + (item[7].value === "new"), 0)}
 							onDownload2={(date) => this.onDownload2(rowsRaw, date)}
 						/>
 					</SideNav>
@@ -334,25 +340,30 @@ class ConnectedIncoming extends Component {
 					</MainWithSideNav>
 				</SideNavWrapper>
 			);
-		} else if (this.props.accessToken) {
+		} else if (this.props.accessToken.hasData) {
+			const hasError = (this.props.ledgers.hasError ||
+				this.props.incoming.hasError);
 			return (
 				<div className="container">
 					<div className="section">
-						<h4>Inkomende Facturen</h4>
+						<h4>Inkomende facturen en bonnetjes</h4>
 						{hasLedgers}
 						{hasIncoming}
 					</div>
 					<div className="divider"></div>
 					<div className="section center">
-						<div className="progress">
-							<div className="indeterminate"></div>
-						</div>
+						{(!hasError) ?
+							<div className="progress">
+								<div className="indeterminate"></div>
+							</div>
+							: <p>Er is iets misgegaan. Ik kan data nu niet ophalen.</p>
+						}
 					</div>
 				</div>
 			);
 		}
 		return (
-			<div className="container">
+			<div className="container" >
 				<div className="section center">
 					<h5>Helaas, er is geen verbinding..</h5>
 					<p>Probeer anders eerst connectie te maken..</p>

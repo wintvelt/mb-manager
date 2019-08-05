@@ -20,7 +20,7 @@ export const incomingHeaders = [
 	{ value: "check_box_outline_blank", align: "center", sortable: false, icon: true, width: "2em", column: 0 },
 	{ value: "Datum", width: "8em", column: 1 },
 	{ value: "Leverancier", width: "20em", column: 1, shorten: false },
-	{ value: "Factuur-ref", width: "30em", column: 1, shorten: false },
+	{ value: "Factuur-ref", width: "25em", column: 1, shorten: false },
 	{ value: "Bedrag", align: "right", width: "180px", column: 2, className: "large-text", amount: true }, 
 	{ value: "Valuta", align: "right", width: "180px", column: 2 }, 
 	{ value: "Status", align: "right", label: true, width: "180px", column: 2 }, 
@@ -28,7 +28,7 @@ export const incomingHeaders = [
 	{ value: "Categorie factuur", width: "25em", column: 4, shorten: false },
 	{ value: "Standaard categorie",width: "25em", column: 4, shorten: false },
 	{ value: "Betaling", align: "center", sortable: true, icon: true, width: "8em", column: 3 },
-	{ value: "Link", align: "right", sortable: false, icon: true, column: 5 },
+	{ value: "Link", align: "right", sortable: false, icon: true, column: 5, width: '3em' },
 	{ value: "CreateDate", hidden: false, column: 1 }
 ].map(tHead);
 
@@ -122,12 +122,12 @@ const filterRows = (rows, checkCat) => {
 	const withoutContact = notNewRows.length - rowsWithContact.length;
 	if (withoutContact > 0) { msg = [ regels(withoutContact) + " zonder contact"] };
 	// remove rows without std categorie
-	const rowsWithStd = rowsWithContact.filter( s => (s[9].value));
+	const rowsWithStd = rowsWithContact.filter( s => (s[10].value));
 	const withoutStd = rowsWithContact.length - rowsWithStd.length;
 	if (withoutStd > 0 && checkCat) { msg = [ ...msg, regels(withoutStd) + " zonder standaard categorie"] };
 	// remove rows where categorie already ok
 	const rowsToDo = (checkCat)?
-		rowsWithStd.filter( s => (s[9].value !== s[8].value))
+		rowsWithStd.filter( s => (s[10].value !== s[9].value))
 		: rowsWithContact;
 	const rowsOK = rowsWithStd.length - rowsToDo.length;
 	if (rowsOK > 0 && checkCat) { msg = [ ...msg, regels(rowsOK) + " waar categorie al OK was"] };
@@ -151,7 +151,7 @@ export const makePatchList = (rows, selectedList) => {
 
 	// create list of { incomingId, newLedgerId }
 	const batchChanges = rowsToDo.rows.map( (r) => { 
-		return { incomingId: r[0].value, newLedgerName: r[9].value }
+		return { incomingId: r[0].value, newLedgerName: r[10].value }
 	});
 	return { batchList : batchChanges, message : rowsToDo.message }
 }

@@ -21,13 +21,14 @@ export function batchLedgTest(batchList) {
 export function batchLedgerUpdate(batchList) {
 	return function(dispatch, getState) {
 		const { ledgers, incoming, accessToken } = getState();
-		if (ledgers && ledgers.length > 0 && incoming && incoming.length > 0 && accessToken) {
+		if (ledgers.data && ledgers.data.length > 0 
+			&& incoming.data && incoming.data.length > 0 && accessToken.hasData) {
 			// we have data to process
 			const newBatchList = batchList.map( (item) => {
 				// gets LedgerId from ledgers from store
 				return Object.assign(
 					{}, item, 
-					{ newLedgerId: getLedgerId(item.newLedgerName, ledgers) }
+					{ newLedgerId: getLedgerId(item.newLedgerName, ledgers.data) }
 					)
 			});
 			const newBatchListClean = newBatchList.filter( item => (item.newLedgerId));
@@ -50,9 +51,9 @@ export function batchLedgerUpdate(batchList) {
 				}
 				dispatch(setBatchCheckMsg(initialPayload));
 				// send single update to server + update batchMsg with response
-				const patchBody = patchFrom(item.incomingId, item.newLedgerId, incoming);
+				const patchBody = patchFrom(item.incomingId, item.newLedgerId, incoming.data);
 				dispatch(
-					patchIncomingLedger("incoming", item.incomingId, patchBody, accessToken)
+					patchIncomingLedger("incoming", item.incomingId, patchBody, accessToken.data)
 				).then( payload => dispatch(setBatchCheckMsg(payload)));
 			});
 		} else {
@@ -67,10 +68,10 @@ export function batchLedgerUpdate(batchList) {
 export function batchPaymentUpdate(batchList) {
 	return function(dispatch, getState) {
 		const { incoming, accessToken } = getState();
-		if (incoming && incoming.length > 0 && accessToken) {
+		if (incoming.data && incoming.data.length > 0 && accessToken.hasData) {
 			// we have incoming
 			const incomingList = batchList.map( item => {
-				return getOneIncoming(incoming, item.incomingId)
+				return getOneIncoming(incoming.data, item.incomingId)
 			});
 			const incomingListClean = incomingList.filter( item => {
 				return (item.payments.length === 0)
@@ -93,7 +94,7 @@ export function batchPaymentUpdate(batchList) {
 				// send single update to server + update batchMsg with response
 				const patchBody = patchPayFrom(item);
 				dispatch(
-					patchPayment("payment", item.id, patchBody, accessToken)
+					patchPayment("payment", item.id, patchBody, accessToken.data)
 				).then( payload => {
 					dispatch(setBatchCheckMsg(payload));
 					//  update of store (incoming)
@@ -120,7 +121,7 @@ export function batchPaymentUpdate(batchList) {
 export function batchContactCustomUpdate(batchList) {
 	return function(dispatch, getState) {
 		const { batchError, accessToken } = getState();
-		if (accessToken) {
+		if (accessToken.hasData) {
 			// we have data to process - by default
 			dispatch(setBatchError(false));
 			// loop over cleaned list
@@ -138,7 +139,7 @@ export function batchContactCustomUpdate(batchList) {
 					// send single update to server + update batchMsg with response
 					const patchBody = makeCustomFieldBody(item.fieldId, item.newValue);
 					dispatch(
-						patchContactField("newCustom", item.contactId, patchBody, accessToken)
+						patchContactField("newCustom", item.contactId, patchBody, accessToken.data)
 					).then( payload => {
 						dispatch(setBatchCheckMsg(payload));
 						//  update of store (contacts, and incoming)
@@ -174,7 +175,7 @@ export function batchContactCustomUpdate(batchList) {
 export function batchContactUpdate(batchList) {
 	return function(dispatch, getState) {
 		const { batchError, accessToken } = getState();
-		if (accessToken) {
+		if (accessToken.hasData) {
 			// we have data to process - by default
 			dispatch(setBatchError(false));
 			// loop over cleaned list
@@ -192,7 +193,7 @@ export function batchContactUpdate(batchList) {
 					// send single update to server + update batchMsg with response
 					const patchBody = makeContactFieldBody(item.fieldId, item.newValue);
 					dispatch(
-						patchContactField("newValue", item.contactId, patchBody, accessToken)
+						patchContactField("newValue", item.contactId, patchBody, accessToken.hasData)
 					).then( payload => {
 						dispatch(setBatchCheckMsg(payload));
 						//  update of store (contacts, and incoming)
@@ -245,16 +246,16 @@ export function setBatchCheckMsg({batchId, fetchId, res, msg}) {
 }
 
 // helpers
-const getOneIncoming = (incoming, id) => {
-	const rows = incoming.filter( (r) => {
+const getOneIncoming = (incomingList, id) => {
+	const rows = incomingList.filter( (r) => {
 		return (r.id === id);
 	});
 	return (rows.length === 1)? rows[0] : {};
 }
 
 // returns body for update of Ledger in Incoming= {}
-const patchFrom = (incomingId, newLedgerId, incoming) => {
-	const incomingSingle = getOneIncoming(incoming, incomingId);
+const patchFrom = (incomingId, newLedgerId, incomingList) => {
+	const incomingSingle = getOneIncoming(incomingList, incomingId);
 	const details = {};
 	incomingSingle.details.forEach( (d, i) => {
 		details[i] = { 
@@ -300,8 +301,8 @@ const makeContactFieldBody = (fieldId, newValue) => {
 	return body;
 }
 
-const getLedgerId = (name, ledgers) => {
-	const ledgersFound = ledgers.filter( l => (l.name === name) );
+const getLedgerId = (name, ledgerList) => {
+	const ledgersFound = ledgerList.filter( l => (l.name === name) );
 	if (ledgersFound.length > 0) {
 		return ledgersFound[0].id
 	} else {

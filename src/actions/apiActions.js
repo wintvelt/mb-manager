@@ -1,10 +1,10 @@
 // voor actions die fetch enzo doen. Met middleware.
 import {
 	setAccessToken, deleteAccessToken,
-	passedTest, doSnackError,
+	testConnection, doSnackError,
 	setLedgers, setAccounts,
-	addIncoming, setIncomingLoading,
-	addContacts, setCustomFields, setContactsLoading,
+	addIncoming,
+	addContacts, setCustomFields,
 	addReceived,
 	setIncomingSums, setExportPending, setSyncPending, setOptDeleted,
 	doSnack
@@ -80,146 +80,122 @@ export function setAccess(reqToken) {
 	}
 }
 
-export function testAccess() {
+// (url, name of ding uit state, setfunc in store, foutmelding)
+function getMBOnce({ storeField, path, storeSetFunc, errorMsg }) {
 	return function (dispatch, getState) {
-		const url = base_url + '/ledger_accounts/243957415182075767.json';
-		const { accessToken } = getState();
-		if (accessToken.hasData()) {
-			return getData(url, accessToken.data)
-				.then(contact => {
-					dispatch(passedTest());
-				}
-				)
-				.catch(error => {
-					const msg = "Test is helaas mislukt. Server gaf foutmelding \""
-						+ error.message + "\".";
-					dispatch(doSnackError(msg))
-				})
-		} else { // access object not present or invalid
-			const msg = "Test is helaas mislukt. Access Object is (toch) niet aanwezig, of niet correct.";
-			dispatch(doSnackError(msg));
-		}
+		const url = base_url + path;
+		const storeState = getState();
+		const accessToken = storeState.accessToken;
+		const stuff = (storeField)? storeState[storeField] : '';
+		if (!stuff) console.log('DID NOT FIND dataState in Store');
+		if (stuff.hasData && accessToken.hasData) return stuff;
+
+		dispatch(storeSetFunc({ LOADING: true }));
+		return getData(url, accessToken.data)
+			.then(stuffData => {
+				dispatch(storeSetFunc(stuffData));
+			})
+			.catch(err => {
+				dispatch(storeSetFunc({ ERROR: true }));
+				const msg = errorMsg + '"' + err.message + '"';
+				dispatch(doSnackError(msg));
+			})
 	}
 }
+export function testAccess() {
+	const params = {
+		storeField: '',
+		path: '/ledger_accounts/243957415182075767.json',
+		storeSetFunc: testConnection,
+		errorMsg: 'Connectie met Moneybird mislukt. Probeer het opnieuw of log uit en in'
+	}
+	return getMBOnce(params);
+}
+
 
 export function getLedgers() {
-	return function (dispatch, getState) {
-		const url = base_url + '/ledger_accounts.json';
-		const { ledgers, accessToken } = getState();
-		if (ledgers.hasData() && accessToken.hasData()) {
-			return ledgers;
-		} else {
-			dispatch(setLedgers({ LOADING: true }));
-			return getData(url, accessToken.data)
-				.then(ledgerData => {
-					dispatch(setLedgers(ledgerData));
-				})
-				.catch(error => {
-					dispatch(setLedgers({ ERROR: true }));
-					const msg = "Rekeningen ophalen helaas mislukt. Server gaf de fout \""
-						+ error.message + "\".";
-					dispatch(doSnackError(msg));
-				})
-		}
+	const params = {
+		storeField: 'ledgers',
+		path: '/ledger_accounts.json',
+		storeSetFunc: setLedgers,
+		errorMsg: 'Fout bij ophalen rekeningen. Melding van Moneybird: '
 	}
+	return getMBOnce(params);
 }
 
 export function getAccounts() {
-	return function (dispatch, getState) {
-		const url = base_url + '/financial_accounts.json';
-		const { accounts, accessToken } = getState();
-		if (accounts && accessToken) {
-			return accounts;
-		} else {
-			return getData(url, accessToken)
-				.then(accounts => {
-					dispatch(setAccounts({ accounts: accounts, accountDate: Date.now() }));
-				})
-				.catch(error => {
-					const msg = "Bankrekeningen ophalen helaas mislukt. Server gaf de fout \""
-						+ error.message + "\".";
-					dispatch(doSnackError(msg));
-				})
-		}
+	const params = {
+		storeField: 'accounts',
+		path: '/financial_accounts.json',
+		storeSetFunc: setAccounts,
+		errorMsg: 'Fout bij ophalen bankrekeningen. Melding van Moneybird: '
 	}
-}
-export function getIncoming(incomingType, page = 1) {
-	return function (dispatch, getState) {
-		const url = base_url + '/documents/' + incomingType + 's.json';
-		const { incoming, incomingLoaded, incomingLoading, accessToken } = getState();
-		if (incoming && incomingLoaded[incomingType] && accessToken) {
-			return incoming;
-		}
-		if (!incomingLoading[incomingType] || !incomingLoading[incomingType].includes(page)) {
-			dispatch(setIncomingLoading({ incomingType: incomingType, page: page }));
-			const filter = "period:201801..201912";
-			return getPagedList(url, accessToken, filter, page)
-				.then(resultList => {
-					dispatch(addIncoming({
-						incoming: resultList,
-						incomingType: incomingType,
-						incomingDate: Date.now(),
-						page: page
-					}));
-					if (resultList.length > 0) {
-						dispatch(getIncoming(incomingType, page + 1));
-					}
-				})
-				.catch(error => {
-					const msg = "Ophalen is helaas mislukt. Server gaf de fout \""
-						+ error.message + "\".";
-					dispatch(doSnackError(msg));
-				});
-		}
-	}
-}
-
-export function getContacts(page = 1) {
-	return function (dispatch, getState) {
-		const url = base_url + '/contacts';
-		const { contacts, contactsLoaded, contactsLoading, accessToken } = getState();
-		if (contacts && contactsLoaded && accessToken.hasData()) {
-			return contacts;
-		}
-		if (!contactsLoading.includes(page)) {
-			dispatch(setContactsLoading(page));
-			return getPagedList(url, accessToken.data, "", page)
-				.then(resultList => {
-					dispatch(addContacts({ contacts: resultList, contactsDate: Date.now(), page: page }));
-					if (resultList.length > 0) {
-						dispatch(getContacts(page + 1));
-					}
-				})
-				.catch(error => {
-					const msg = "Ophalen is helaas mislukt. Server gaf de fout \""
-						+ error.message + "\".";
-					dispatch(doSnackError(msg));
-				});
-		}
-	}
+	return getMBOnce(params);
 }
 
 export function getCustomFields() {
+	const params = {
+		storeField: 'customFields',
+		path: '/custom_fields.json',
+		storeSetFunc: setCustomFields,
+		errorMsg: 'Fout bij ophalen custom fields. Melding van Moneybird: '
+	}
+	return getMBOnce(params);
+}
+
+
+// Get paged data from Moneybird
+function getMBMulti(params) {
+	const { storeField, path, storeSetMultiFunc, filter, errorMsg, type, page } = params;
 	return function (dispatch, getState) {
-		const url = base_url + '/custom_fields.json';
-		const { customFields, accessToken } = getState();
-		if (customFields.hasData() && accessToken.hasData()) {
-			return customFields;
-		} else {
-			dispatch(setCustomFields({ LOADING: true }))
-			return getData(url, accessToken.data)
-				.then(customFields => {
-					dispatch(setCustomFields(customFields));
-				})
-				.catch(error => {
-					dispatch(setCustomFields({ ERROR: true }))
-					const msg = "Custom velden ophalen helaas mislukt. Server gaf de fout \""
-						+ error.message + "\".";
-					dispatch(doSnackError(msg));
-				})
-		}
+		const url = base_url + path;
+		const storeState = getState();
+		const accessToken = storeState.accessToken;
+		const stuff = storeState[storeField];
+		if (!stuff) console.log('DID NOT FIND dataState in Store');
+		if (stuff.hasAllData && accessToken.hasData) return stuff;
+
+		dispatch(storeSetMultiFunc({ LOADING: true, type, page }));
+		return getPagedList(url, accessToken.data, filter, page)
+			.then(resultList => {
+				dispatch(storeSetMultiFunc({ stuff: resultList, type, page }));
+				if (resultList.length > 0) {
+					dispatch(getMBMulti({ ...params, page: page + 1 }));
+				}
+			})
+			.catch(err => {
+				dispatch(storeSetMultiFunc({ ERROR: true }));
+				const msg = errorMsg + '"' + err.message + '"';
+				dispatch(doSnackError(msg));
+			})
 	}
 }
+
+export function getContacts() {
+	const params = {
+		storeField: 'accounts',
+		path: '/contacts',
+		storeSetMultiFunc: addContacts,
+		errorMsg: 'Fout bij ophalen contacten. Melding van Moneybird: ',
+		type: 'contacts',
+		page: 1
+	}
+	return getMBMulti(params);
+}
+
+export function getIncoming(incomingType) {
+	const params = {
+		storeField: 'incoming',
+		path: '/documents/' + incomingType + 's.json',
+		filter: 'period:201801..201912',
+		storeSetMultiFunc: addIncoming,
+		errorMsg: 'Fout bij ophalen inkomende facturen. Melding van Moneybird: ',
+		type: incomingType,
+		page: 1
+	}
+	return getMBMulti(params);
+}
+
 
 export function getIncomingSums(access_token) {
 	return function (dispatch) {

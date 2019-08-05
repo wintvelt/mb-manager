@@ -36,57 +36,91 @@ export const paramToObj = (str) => {
 
 
 // helper for better loading experience
-// test voor classes
-export class dataState {
-    constructor(newData, time) {
-        this._state = (newData) ? 'DONE' : 'NOTASKED';
-        this._loading = [];
-        this.data = newData;
-        this.time = (newData) ? Date.now() : time;
-    }
-    setLoading(page = 1) {
-        this._state = 'LOADING';
-        this.data = (this._loading.length === 0) ? null : this.data;
-        this._loading = [...this._loading, page];
-        return this;
-    }
-    add(data, page = 1) {
-        this._loading = this._loading.filter(it => (it !== page));
-        this._state = (this._loading.length === 0) ? 'DONE' : 'LOADING';
-        this.data = (this.data) ? [...this.data, ...data] : [...data];
-        this.time = Date.now();
-        return this;
-    }
-    setNew(data, time) {
-        this._state = 'DONE';
-        this._loading = [];
-        this.data = data;
-        this._time = (time)? time : Date.now();
-        return this;
-    }
-    setError() {
-        this._state = 'ERROR';
-        return this;
-    }
-    set(something) {
-        if (something.LOADING) return this.setLoading();
-        if (something.ERROR) return this.setError();
-        return this.setNew(something);
-    }
-    // check for state
-    hasData() {
-        return (this.data);
-    }
-    hasAllData() {
-        return (this._state === 'DONE')
-    }
-    hasError() {
-        return (this._state === 'ERROR')
-    }
-    isLoading() {
-        return (this._state === 'LOADING')
-    }
-    notAsked() {
-        return (this._state === 'NOTASKED')
-    }
+// immutable, otherwise store breaks (misses re-renders)
+const initApiDataFlags = {
+    notAsked: false,
+    isLoading: false,
+    hasData: false,
+    hasAllData: false,
+    hasError: false
+}
+
+const initApiData = Object.assign({
+    data: null,
+    loading: {},
+    time: null
+}, initApiDataFlags)
+
+export const newApiData = (data, time, type) => {
+    const hasData = (data) ? true : false;
+    const newData = (type && data) ? data.map(it => Object.assign({}, it, { type: type })) : data;
+    return Object.assign({}, initApiData, {
+        notAsked: !hasData,
+        hasData: hasData,
+        data: newData,
+        time: (!time && data) ? Date.now() : null
+    })
+}
+
+export const api = {
+    setLoading,
+    addData,
+    setData,
+    setError,
+    set
+}
+
+function setLoading(apiData, page = 1, type) {
+    const newType = type || 'NOTYPE';
+    const loadingList = apiData.loading[newType] || [];
+    var newLoading = Object.assign({}, apiData.loading);
+    newLoading[newType] = [...loadingList, page];
+    return Object.assign({}, apiData, {
+        isLoading: true,
+        hasError: false,
+        loading: newLoading
+    })
+}
+
+function addData(apiData, data, type, page = 1) {
+    const newType = type || 'NOTYPE';
+    const loadingList = apiData.loading[newType] || [];
+    var newLoading = Object.assign({}, apiData.loading);
+    newLoading[newType] = loadingList.filter(it => (it !== page));
+    const loadingCount = Object.keys(newLoading)
+        .reduce((prev, key) => prev + newLoading[key].length, 0);
+    const newData = (data) ? data.map(it => Object.assign({}, it, { type: type })) : [];
+    const newAllData = (apiData.data) ? [...new Set([...apiData.data, ...newData])] : [...newData];
+    return Object.assign({}, apiData, initApiDataFlags, {
+        isLoading: !(loadingCount === 0),
+        hasAllData: (loadingCount === 0),
+        hasData: (newAllData.length > 0),
+        data: newAllData,
+        loading: newLoading,
+        time: Date.now()
+    });
+}
+
+function setData(data, time) {
+    return Object.assign({}, initApiData, {
+        hasData: true,
+        hasAllData: true,
+        data: data,
+        time: (time) ? time : Date.now()
+    });
+}
+
+function setError(apiData) {
+    return Object.assign({}, apiData, initApiDataFlags, {
+        hasError: true
+    })
+}
+
+function set(apiData, something) {
+    if (something.LOADING) return setLoading(apiData, something.page, something.type);
+    if (something.ERROR) return setError(apiData);
+    if (something.type && something.stuff) {
+        return addData(apiData, something.stuff, something.type, something.page)
+    };
+    return this.setData(something);
 }

@@ -40,6 +40,9 @@ th .flex, div .flex {
 	flex-direction: row;
 	align-items: center;
 }
+.flex > i {
+	width: 1.2em;
+}
 .flex-center, .h-center > * {
 	justify-content: center;
 }

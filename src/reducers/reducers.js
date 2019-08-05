@@ -3,40 +3,30 @@
 import {
   DO_SNACK, DO_SNACK_ERROR,
   SET_ACCESS_TOKEN, DELETE_ACCESS_TOKEN,
-  PASSED_TEST, SET_BATCH_ERROR,
+  TEST_CONNECTION, SET_BATCH_ERROR,
   SET_LEDGERS, SET_ACCOUNTS, SET_CUSTOM_FIELDS,
   ADD_INCOMING, SET_INCOMING_LEDGER, SET_INCOMING_CUSTOM_FIELD, SET_INCOMING_PAYMENT,
-  SET_INCOMING_LOADING,
   ADD_CONTACTS, SET_CONTACT_FIELD, SET_CONTACT_CUSTOM_FIELD,
   ADD_RECEIVED, SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
-  LOGIN, LOGOUT, TEST, SET_TEST_RESULT, SET_CONTACTS_LOADING,
+  LOGIN, LOGOUT, TEST, SET_TEST_RESULT,
 } from "../constants/action-types";
 import {
   setLedgerInRow, setCustomFieldInRow, setPaymentInRow
 } from './reducer-helpers';
-import { dataState } from '../constants/helpers';
+import { newApiData, api } from '../constants/helpers';
 
 // initial state also exported to root (to set default when initializing)
 export const initialState = {
   newSnack: "",
-  accessToken: new dataState(),
+  accessToken: newApiData(),
   accessVerified: false,
   testOutput: "",
-  ledgers: new dataState(),
-  ledgerDate: "",
-  accounts: null,
-  accountDate: "",
-  customFields: new dataState(),
-  customFieldsDate: "",
-  incoming: null,
-  incomingLoaded: {},
-  incomingLoading: {},
-  incomingDate: "",
-  contacts: null,
-  contactsLoaded: false,
-  contactsLoading: [],
-  contactsDate: "",
+  ledgers: newApiData(),
+  accounts: newApiData(),
+  customFields: newApiData(),
+  incoming: newApiData(),
+  contacts: newApiData(),
   received: null,
   receivedDate: "",
   incomingSums: null,
@@ -53,20 +43,20 @@ function rootReducer(state = initialState, action) {
     // payload = accessToken
     case SET_ACCESS_TOKEN: {
       return Object.assign({}, state, {
-        accessToken: state.accessToken.set(action.payload),
-        accessVerified: true,
+        accessToken: api.set(state.accessToken, action.payload),
+        accessVerified: (!action.payload.ERROR),
       })
     }
     case DELETE_ACCESS_TOKEN: {
       return Object.assign({}, state, {
-        accessToken: new dataState(),
+        accessToken: newApiData(),
         accessVerified: false
       })
     }
     // payload = ()
-    case PASSED_TEST: {
+    case TEST_CONNECTION: {
       return Object.assign({}, state, {
-        accessVerified: true
+        accessVerified: (!action.payload.LOADING && !action.payload.ERROR)
       })
     }
     // payload = (bool)
@@ -75,26 +65,26 @@ function rootReducer(state = initialState, action) {
         batchError: action.payload
       })
     }
-    // payload = { ledgers, ledgerDate }
+    // payload = { ledgers or loading or error }
     case SET_LEDGERS: {
-      const newLedgers = state.ledgers.set(action.payload);
+      const newLedgers = api.set(state.ledgers, action.payload);
       return Object.assign({}, state, {
         ledgers: newLedgers,
-        accessVerified: true
+        accessVerified: (!action.payload.ERROR)
       })
     }
-    // payload = { accounts, accountDate }
+    // payload = { accounts or loading or error }
     case SET_ACCOUNTS: {
+      const newAccounts = api.set(state.accounts, action.payload);
       return Object.assign({}, state, {
-        accounts: action.payload.accounts,
-        accountDate: action.payload.accountDate,
-        accessVerified: true
+        accounts: newAccounts,
+        accessVerified: (!action.payload.ERROR)
       })
     }
     case SET_CUSTOM_FIELDS: {
       return Object.assign({}, state, {
-        customFields: state.customFields.set(action.payload),
-        accessVerified: true
+        customFields: api.set(state.customFields, action.payload),
+        accessVerified: (!action.payload.ERROR)
       })
     }
 
@@ -124,49 +114,36 @@ function rootReducer(state = initialState, action) {
     }
 
     // from server
-    // payload = { incoming, incomingType, incomingDate, page }
     case ADD_INCOMING: {
-      const incoming = state.incoming || [];
-      // NB MUTABLE CHANGE - add type to incoming (purchase invoice or receipt)
-      for (var i = 0, len = action.payload.incoming.length; i < len; i++) {
-        action.payload.incoming[i].type = action.payload.incomingType;
-      }
-      const newIncomingLoaded = Object.assign({}, state.incomingLoaded);
-      newIncomingLoaded[action.payload.incomingType] = (action.payload.incoming.length === 0);
-      const newIncomingLoading = Object.assign({}, state.incomingLoading);
-      newIncomingLoading[action.payload.incomingType] =
-        state.incomingLoading[action.payload.incomingType].filter(item => (item !== action.payload.page));
+      const newIncoming = api.set(state.incoming, action.payload);
       return Object.assign({}, state, {
-        incoming: [...incoming, ...action.payload.incoming],
-        incomingDate: action.payload.incomingDate,
-        incomingLoaded: newIncomingLoaded,
-        incomingLoading: newIncomingLoading,
-        accessVerified: true
+        incoming: newIncoming,
+        accessVerified: (!action.payload.ERROR)
       })
     }
 
     // payload = { incomingId, newLedgerId }
     case SET_INCOMING_LEDGER: {
-      if (!state.incoming || state.incoming.length === 0) return state;
-      const incomingList = state.incoming.filter((incoming) => (incoming.id === action.payload.incomingId));
+      if (!state.incoming.hasData || state.incoming.data.length === 0) return state;
+      const incomingList = state.incoming.data.filter((incoming) => (incoming.id === action.payload.incomingId));
       if (incomingList.length === 0) return state;
       const incomingToUpdate = incomingList[0];
       const newIncoming = setLedgerInRow(incomingToUpdate, action.payload.newLedgerId);
       if (newIncoming === incomingToUpdate) return state;
-      const newIncomingList = state.incoming.map((incoming, i) => {
+      const newIncomingList = state.incoming.data.map((incoming, i) => {
         if (incoming.id === action.payload.incomingId) {
           return newIncoming;
         } else return incoming;
       });
       return Object.assign({}, state, {
-        incoming: newIncomingList
+        incoming: api.setData(newIncomingList)
       });
     }
 
     // payload = { contactId, fieldId, newValue }
     case SET_INCOMING_CUSTOM_FIELD: {
-      if (!state.incoming || state.incoming.length === 0) return state;
-      const newIncomingList = state.incoming.map((incoming) => {
+      if (!state.incoming.hasData || state.incoming.data.length === 0) return state;
+      const newIncomingList = state.incoming.data.map((incoming) => {
         if (incoming.contact && incoming.contact.id === action.payload.contactId &&
           incoming.contact.custom_fields && incoming.contact.custom_fields.length > 2
           && incoming.contact.custom_fields[2].value !== action.payload.newStdLedgerName) {
@@ -176,55 +153,41 @@ function rootReducer(state = initialState, action) {
         }
       });
       return Object.assign({}, state, {
-        incoming: newIncomingList
+        incoming: api.setData(newIncomingList)
       });
     }
 
     // payload = { incomingId }
     case SET_INCOMING_PAYMENT: {
-      if (!state.incoming || state.incoming.length === 0) return state;
-      const incomingList = state.incoming.filter((incoming) => (incoming.id === action.payload.incomingId));
+      if (!state.incoming.hasData || state.incoming.data.length === 0) return state;
+      const incomingList = state.incoming.data.filter((incoming) => (incoming.id === action.payload.incomingId));
       if (incomingList.length === 0) return state;
       const incomingToUpdate = incomingList[0];
       const newIncoming = setPaymentInRow(incomingToUpdate);
       if (newIncoming === incomingToUpdate) return state;
-      const newIncomingList = state.incoming.map((incoming, i) => {
+      const newIncomingList = state.incoming.data.map((incoming, i) => {
         if (incoming.id === action.payload.incomingId) {
           return newIncoming;
         } else return incoming;
       });
       return Object.assign({}, state, {
-        incoming: newIncomingList
+        incoming: api.set(newIncomingList)
       });
     }
 
-    // payload = { incomingType, page }
-    case SET_INCOMING_LOADING: {
-      const oldList = state.incomingLoading[action.payload.incomingType] || []
-      const newIncomingLoading = Object.assign({}, state.incomingLoading);
-      newIncomingLoading[action.payload.incomingType] =
-        [...new Set([...oldList, action.payload.page])]
-      return Object.assign({}, state, {
-        incomingLoading: newIncomingLoading
-      })
-    }
-
-    // payload = { contacts, contactsDate, page }
+    // payload = { stuff, type, page, LOADING, ERROR }
     case ADD_CONTACTS: {
-      const contacts = state.contacts || [];
+      const newContacts = api.set(state.contacts, action.payload);
       return Object.assign({}, state, {
-        contacts: [...contacts, ...action.payload.contacts],
-        contactsLoaded: (action.payload.contacts.length === 0),
-        contactsLoading: state.contactsLoading.filter(item => (item !== action.payload.page)),
-        contactsDate: action.payload.contactsDate,
-        accessVerified: true
+        contacts: newContacts,
+        accessVerified: (!action.payload.ERROR)
       })
     }
 
     // payload = { contactId, fieldId, newValue }
     case SET_CONTACT_FIELD: {
-      if (!state.contacts || state.contacts.length === 0) return state;
-      const newContacts = state.contacts.map((contact) => {
+      if (!state.contacts.hasData || state.contacts.data.length === 0) return state;
+      const newContacts = state.contacts.data.map((contact) => {
         if (contact.id === action.payload.contactId) {
           var newField = {};
           newField[action.payload.fieldId] = action.payload.newValue;
@@ -234,14 +197,14 @@ function rootReducer(state = initialState, action) {
         }
       });
       return Object.assign({}, state, {
-        contacts: newContacts
+        contacts: api.setData(newContacts)
       })
     }
 
     // payload = { contactId, fieldId, newValue }
     case SET_CONTACT_CUSTOM_FIELD: {
-      if (!state.contacts || state.contacts.length === 0) return state;
-      const newContacts = state.contacts.map((contact) => {
+      if (!state.contacts.hasData || state.contacts.data.length === 0) return state;
+      const newContacts = state.contacts.data.map((contact) => {
         if (contact.id === action.payload.contactId && contact.custom_fields) {
           const newCustomFields = contact.custom_fields.map((field) => {
             if (field.id === action.payload.fieldId) {
@@ -256,13 +219,7 @@ function rootReducer(state = initialState, action) {
         }
       });
       return Object.assign({}, state, {
-        contacts: newContacts
-      })
-    }
-
-    case SET_CONTACTS_LOADING: {
-      return Object.assign({}, state, {
-        contactsLoading: [...new Set([...state.contactsLoading, action.payload])]
+        contacts: api.setData(newContacts)
       })
     }
 
@@ -317,7 +274,7 @@ function rootReducer(state = initialState, action) {
     case LOGOUT: {
       // for testing only
       return Object.assign({}, state, {
-        accessToken: new dataState(),
+        accessToken: newApiData(),
         accessVerified: false
       })
     }

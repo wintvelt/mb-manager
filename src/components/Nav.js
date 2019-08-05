@@ -13,8 +13,8 @@ const mapStateToProps = state => {
 };
 
 const ConnectedNav = (props) => {
-	const iconLogin = (props.accessToken.hasData()) ? (props.accessVerified) ? "done_all" : "done" : "do_not_disturb";
-	const menuShow = (props.accessToken.hasData()) ? "" : " hide";
+	const iconLogin = (props.accessToken.hasData) ? (props.accessVerified) ? "done_all" : "done" : "do_not_disturb";
+	const menuShow = (props.accessToken.hasData) ? "" : " hide";
 	const menu = [
 		{ path: "/contacten", text: "Contacten" },
 		{ path: "/inkomend", text: "Inkomend" },

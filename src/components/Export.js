@@ -24,9 +24,9 @@ const mapStateToProps = state => {
 
 function mapDispatchToProps(dispatch) {
     return {
-        getIncomingSums: (accessToken) => dispatch(getIncomingSums(accessToken)),
-        exportDocs: (body, accessToken) => dispatch(exportDocs(body, accessToken)),
-        syncFiles: (accessToken) => dispatch(syncFiles(accessToken)),
+        getIncomingSums: (access_token) => dispatch(getIncomingSums(access_token)),
+        exportDocs: (body, access_token) => dispatch(exportDocs(body, access_token)),
+        syncFiles: (access_token) => dispatch(syncFiles(access_token)),
         deleteFile: (filename) => dispatch(deleteFile(filename)),
         doSnack: ((msg) => dispatch(doSnack(msg)))
     };
@@ -50,13 +50,15 @@ class ConnectedExport extends Component {
         this.onClearDelete = this.onClearDelete.bind(this);
         this.onExport = this.onExport.bind(this);
         this.onChangeInput = this.onChangeInput.bind(this);
-        if (props.accessToken.hasData() && !props.incomingSums) props.getIncomingSums(this.props.accessToken.data);
+        if (props.accessToken.hasData && !props.incomingSums) {
+            props.getIncomingSums(this.props.accessToken.data)
+        };
     }
     setYear(value) {
         this.setState({ selectedYear: value });
     }
-    sync(accessToken) {
-        this.props.syncFiles(accessToken);
+    sync(access_token) {
+        this.props.syncFiles(access_token);
     }
     onDelete(filename) {
         if (filename === this.state.selectedForDelete) {
@@ -72,7 +74,7 @@ class ConnectedExport extends Component {
     onClearDelete() {
         this.setState({ selectedForDelete: '' });
     }
-    onExport(selection, accessToken) {
+    onExport(selection, access_token) {
         var body = {
             ids: selection,
         }
@@ -90,7 +92,7 @@ class ConnectedExport extends Component {
                 body.noLog = true;
                 break;
         }
-        this.props.exportDocs(body, accessToken)
+        this.props.exportDocs(body, access_token)
     }
     onChangeInput(field, value) {
         switch (field) {
@@ -119,7 +121,7 @@ class ConnectedExport extends Component {
         }
     }
     render() {
-        const hasToken = (this.props.accessToken.hasData());
+        const hasToken = (this.props.accessToken.hasData);
         const hasData = (hasToken && this.props.incomingSums);
 
         if (hasData) {

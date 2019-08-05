@@ -221,8 +221,8 @@ export class SortableTable extends Component {
 	constructor(props) {
 		super(props);
 		this.state= {
-			sortValue: props.sortValue,
-			sortDirection: props.sortDirection,
+			sortValue: props.sortValue || 'Leverancier',
+			sortDirection: props.sortDirection || 'up',
 		}
 		this.onSort = this.onSort.bind(this);
 	}
