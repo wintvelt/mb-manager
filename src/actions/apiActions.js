@@ -304,13 +304,13 @@ export function deleteFile(filename, access_token) {
 export function getReceived(idList) {
 	return function (dispatch, getState) {
 		const { received, accessToken } = getState();
-		if (received && accessToken && !idList) {
+		if (received.hasData && accessToken.hasData && !idList) {
 			return received;
 		}
 		if (!idList) {
 			// fetch payment ids
 			const url = base_url + '/financial_mutations/synchronization.json?filter=period:this_year';
-			return getData(url, accessToken)
+			return getData(url, accessToken.data)
 				.then(idListRaw => {
 					const idList = [...new Set(idListRaw.map(it => it.id))];
 					if (idList.length > 0) {
@@ -327,9 +327,9 @@ export function getReceived(idList) {
 		const newIdList = idList.slice(0, PERPAGE);
 		const nextIds = idList.slice(PERPAGE);
 		const newUrl = base_url + '/financial_mutations/synchronization.json';
-		return postData(newUrl, { ids: newIdList }, "POST", accessToken)
+		return postData(newUrl, { ids: newIdList }, "POST", accessToken.data)
 			.then(resultList => {
-				dispatch(addReceived({ received: resultList, receivedDate: Date.now() }));
+				dispatch(addReceived({stuff: resultList, type: 'received'}));
 				if (nextIds.length > 0) {
 					dispatch(getReceived(nextIds));
 				}

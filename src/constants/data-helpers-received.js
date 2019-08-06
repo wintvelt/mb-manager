@@ -7,7 +7,7 @@ export const receivedHeaders = [
 	"Key", 
 	{ value: "check_box_outline_blank", align: "center", sortable: false, icon: true, width: "2em", column: 0 },
 	{ value: "Datum", width: "8em", column: 1 },
-	{ value: "Bedrag", align: "right", width: "5em", className: "large-text", amount: true, column: 2 },
+	{ value: "Bedrag", align: "right", width: "7em", className: "large-text", amount: true, column: 2 },
 	{ value: "Valuta", align: "right", width: "100%", amount: false, column: 2 },
 	{ value: "Status", align: "center", label: true, width: "8em", column: 3 }, 
 	{ value : "Van/ aan", shorten: false, width: "15em", column: 1 },

@@ -17,8 +17,7 @@ import ContactActions from './ContactActions';
 import { downloadCsv } from '../constants/download-helpers';
 import { SideNavWrapper, SideNav, MainWithSideNav } from './SideNav';
 
-
-import { since } from '../constants/helpers';
+import { loadComp } from '../constants/helpers';
 
 const mapStateToProps = state => {
 	return {
@@ -161,36 +160,12 @@ class ConnectedContacts extends Component {
 		const hasError = (!this.props.accessToken.hasData);
 		const hasData = (!hasError && this.props.ledgers.hasData
 			&& this.props.contacts.hasData && this.props.customFields.hasData);
-		const hasLedgers = (this.props.ledgers.hasData) ?
-			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.ledgers.data.length + " ledgers opgehaald - " +
-					since(this.props.ledgers.time)}</span></p>
-			: (this.props.ledgers.hasError) ?
-				<p className="flex"><i className="material-icons red-text">warning</i>
-					<span>Legders ophalen is helaas mislukt</span></p>
-				:
-				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-					<span>Legders (nog) niet gevonden</span></p>;
-		const hasContacts = (this.props.contacts.hasData) ?
-			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.contacts.data.length + " contacten opgehaald - " +
-					since(this.props.contacts.time)}</span></p>
-			: (this.props.contacts.hasError) ?
-				<p className="flex"><i className="material-icons red-text">warning</i>
-					<span>Ophalen van contacten is mislukt</span></p>
-				:
-				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-					<span>Contacten (nog) niet gevonden</span></p>;
-		const hasCustomFields = (this.props.customFields.hasData) ?
-			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.customFields.data.length + " custom velden opgehaald - " +
-					since(this.props.customFields.time)}</span></p>
-			: (this.props.customFields.hasError) ?
-				<p className="flex"><i className="material-icons red-text">warning</i>
-					<span>Ophalen van Custom velden is mislukt</span></p>
-				:
-				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-					<span>Custom velden (nog) niet gevonden</span></p>;
+		const hasLedgers = loadComp(this.props.ledgers,
+			'Legders (nog) niet gevonden', 'Legders ophalen is helaas mislukt', 'ledgers opgehaald');
+		const hasContacts = loadComp(this.props.contacts,
+			'Contacten aan het ophalen', 'Ophalen contacten is mislukt', 'contacten opgehaald');
+		const hasCustomFields = loadComp(this.props.customFields,
+			'Custom velden aan het ophalen', 'Ophalen custom velden is mislukt', 'Custom velden binnen');
 		const rowsRaw = (hasData && this.props.contacts.hasData) ?
 			contactRows(this.props.contacts.data)
 			: null;
@@ -299,8 +274,8 @@ class ConnectedContacts extends Component {
 				</SideNavWrapper>
 			);
 		} else if (this.props.accessToken.hasData) {
-			const isLoading = (this.props.ledgers.isLoading ||
-				this.props.customFields.isLoading || this.props.contacts.isLoading);
+			const hasError = (this.props.ledgers.hasError ||
+				this.props.customFields.hasError || this.props.contacts.hasError);
 			return (
 				<div className="container">
 					<div className="section">
@@ -311,7 +286,7 @@ class ConnectedContacts extends Component {
 					</div>
 					<div className="divider"></div>
 					<div className="section center">
-						{(isLoading) ?
+						{(!hasError) ?
 							<div className="progress">
 								<div className="indeterminate"></div>
 							</div>

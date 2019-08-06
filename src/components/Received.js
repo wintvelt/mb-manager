@@ -13,13 +13,12 @@ import ReceivedActions from './ReceivedActions';
 import { downloadCsv } from '../constants/download-helpers';
 import { SideNavWrapper, SideNav, MainWithSideNav } from './SideNav';
 
-import { since } from '../constants/helpers';
+import { loadComp } from '../constants/helpers';
 
 const mapStateToProps = state => {
 	return {
 		accessToken: state.accessToken,
 		received: state.received,
-		receivedDate: state.receivedDate,
 		accounts: state.accounts,
 		accountDate: state.accountDate
 	};
@@ -50,10 +49,10 @@ class ConnectedReceived extends Component {
 		this.onSelectAll = this.onSelectAll.bind(this);
 		this.onDownload = this.onDownload.bind(this);
 
-		if (!props.accounts && props.accessToken) {
+		if (!props.accounts.hasData && props.accessToken.hasData) {
 			props.getAccounts();
 		}
-		if (!props.received && props.accessToken) {
+		if (!props.received.hasData && props.accessToken.hasData) {
 			props.getReceived();
 		}
 
@@ -131,25 +130,16 @@ class ConnectedReceived extends Component {
 	}
 
 	render() {
-		const hasError = (!this.props.accessToken);
-		const hasData = (!hasError && this.props.received);
-		const hasAccounts = (this.props.accounts) ?
-			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.accounts.length + " bankrekeningen opgehaald - " +
-					since(this.props.accountDate)}</span></p>
-			:
-			<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-				<span>Bankrekeningen (nog) niet gevonden</span></p>;
-		const hasReceived = (this.props.received) ?
-			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.received.length + " ontvangen betalingen opgehaald - " +
-					since(this.props.receivedDate)}</span></p>
-			:
-			<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-				<span>Ontvangen betalingen (nog) niet gevonden</span></p>;
-		const rowsRaw = (hasData && this.props.accounts.length > 0
-			&& this.props.received.length > 0) ?
-			receivedRows(this.props.accounts, this.props.received)
+		const hasError = (this.props.accessToken.hasError
+			|| this.props.accounts.hasError || this.props.received.hasError);
+		const hasData = (!hasError && this.props.received.hasData);
+		const hasAccounts = loadComp(this.props.accounts,
+			'Bankrekeningen ophalen (ff bezig)', 'Ophalen bankrekeningen gefaald', 'bankrekeningen opgehaald');
+		const hasReceived = loadComp(this.props.received,
+			'Betalingen aan het ophalen', 'Ophalen van betalingen mislukt', 'betalingen opgehaald');
+		const rowsRaw = (hasData && this.props.accounts.data.length > 0
+			&& this.props.received.hasData) ?
+			receivedRows(this.props.accounts.data, this.props.received.data)
 			: null;
 
 		if (rowsRaw) {
@@ -162,7 +152,7 @@ class ConnectedReceived extends Component {
 				["Alles", "Ontvangen", "Uitgegeven"]
 					.map(v => { return { value: v, label: v } });
 			const accountOptions =
-				this.props.accounts
+				this.props.accounts.data
 					.map(acc => { return { value: acc.name, label: acc.name } });
 
 			const rows = rowsRaw
@@ -223,7 +213,9 @@ class ConnectedReceived extends Component {
 					</MainWithSideNav>
 				</SideNavWrapper>
 			);
-		} else if (this.props.accessToken) {
+		} else if (this.props.accessToken.hasData) {
+			const hasError = (this.props.accounts.hasError ||
+				this.props.received.hasError);
 			return (
 				<div className="container">
 					<div className="section">
@@ -233,9 +225,12 @@ class ConnectedReceived extends Component {
 					</div>
 					<div className="divider"></div>
 					<div className="section center">
-						<div className="progress">
-							<div className="indeterminate"></div>
-						</div>
+						{(!hasError) ?
+							<div className="progress">
+								<div className="indeterminate"></div>
+							</div>
+							: <p>Er is iets misgegaan. Ik kan data nu niet ophalen.</p>
+						}
 					</div>
 				</div>
 			);

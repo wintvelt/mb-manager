@@ -27,8 +27,7 @@ export const initialState = {
   customFields: newApiData(),
   incoming: newApiData(),
   contacts: newApiData(),
-  received: null,
-  receivedDate: "",
+  received: newApiData(),
   incomingSums: null,
   exportPending: 0,
   optDeleted: [],
@@ -223,15 +222,14 @@ function rootReducer(state = initialState, action) {
       })
     }
 
-    // payload = { received, receivedDate, page }
     case ADD_RECEIVED: {
-      const received = state.received || [];
+      const newReceived = api.set(state.received, action.payload);
       return Object.assign({}, state, {
-        received: [...received, ...action.payload.received],
-        receivedDate: action.payload.receivedDate,
-        accessVerified: true
+        received: newReceived,
+        accessVerified: (!action.payload.ERROR)
       })
     }
+
 
     // payload = { batchId, fetchId, res, msg }
     case SET_BATCH_MSG: {

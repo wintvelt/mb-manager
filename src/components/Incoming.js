@@ -17,7 +17,7 @@ import IncomingActions from './IncomingActions';
 import { SideNavWrapper, SideNav, MainWithSideNav } from './SideNav';
 import { downloadCsv } from '../constants/download-helpers';
 
-import { since } from '../constants/helpers';
+import { loadComp } from '../constants/helpers';
 
 const mapStateToProps = state => {
 	return {
@@ -217,26 +217,11 @@ class ConnectedIncoming extends Component {
 		const hasError = (!this.props.accessToken.hasData);
 		const hasData = (!hasError && this.props.ledgers.hasData && this.props.incoming.hasData);
 
-		const hasLedgers = (this.props.ledgers.hasData) ?
-			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.ledgers.data.length + " ledgers opgehaald - " +
-					since(this.props.ledgers.time)}</span></p>
-			: (this.props.ledgers.hasError) ?
-				<p className="flex"><i className="material-icons red-text">warning</i>
-					<span>Legders ophalen is helaas mislukt</span></p>
-				:
-				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-					<span>Legders (nog) niet gevonden</span></p>;
-		const hasIncoming = (this.props.incoming.hasData) ?
-			<p className="flex"><i className="material-icons green-text">done</i>
-				<span>{this.props.incoming.data.length + " facturen en bonnetjes opgehaald - " +
-					since(this.props.incoming.time)}</span></p>
-			: (this.props.incoming.hasError) ?
-				<p className="flex"><i className="material-icons red-text">warning</i>
-					<span>Facturen en bonnetjes ophalen is helaas mislukt</span></p>
-				:
-				<p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-					<span>Facturen en bonnetjes (nog) niet gevonden</span></p>;
+		const hasLedgers = loadComp(this.props.ledgers, 
+			'ledgers (categorieën) aan het ophalen', 'Laden categorieën mislukt', 'categorieën opgehaald');
+		const hasIncoming = loadComp(this.props.incoming, 
+			'facturen en bonnetjes aan het ophalen', 'Ophalen van facturen en bonnetjes is mislukt',
+			'facturen en bonnetjes opgehaald');
 		const rowsRaw = (hasData
 			&& this.props.ledgers.data.length > 0
 			&& this.props.incoming.data.length > 0) ?

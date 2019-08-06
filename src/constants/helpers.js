@@ -1,6 +1,7 @@
 // helpers.js
 import moment from 'moment';
 import 'moment/locale/nl';
+import React from 'react';
 
 export const since = (date) => {
     moment.locale('nl');
@@ -123,4 +124,20 @@ function set(apiData, something) {
         return addData(apiData, something.stuff, something.type, something.page)
     };
     return this.setData(something);
+}
+
+// Component for loading state of API
+export const loadComp = (apiEl, txtLoading, txtError, txtOK) => {
+    return (
+        (apiEl.hasData) ?
+            <p className="flex"><i className="material-icons green-text">done</i>
+                <span>{apiEl.data.length + " " + txtOK + " - " +
+                    since(apiEl.time)}</span></p>
+            : (apiEl.hasError) ?
+                <p className="flex"><i className="material-icons red-text">warning</i>
+                    <span>{txtError}</span></p>
+                :
+                <p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
+                    <span>{txtLoading}</span></p>
+    );
 }
