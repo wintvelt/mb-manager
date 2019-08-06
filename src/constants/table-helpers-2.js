@@ -243,10 +243,11 @@ function row(arr, headers, hideKey) {
 	hideKey = true: hide first column
 */
 export const CustomTable = ({ headers, rows, onSort, sortValue, sortDirection, hideKey }) => {
+	const newRows = rows.map( r => row(r, headers, hideKey) );
 	return (
 		<ul>
 			{ hRow(headers, onSort, sortValue, sortDirection, hideKey) }
-            { rows.map( r => row(r, headers, hideKey) )}
+            { newRows }
 		</ul>
 	);
 }

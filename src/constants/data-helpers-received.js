@@ -22,10 +22,17 @@ const receivedIds = [
 export const receivedRows = (accountList, receivedList) => {
 	const accounts = accountDict(accountList);
 	if (!accountDict || !receivedList || receivedList.length === 0) return null;
-	return receivedList.map( (item, i) => {
-		const rowValues = receivedIds.map( (idArr, j) => mapToVal(idArr, j, item, accounts));
-		return rowValues.map( (val, k ) => valToCell(val, k));
-	});
+	var outArr = [];
+	for (let i = 0; i < receivedList.length; i++) {
+		const item = receivedList[i];
+		var outRow = [];
+		for (let j = 0; j < receivedIds.length; j++) {
+			const idArr = receivedIds[j];
+			outRow.push(valToCell(mapToVal(idArr, j, item, accounts),j));
+		}
+		outArr.push(outRow);
+	}
+	return outArr;
 }
 
 // generic helpers, gets value (string or { value, href } from nested object based on key array

@@ -91,7 +91,7 @@ function addData(apiData, data, type, page = 1) {
     const loadingCount = Object.keys(newLoading)
         .reduce((prev, key) => prev + newLoading[key].length, 0);
     const newData = (data) ? data.map(it => Object.assign({}, it, { type: type })) : [];
-    const newAllData = (apiData.data) ? [...new Set([...apiData.data, ...newData])] : [...newData];
+    const newAllData = onlyNew(newData, apiData.data);
     return Object.assign({}, apiData, initApiDataFlags, {
         isLoading: !(loadingCount === 0),
         hasAllData: (loadingCount === 0),
@@ -140,4 +140,18 @@ export const loadComp = (apiEl, txtLoading, txtError, txtOK) => {
                 <p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
                     <span>{txtLoading}</span></p>
     );
+}
+
+function onlyNew(oldList = [], newList = []) {
+    var cleanOldList = [];
+    for (let i = 0; i < oldList.length; i++) {
+        const oldEl = oldList[i];
+        var isInNew = false;
+        for (let j = 0; j < newList.length; j++) {
+            const newEl = newList[j];
+            if (oldEl.id === newEl.id) isInNew = true;
+        }
+        if (!isInNew) cleanOldList.push(oldEl);
+    }
+    return [...cleanOldList, ...newList];
 }

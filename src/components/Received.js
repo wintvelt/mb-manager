@@ -154,15 +154,18 @@ class ConnectedReceived extends Component {
 			const accountOptions =
 				this.props.accounts.data
 					.map(acc => { return { value: acc.name, label: acc.name } });
-
 			const rows = rowsRaw
-				.filter(row => filterMonth(row, this.state.monthFilter))
-				.filter(row => filterStatus(row, this.state.statusFilter))
-				.filter(row => filterAmount(row, this.state.amountFilter))
-				.filter(row => filterSearch(row, this.state.searchFilter))
-				.filter(row => filterAccount(row, this.state.accountFilter))
-				.filter(row => (!this.state.selFilter || this.state.selected.length === 0 ||
-					(this.state.selected.filter(i => (i === row[0].value)).length > 0)))
+				.filter(row => {
+					return (
+						filterMonth(row, this.state.monthFilter)
+						&& filterStatus(row, this.state.statusFilter)
+						&& filterAmount(row, this.state.amountFilter)
+						&& filterSearch(row, this.state.searchFilter)
+						&& filterAccount(row, this.state.accountFilter)
+						&& (!this.state.selFilter || this.state.selected.length === 0 ||
+							(this.state.selected.filter(i => (i === row[0].value)).length > 0))
+					);
+				})
 				.map(row => {
 					if (this.state.selected.length === 0 ||
 						(this.state.selected.filter(i => (i === row[0].value)).length === 0)) {
@@ -175,7 +178,6 @@ class ConnectedReceived extends Component {
 						...row.slice(2)]
 					}
 				});
-
 			const selectIcon = (this.state.selected.length === 0) ?
 				"check_box_outline_blank"
 				: (rows.filter(row => (
@@ -186,7 +188,6 @@ class ConnectedReceived extends Component {
 			// store select icon and list of all visible IDs (used in select all)
 			headers[1].value = selectIcon; // NB MUTABLE CHANGE!
 			headers[1].visibleIds = rows.map(row => row[0].value); // NB MUTABLE CHANGE!
-
 			return (
 				<SideNavWrapper>
 					<SideNav>
