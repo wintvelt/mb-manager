@@ -65,7 +65,6 @@ const valToCell = (val, i) => {
 // to extract info from incomingSums
 // USES MUTABLES INSIDE
 export function getFromSums(incomingSums, state, optDeleted) {
-    console.log('into getfromsums');
     const yearOptions = [...new Set(incomingSums.map(item => { 
         return item.createDate.slice(0, 4) }))].sort().reverse()
         .map(i => { return { value: i, label: i } });

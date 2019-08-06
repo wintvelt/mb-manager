@@ -296,6 +296,10 @@ h4.inline_select {
 	font-size: 16px;
 	color: teal;
 }
+.input-line label .text.disabled {
+	color: rgba(0,0,0,0.42);
+	pointer-events: none;
+}
 .whitespace-vert {
 	height: 32px;
 }

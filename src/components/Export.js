@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Select from 'react-select';
 import moment from 'moment';
 
-import { getIncomingSums, exportDocs, deleteFile, syncFiles } from '../actions/apiActions';
+import { getIncomingSums, exportDocs, deleteFile, syncFiles } from '../actions/api-AWS-actions';
 import { exportRows, exportHeaders, getFromSums } from '../constants/data-helpers-export';
 import { SortableTable, tHeadAddSelect } from '../constants/table-helpers';
 import { doSnack } from "../actions/actions";
@@ -146,8 +146,8 @@ class ConnectedExport extends Component {
             const headers = tHeadAddSelect(exportHeaders, this.onDelete, this.onClearDelete, 7);
             const rows = exportRows(fileStats).map(row => {
                 if (row[0].value.includes('initial')) {
-                    return [...row.slice(0,7), 
-                        Object.assign({}, row[7], { value: 'do_not_disturb', disabled: true })]
+                    return [...row.slice(0, 7),
+                    Object.assign({}, row[7], { value: 'do_not_disturb', disabled: true })]
                 }
                 if (row[0].value !== this.state.selectedForDelete) return row;
                 const newDeleteCell = Object.assign({}, row[7],
@@ -187,14 +187,19 @@ class ConnectedExport extends Component {
                                     <div className='card-title'>Filters voor export</div>
                                     <div className="row" style={{ marginBottom: '0' }}>
                                         <div className="col l6 m6">
-                                            {Radio('new', 'Nieuwe verwerkte documenten', 'Nieuw',
-                                                this.state.mutSelected, this.onChangeInput)}
-                                            {Radio('mut', 'Met mutaties sinds export', 'Gemuteerd',
-                                                this.state.mutSelected, this.onChangeInput)}
+                                            {Radio('new', 'Nieuwe documenten (' + unexportedCount + ')',
+                                                'Nieuw (' + unexportedCount + ')',
+                                                this.state.mutSelected, (unexportedCount === 0),
+                                                this.onChangeInput)}
+                                            {Radio('mut', 'Met mutaties sinds export (' + mutatedCount + ')',
+                                                'Gemuteerd (' + mutatedCount + ')',
+                                                this.state.mutSelected, (mutatedCount === 0),
+                                                this.onChangeInput)}
                                         </div>
                                         <div className="col l6 m6">
-                                            {Radio('all', 'Archief (alle documenten, zonder log)', 'Archief',
-                                                this.state.mutSelected, this.onChangeInput)}
+                                            {Radio('all', 'Archief ('+docCount+' documenten, zonder log)', 
+                                                'Archief ('+docCount+')',
+                                                this.state.mutSelected, false, this.onChangeInput)}
                                         </div>
                                     </div>
                                     {InputLine('Factuurdatum', 'van', 'invoiceFrom', this.state.invoiceFrom, this.onChangeInput)}
@@ -238,25 +243,16 @@ class ConnectedExport extends Component {
                                             }
                                         </div>
                                         <div className='col l6 hide-on-med-and-down'>
-                                            <p>
-                                                <span className='export-stats'>{selStats.docCount}</span>
-                                                documenten</p>
-                                            <p><span className='export-stats'>{selStats.mutatedCount}</span>met mutaties</p>
-                                            <p><span className='export-stats'>{selStats.unexportedCount}</span>nieuw</p>
-                                            <p><span className='export-stats'>
-                                                {moment(selStats.invoiceFromTo.min).format('D MMM YYYY')}
-                                            </span>
-                                                eerste factuurdatum
-                                                </p>
-                                            <p><span className='export-stats'>
-                                                {moment(selStats.invoiceFromTo.max).format('D MMM YYYY')}</span>
-                                                laatste factuurdatum</p>
-                                            <p><span className='export-stats'>
-                                                {moment(selStats.createFromTo.min).format('D MMM YYYY')}</span>eerst opgevoerd
-                                                </p>
-                                            <p><span className='export-stats'>
-                                                {moment(selStats.createFromTo.max).format('D MMM YYYY')}</span>
-                                                laatst opgevoerd</p>
+                                            {[
+                                                { value: selStats.docCount, text: 'documenten' },
+                                                { value: selStats.mutatedCount, text: 'met mutaties' },
+                                                { value: selStats.unexportedCount, text: 'nieuw' },
+                                                { date: selStats.invoiceFromTo.min, text: 'eerste factuurdatum' },
+                                                { date: selStats.invoiceFromTo.max, text: 'laatste factuurdatum' },
+                                                { date: selStats.createFromTo.min, text: 'eerst opgevoerd' },
+                                                { date: selStats.createFromTo.max, text: 'laatst opgevoerd' }
+                                            ].map(miniStat)
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -326,15 +322,17 @@ function Widget({ title, text, icon, btnFunc, pending }) {
     );
 }
 
-function Radio(option, fullText, smallText, checked, changeFunc) {
+function Radio(option, fullText, smallText, checked, disabled, changeFunc) {
+    const radioClass = (disabled) ? 'text disabled' : 'text';
     return (
         <div className='input-line'>
             <label>
                 <input className="with-gap" name="group1" type="radio"
                     value={option}
                     checked={(checked === option)}
+                    disabled={disabled}
                     onChange={(e) => changeFunc('mutSelected', e.target.value)} />
-                <span className='text'>
+                <span className={radioClass}>
                     <span className='hide-on-med-and-down'>{fullText}</span>
                     <span className='hide-on-large-only'>{smallText}</span>
                 </span>
@@ -360,6 +358,16 @@ function InputLine(text1, text2, fieldId, value, changeFunc) {
     );
 }
 
+function miniStat({ value, date, text }) {
+    const val = (date) ? moment(date).format('D MMM YYYY') : value;
+    const key = value || date;
+    return (
+        <p key={key+text}>
+            <span className='export-stats'>{val}</span>
+            {text}
+        </p>
+    );
+}
 
 // styling for select
 const customStyles = {
