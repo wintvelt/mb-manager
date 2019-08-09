@@ -30,7 +30,14 @@ export class FileZone extends Component {
         e.preventDefault();
         console.log("onFileDrop");
         console.log(e.dataTransfer.files);
-        alert("dropped");
+        var reader = new FileReader();
+        reader.onload = (e) => {
+            const csvString = e.target.result;
+            const csvArr = csvString.split('\r');
+            const arr2 = csvArr.map(it => it.split(';'));
+            console.log(JSON.stringify(arr2,null,2));
+        };
+        reader.readAsText(e.dataTransfer.files[0]);
         this.setState({ dragOver : false });
     }
   
