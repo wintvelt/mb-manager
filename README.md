@@ -27,13 +27,46 @@ For each csv upload:
 * in all cases, unconverted file is saved
 * files sent are marked
 
-Files can be sent to Moneybird more than once (only latest datetime is saved): whenever a file is sent, it will check the file IDs in Moneybird to check if the file was already processed. If it was, sending will fail.
+Files can be sent to Moneybird more than once (only latest datetime is saved). But in moneybird, check is needed to ensure that the same payments are not processed twice.
 
 ---
-
-* Left (or sub)menu with bankaccounts in Moneybird
+### Layout:
+* Left menu with bankaccounts in Moneybird
 * Main screen with details for each bankaccount
-    * Settings, with possible states:
-        * Mapping not yet completed
-            * check done if all required fields have mapping
-            * 
+    * Title (shows name of bankaccount)
+    * Settings icon:
+        * Settings (= mappings) can be OK | NOK
+            * OK only if a conversion previously went OK (validated flag in config)
+        * Has/is edit button, to show (always if NOK) mapping details editor
+            * Button is hidden if there is no csv file
+    * upload area (filezone) for csv files
+    * 0 or more csv files in list
+* Typical steps:
+    * upload a file:
+        * save file on S3 (with API)
+        * if config NOK: open settings to make config, otherwise:
+        * convert the just uploaded file
+        * save converted file
+
+
+### Settings for csv conversion - THIS IS TODO
+* column with interpreted csv:
+    * settings on top:
+        * separator
+        * decimal
+    * 2 columns, with on each row
+        * header
+        * 3 examples
+* detail mappings row:
+    * datum, field, input format, examples
+    * valuta datum, field, format, examples
+    * omschrijving, fields (COMBI of multiple fields possible)
+    * bedrag, field, decimal, examples
+    * contra name, field, examples
+    * contra account, field, examples
+    * reference tegenpartij, field, examples
+* SAVE button (if validated, will convert and save the csv too)
+* (general settings are impossible to change)
+    * official date (system: date of upload)
+    * official balance (system: default)
+    * reference (system: same as csv filename)

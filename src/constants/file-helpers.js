@@ -16,13 +16,13 @@ export class FileZone extends Component {
     onDragEnter(e) {
         e.stopPropagation();
         e.preventDefault();
-        this.setState({ dragOver : true });
+        this.setState({ dragOver: true });
     }
-  
+
     onDragLeave(e) {
         e.stopPropagation();
         e.preventDefault();
-        this.setState({ dragOver : false });
+        this.setState({ dragOver: false });
     }
 
     onFileDrop(e) {
@@ -33,20 +33,27 @@ export class FileZone extends Component {
         var reader = new FileReader();
         reader.onload = (e) => {
             const csvString = e.target.result;
-            const csvArr = csvString.split('\r');
-            const arr2 = csvArr.map(it => it.split(';'));
-            console.log(JSON.stringify(arr2,null,2));
+            const csvArr = csvString.split(/\n|\r/);
+            console.log(csvArr.length);
+            const arr2 = csvArr.map(it => {
+                try {
+                    return JSON.parse('['+it+']');
+                } catch (_) {
+                    return it.split(',')
+                }
+            });
+            console.log(JSON.stringify(arr2, null, 2));
         };
         reader.readAsText(e.dataTransfer.files[0]);
-        this.setState({ dragOver : false });
+        this.setState({ dragOver: false });
     }
-  
+
     render() {
-        const zoneStyle = (this.state.dragOver)? "upload-zone dragover" : "upload-zone";
+        const zoneStyle = (this.state.dragOver) ? "upload-zone dragover" : "upload-zone";
         return (
             <div className={zoneStyle}
                 onDragEnter={this.onDragEnter}
-                onDragLeave ={this.onDragLeave}
+                onDragLeave={this.onDragLeave}
                 onDragOver={(e) => {
                     e.dataTransfer.dropEffect = 'copy';
                     e.stopPropagation();
