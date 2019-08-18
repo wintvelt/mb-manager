@@ -11,6 +11,7 @@ import Contacts from './Contacts';
 import Incoming from './Incoming';
 import Received from './Received';
 import Export from './Export';
+import Bankmutations from './Bankmutations';
 import Secret from './Secret';
 import Home from './Home';
 
@@ -42,6 +43,7 @@ const ConnectedApp = (props) => {
 				    <PrivateRoute path="/export" component={Export} 
 				    	isConnected={props.isConnected}/>
 					<Route exact path="/connection" component={Connection} />
+					<Route exact path="/bankmutations" component={Bankmutations} />
 					<Route exact path={secretPath} component={Secret} />
 			    	<Route render={(routeprops) => 
 			    		{ 

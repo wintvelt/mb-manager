@@ -7,7 +7,8 @@ import { DO_SNACK, DO_SNACK_ERROR,
   ADD_CONTACTS, SET_CONTACT_FIELD, SET_CONTACT_CUSTOM_FIELD,
   ADD_RECEIVED, SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
-  LOGIN, LOGOUT, TEST, SET_TEST_RESULT 
+  LOGIN, LOGOUT, TEST, SET_TEST_RESULT,
+  SET_BANK
   } from "../constants/action-types";
 
 export function setAccessToken(payload) {
@@ -28,6 +29,10 @@ export function setLedgers(payload) {
 export function setAccounts(payload) {
   return { type: SET_ACCOUNTS, payload };
 }
+export function setBank(payload) {
+  return { type: SET_BANK, payload };
+}
+
 export function setCustomFields(payload) {
   return { type: SET_CUSTOM_FIELDS, payload };
 }

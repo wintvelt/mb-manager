@@ -85,7 +85,7 @@ function getMBOnce({ storeField, path, storeSetFunc, errorMsg }) {
 		const storeState = getState();
 		const accessToken = storeState.accessToken;
 		const stuff = (storeField)? storeState[storeField] : '';
-		if (!stuff) console.log('DID NOT FIND dataState in Store for field "'+storeField+'"');
+		if (!stuff) console.log('DID NOT FIND dataState in Store for field "'+storeField+'"', path);
 		if (stuff.hasData && accessToken.hasData) return stuff;
 
 		dispatch(storeSetFunc({ LOADING: true }));
@@ -102,7 +102,7 @@ function getMBOnce({ storeField, path, storeSetFunc, errorMsg }) {
 }
 export function testAccess() {
 	const params = {
-		storeField: '',
+		storeField: 'ledgers',
 		path: '/ledger_accounts/243957415182075767.json',
 		storeSetFunc: testConnection,
 		errorMsg: 'Connectie met Moneybird mislukt. Probeer het opnieuw of log uit en in'

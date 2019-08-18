@@ -38,7 +38,7 @@ export const paramToObj = (str) => {
 
 // helper for better loading experience
 // immutable, otherwise store breaks (misses re-renders)
-const initApiDataFlags = {
+export const initApiDataFlags = {
     notAsked: false,
     isLoading: false,
     hasData: false,
@@ -77,6 +77,7 @@ function setLoading(apiData, page = 1, type) {
     var newLoading = Object.assign({}, apiData.loading);
     newLoading[newType] = [...loadingList, page];
     return Object.assign({}, apiData, {
+        notAsked: false,
         isLoading: true,
         hasError: false,
         loading: newLoading
