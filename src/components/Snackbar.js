@@ -6,7 +6,7 @@ const addSnack = (snacks, newSnack, closeSnack) => {
 	if ( newSnack && snacks.indexOf(newSnack) === -1) {
 		setTimeout(() => {
 			closeSnack(newSnack);
-		},4000);
+		},10000);
 		return [...snacks, newSnack];
 	} else {
 		return snacks;

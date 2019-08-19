@@ -123,14 +123,18 @@ table.small {
 	background-color: #3191F0;
 }
 
-.upload-zone {
+.upload-zone, label.upload-zone {
 	height: 128px;
 	padding: 16px;
 	border-radius: 4px;
 	background-color: lightgrey;
+	display: block;
+	cursor: pointer;
+	font-size: 14px;
 }
 .upload-zone > * {
 	pointer-events: none;
+	user-select: none;
 }
 .upload-zone .upload-border {
 	width: 100%;
@@ -145,6 +149,12 @@ table.small {
 .upload-zone.dragover {
 	background-color: #b2dfdb;
 	padding: 4px;
+}
+input[type='file'].upload-zone {
+	position: absolute;
+    top: 0;
+    width: 100%;
+	z-index: -1;
 }
 
 .sidenav {
