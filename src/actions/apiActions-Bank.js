@@ -12,7 +12,8 @@ export const fetchMBAPI = (params) => {
 }
 
 export const fetchAWSAPI = (params) => {
-    const base_url_AWS = 'https://87xzyymsji.execute-api.eu-central-1.amazonaws.com/Prod';
+    // const base_url_AWS = 'https://87xzyymsji.execute-api.eu-central-1.amazonaws.com/Prod';
+    const base_url_AWS = 'http://localhost:3030';
     const url = base_url_AWS + params.path;
 
     const options = Object.assign({}, params, { url });
@@ -20,27 +21,40 @@ export const fetchAWSAPI = (params) => {
 }
 
 
-const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc, errorMsg }) => {
+const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc, errorMsg, method = 'GET', body, loadingMsg }) => {
     if (stuff.hasData && accessToken.hasData) return;
-    dispatch(storeSetFunc({ LOADING: true }));
-    return getData(url, accessToken.data)
-        .then(res => res.json())
+    const safeBody = (!body || typeof body === 'string') ? body : JSON.stringify(body);
+    if (method === 'POST') console.log('loading:' + loadingMsg);
+    dispatch(storeSetFunc({ LOADING: true, loadingMsg }));
+    return fetch(url, {
+        mode: "cors", cache: 'no-cache',
+        method,
+        body: safeBody,
+        headers: { Authorization: 'Bearer ' + accessToken.data }
+    })
+        .then(res => {
+            if (res.ok) {
+                return res.text();
+            } else {
+                return res.text()
+                    .then(errorMsg => {
+                        throw new Error(errorMsg);
+                    })
+            }
+        })
+        .then(string => {
+            try {
+                return JSON.parse(string)
+            } catch (error) {
+                return string;
+            }
+        })
         .then(stuffData => {
             dispatch(storeSetFunc(stuffData));
         })
         .catch(err => {
-            dispatch(storeSetFunc({ ERROR: true }));
+            dispatch(storeSetFunc({ ERROR: true, message: err.message }));
             const msg = errorMsg + '"' + err.message + '"';
             dispatch(doSnackError(msg));
         })
 }
-
-const getData = (url, access_token) => {
-    return fetch(url, {
-        mode: "cors", cache: 'no-cache',
-        headers: {
-            Authorization: 'Bearer ' + access_token // ACCESS_TOKEN
-        }
-    })
-}
-

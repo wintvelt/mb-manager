@@ -6,7 +6,9 @@ const defaultBank = { value: '243233339071268359', label: "KBC 1213" }; // KBC 1
 export const initBankData = {
     activeAccount: null,
     config: newApiData(),
-    files: newApiData()
+    files: newApiData(),
+    activeCsv: newApiData(),
+    convertResult: newApiData(),
 }
 
 export const setBank = (state, payload) => {
@@ -29,10 +31,42 @@ export const setBank = (state, payload) => {
             return Object.assign({}, oldBankData, { config: newConfig });
 
         case 'setFiles':
-            const newFiles = api.set(oldBankData.files, payload.content);
+            const newFiles = api.set(oldBankData.files, payload.content, onlyCsv);
             return Object.assign({}, oldBankData, { files: newFiles });
+
+        case 'setCsv':
+            const newCsv = api.set(oldBankData.activeCsv, payload.content, parseCsv);
+            return Object.assign({}, oldBankData, { activeCsv: newCsv });
+
+        case 'setConvertResult':
+            const newConvertResult = api.set(oldBankData.convertResult, payload.content);
+            return Object.assign({}, oldBankData, { convertResult: newConvertResult });
 
         default:
             return state.bankData;
     }
+}
+
+const onlyCsv = (fileList) => {
+    return fileList.filter(file => (file.last_modified && (file.last_modified.csv || file.last_modified.CSV)))
+}
+
+const parseCsv = ({ filename, content }) => {
+    // need to parse csv string first
+    const semiColons = (content.match(/;/g) || []).length;
+    const commas = (content.match(/,/g) || []).length;
+    const separator = (semiColons > commas) ? ';' : ',';
+    let arr = content.split(/\n|\r/); // split string into lines
+    arr = arr.filter(line => (line.length > 0)); // remove empty lines if needed
+    const parsedContent = arr.map((it, i) => {
+        let row;
+        try {
+            row = JSON.parse('[' + it + ']');
+        } catch (_) {
+            row = it.split(separator);
+        }
+        if (!row[row.length - 1]) row = row.slice(0, -1); // remove last empty fields if needed
+        return row;
+    });
+    return { filename, content: parsedContent };
 }

@@ -7,23 +7,15 @@ import Select from 'react-select';
 import { ActiveAccount } from './Bankmutations-ActiveAccount';
 
 let counter = 0;
+const maxCounter = 100;
 
 const Bankmutations = () => {
     counter++;
     console.log('rendering ' + counter);
     const { accounts, bankData, accessToken } = useSelector(store => store);
-    const log = {
-        accountsNotAsked: accounts.notAsked,
-        activeAccount: (bankData.activeAccount)? bankData.activeAccount.label : 'empty',
-        configNotAsked: bankData.config.notAsked,
-        configLoading: bankData.config.isLoading,
-        configData: bankData.config.hasData,
-        filesNotAsked: bankData.files.notAsked
-    }
-    console.log(log);
     const dispatch = useDispatch();
     if (accounts.notAsked && counter < 20) fetchData(accounts, accessToken, dispatch);
-    if (bankData.activeAccount && bankData.config.notAsked && counter < 20) {
+    if (bankData.activeAccount && bankData.config.notAsked && counter < maxCounter) {
         console.log('fetching details');
         fetchActiveStuff(bankData, accessToken, dispatch)
     };
@@ -37,7 +29,7 @@ const Bankmutations = () => {
             <ActiveAccount bankData={bankData}/>
         </div>
     );
-    if (accessToken.hasData) return (
+    if (accessToken.hasData && !accounts.hasError) return (
         // loading screen
         <div className="container">
             <div className="section">
@@ -91,8 +83,9 @@ const fetchActiveStuff = (bankData, accessToken, dispatch) => {
         stuff: bankData.files,
         path: '/files/' + bankData.activeAccount.value,
         storeSetFunc: (content) => setBank({ type: 'setFiles', content}),
-        errorMsg: 'Fout bij ophalen config, melding van AWS: ',
+        errorMsg: 'Fout bij ophalen files, melding van AWS: ',
         accessToken,
+        loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',
         dispatch,
     }
     fetchAWSAPI(getFilesOptions);

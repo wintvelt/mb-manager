@@ -41,9 +41,11 @@ export const paramToObj = (str) => {
 export const initApiDataFlags = {
     notAsked: false,
     isLoading: false,
+    loadingMsg: '',
     hasData: false,
     hasAllData: false,
-    hasError: false
+    hasError: false,
+    errorMsg: ''
 }
 
 const initApiData = Object.assign({
@@ -71,7 +73,7 @@ export const api = {
     set
 }
 
-function setLoading(apiData, page = 1, type) {
+function setLoading(apiData, page = 1, type, loadingMsg) {
     const newType = type || 'NOTYPE';
     const loadingList = apiData.loading[newType] || [];
     var newLoading = Object.assign({}, apiData.loading);
@@ -80,7 +82,8 @@ function setLoading(apiData, page = 1, type) {
         notAsked: false,
         isLoading: true,
         hasError: false,
-        loading: newLoading
+        loading: newLoading,
+        loadingMsg
     })
 }
 
@@ -112,19 +115,24 @@ function setData(data, time) {
     });
 }
 
-function setError(apiData) {
+function setError(apiData, message) {
     return Object.assign({}, apiData, initApiDataFlags, {
-        hasError: true
+        hasError: true,
+        errorMsg: message
     })
 }
 
-function set(apiData, something) {
-    if (something.LOADING) return setLoading(apiData, something.page, something.type);
-    if (something.ERROR) return setError(apiData);
+function set(apiData, something, resultsMap) {
+    const resultsFunc = (results) => {
+        return (!resultsMap)? results
+            : resultsMap(results)
+    }
+    if (something.LOADING) return setLoading(apiData, something.page, something.type, something.loadingMsg);
+    if (something.ERROR) return setError(apiData, something.message);
     if (something.type && something.stuff) {
-        return addData(apiData, something.stuff, something.type, something.page)
+        return addData(apiData, resultsFunc(something.stuff), something.type, something.page)
     };
-    return this.setData(something);
+    return this.setData(resultsFunc(something));
 }
 
 // Component for loading state of API
