@@ -25,7 +25,7 @@ const Bankmutations = () => {
 
     if (accounts.hasData) return (
         <div className="container">
-            <h4>Betalingen van rekening {accountComp(accounts.data, bankData.activeAccount, onChange)}</h4>
+            <h4>Transacties van rekening {accountComp(accounts.data, bankData.activeAccount, onChange)}</h4>
             <ActiveAccount bankData={bankData}/>
         </div>
     );
@@ -33,7 +33,7 @@ const Bankmutations = () => {
         // loading screen
         <div className="container">
             <div className="section">
-                <h4>Betalingen uploaden</h4>
+                <h4>Transacties uploaden</h4>
                 <p className="flex">
                     <span>Nog even gegevens van bankrekeningen aan het ophalen..</span>
                 </p>

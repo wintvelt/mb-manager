@@ -9,6 +9,7 @@ export const initBankData = {
     files: newApiData(),
     activeCsv: newApiData(),
     convertResult: newApiData(),
+    deleteFile: newApiData()
 }
 
 export const setBank = (state, payload) => {
@@ -42,13 +43,26 @@ export const setBank = (state, payload) => {
             const newConvertResult = api.set(oldBankData.convertResult, payload.content);
             return Object.assign({}, oldBankData, { convertResult: newConvertResult });
 
+        case 'deleteFile':
+            const newDeleteFile = api.set(oldBankData.deleteFile, payload.content);
+            return Object.assign({}, oldBankData, { deleteFile: newDeleteFile });
+
         default:
             return state.bankData;
     }
 }
 
 const onlyCsv = (fileList) => {
-    return fileList.filter(file => (file.last_modified && (file.last_modified.csv || file.last_modified.CSV)))
+    return fileList
+        .filter(file => (file.last_modified && (file.last_modified.csv || file.last_modified.CSV)))
+        .sort(sortDesc('filename'));
+}
+
+const sortDesc = (key) => {
+    return (a, b) => {
+        return (b[key] > a[key]) ? 1 :
+            (a[key] > b[key]) ? -1 : 0;
+    }
 }
 
 const parseCsv = ({ filename, content }) => {

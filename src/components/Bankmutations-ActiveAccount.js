@@ -21,18 +21,51 @@ export const ActiveAccount = (props) => {
             dispatch(doSnack(errorMsg))
         } else {
             let reader = new FileReader();
-            reader.onload = (e) => onLoad(e.target.result, file.name);
+            reader.onload = (e) => {
+                dispatch(setBank({ type: 'setCsv', content: { file: file.name, content: e.target.result } }));
+                convertCsvData(file.name, e.target.result)
+            };
             reader.readAsText(file);
         }
     }
-    const onLoad = (data, filename) => {
-        dispatch(setBank({ type: 'setCsv', content: { filename, content: data } }));
+    const onFileConvert = (filename) => {
+        const storeSetFunc = (content) => {
+            if (content.LOADING || content.ERROR) {
+                return setBank({ type: 'setCsv', content })
+            } else {
+                return setBank({ type: 'setCsv', content: { file: filename, content } })
+            }
+        }
+        const getCsvOptions = {
+            stuff: bankData.activeCsv,
+            path: '/files/' + bankData.activeAccount.value + '/' + filename,
+            storeSetFunc,
+            errorMsg: 'Fout bij ophalen csv, melding van AWS: ',
+            accessToken,
+            loadingMsg: 'Even geduld terwijl we csv bestand ophalen',
+            dispatch,
+            callback: (csv_content) => {
+                convertCsvData(filename, csv_content)
+            }
+        }
+        fetchAWSAPI(getCsvOptions);
+    }
+    const convertCsvData = (filename, data) => {
         const postBody = {
             csv_filename: filename,
             csv_content: data,
             convert_only: true
         }
         const loadingMsg = `bezig met converteren ${filename}`;
+        const getFilesOptions = {
+            stuff: bankData.files,
+            path: '/files/' + bankData.activeAccount.value,
+            storeSetFunc: (content) => setBank({ type: 'setFiles', content }),
+            errorMsg: 'Fout bij ophalen files, melding van AWS: ',
+            accessToken,
+            loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',
+            dispatch
+        }
         const convertCsvOptions = {
             method: 'POST',
             body: postBody,
@@ -43,20 +76,34 @@ export const ActiveAccount = (props) => {
             errorMsg: 'Fout bij conversie: ',
             accessToken,
             dispatch,
+            callback: () => fetchAWSAPI(getFilesOptions)
         }
         fetchAWSAPI(convertCsvOptions);
     }
     return (
         <div>
             {(bankData.convertResult.isLoading) ?
-                <Loader apiData={bankData.convertResult} className='upload-zone'/>
-                : <FileZone fileHandler={fileHandler} />
+                <Loader apiData={bankData.convertResult} className='upload-zone' />
+                : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
             }
             <p>(Placeholder for config section)</p>
-            {(!bankData.files.hasData && !bankData.files.hasError) ?
+            {(!bankData.files.hasAllData && !bankData.files.hasError) ?
                 <Loader apiData={bankData.files} />
-                : <BankFiles files={bankData.files.data} />
+                : (bankData.files.data.length > 0) ?
+                    <> {(bankData.files.isLoading) ?
+                        <div style={{ position: 'relative' }}>
+                            <div className="progress" style={{ position: 'absolute' }}>
+                                <div className="indeterminate"></div>
+                            </div>
+                        </div>
+                        : <></>}
+                        <BankFiles files={bankData.files.data} onFileConvert={onFileConvert} />
+                    </>
+                    : <></>
+
+
             }
+            <pre>(deleteFile){JSON.stringify(bankData.deleteFile, null, 2)}</pre>
             <pre>(convertResult){JSON.stringify(bankData.convertResult, null, 2)}</pre>
             <pre>(activeCsv){JSON.stringify(bankData.activeCsv, null, 2)}</pre>
         </div>

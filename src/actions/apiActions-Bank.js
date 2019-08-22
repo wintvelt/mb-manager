@@ -21,8 +21,9 @@ export const fetchAWSAPI = (params) => {
 }
 
 
-const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc, errorMsg, method = 'GET', body, loadingMsg }) => {
-    if (stuff.hasData && accessToken.hasData) return;
+const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc, 
+    errorMsg, method = 'GET', body, loadingMsg, callback=null }) => {
+    if (stuff.hasData && accessToken.hasData) console.log('fetching again');
     const safeBody = (!body || typeof body === 'string') ? body : JSON.stringify(body);
     if (method === 'POST') console.log('loading:' + loadingMsg);
     dispatch(storeSetFunc({ LOADING: true, loadingMsg }));
@@ -51,6 +52,9 @@ const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc, errorMsg, m
         })
         .then(stuffData => {
             dispatch(storeSetFunc(stuffData));
+            if (callback) {
+                callback(stuffData);
+            };
         })
         .catch(err => {
             dispatch(storeSetFunc({ ERROR: true, message: err.message }));

@@ -1,98 +1,150 @@
 // component for listing files
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setBank } from '../actions/actions';
+import { setBank, doSnack } from '../actions/actions';
 import { fetchAWSAPI } from '../actions/apiActions-Bank';
 
-const adminCode = '';
+const adminCode = "243231934476453244";
+const baseUrlMB = 'https://moneybird.com/' + adminCode;
 
-export const BankFiles = ({ files }) => {
+let counter = 0;
+
+export const BankFiles = ({ files, onFileConvert }) => {
     const { accessToken, bankData } = useSelector(store => store);
     const dispatch = useDispatch();
-    const [selForDel, setSelForDel] = useState();
-    const onCancelSel = () => setSelForDel(null);
-    const onConvert = (filename) => {
-        const postBody = {
-            csv_filename: filename,
-            convert_only: true
-        }
-        const convertCsvOptions = {
-            method: 'POST',
-            body: postBody,
-            stuff: bankData.convertResult,
-            path: '/convert/' + bankData.activeAccount.value,
-            storeSetFunc: (content) => setBank({ type: 'setConvertResult', content }),
-            errorMsg: 'Fout bij conversie: ',
-            accessToken,
-            dispatch,
-        }
-        fetchAWSAPI(convertCsvOptions);
+    const [state, stateDispatch] = useReducer(myReducer, { selForDel: null, initial: true, deleting: null });
+    counter++;
+    console.log('rendering files ' + counter);
+    const getFilesOptions = {
+        stuff: bankData.files,
+        path: '/files/' + bankData.activeAccount.value,
+        storeSetFunc: (content) => setBank({ type: 'setFiles', content }),
+        errorMsg: 'Fout bij ophalen files, melding van AWS: ',
+        accessToken,
+        loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',
+        dispatch,
     }
-    const onClickDel = setSelForDel;
+    const onCancelSel = () => stateDispatch({ type: 'SET', payload: null });
+    const onClickDel = (filename) => {
+        if (state.initial) dispatch(doSnack('Klik nog een keer op delete om bestand definitief te verwijderen.'));
+        if (state.selForDel === filename) {
+            const postBody = {
+                filename
+            }
+            const deleteFileOptions = {
+                method: 'DELETE',
+                body: postBody,
+                stuff: bankData.deleteFile,
+                path: '/files/' + bankData.activeAccount.value,
+                storeSetFunc: (content) => setBank({ type: 'deleteFile', content }),
+                errorMsg: 'Fout bij verwijderen: ',
+                loadingMsg: `Bezig met verwijderen van bestand ${filename}`,
+                accessToken,
+                dispatch,
+                callback: () => fetchAWSAPI(getFilesOptions)
+            }
+            fetchAWSAPI(deleteFileOptions);
+            stateDispatch({ type: 'SET_DELETING', payload: filename });
+        } else {
+            stateDispatch({ type: 'SET', payload: filename });
+        }
+    }
     return (
         <div>
-            {files.sort(sortDesc('filename')).map((file) => {
-                const filenames = file.filename.split('/');
-                const filename = filenames[filenames.length - 1];
-
-                return <FileRow key={filename} filename={filename} file={file} selForDel={selForDel}
-                    onClickDel={onClickDel} onCancelSel={onCancelSel} onConvert={onConvert} />
+            <div className='row file-row file-row-header'>
+                <div className='col s6'><span>Bestandsnaam</span></div>
+                <div className='col s3 offset-s1'><span>Doorgestuurd op</span></div>
+                <div className='col s1 center'><span>Acties</span></div>
+                <div className='col s1'></div>
+            </div>
+            {files.map((file) => {
+                return <FileRow key={file.filename} file={file} selForDel={state.selForDel} deleting={state.deleting}
+                    isConverting={bankData.convertResult.isLoading}
+                    onClickDel={onClickDel} onCancelSel={onCancelSel} onConvert={onFileConvert} />
             })}
         </div>
     )
 }
 
-const FileRow = ({ file, filename, selForDel, onClickDel, onCancelSel }) => {
+const FileRow = ({ file, selForDel, isConverting, onClickDel, onCancelSel, onConvert, deleting }) => {
+    const filenames = file.filename.split('/');
+    const fileFirstname = filenames[filenames.length - 1];
+    const filename = fileFirstname + '.' + Object.keys(file.last_modified).filter(ext => (ext !== 'json'))[0];
+
     const isHot = (selForDel && selForDel === filename);
+    const isCold = (deleting && deleting === filename);
     const [delButtonClass, delIcon] = (isHot) ?
-        ['btn-small red white-text', 'delete_forever'] : ['btn-small grey darkgrey-text', 'delete'];
+        ['btn-flat red white-text', 'delete_forever'] : ['btn-flat grey-text', 'delete'];
+    const rowStyle = (isCold) ? { color: '#e0e0e0' } : {};
     return (
-        <div className='row' style={rowStyle} onClick={onCancelSel}>
-            <div className='col l7 m8 s8' style={colStyle}>
+        <div className='row file-row' onClick={onCancelSel} style={rowStyle}>
+            <div className='col s6'>
+                <span>{filename}</span>
+            </div>
+            <div className='col s1 center'>
                 {(file.last_modified.json) ?
                     (file.send_result_ok) ?
-                        <>
-                            <span>{filename}</span>
-                            <i className='material-icons'>done_all</i>
-                            (verzonden op {simpleDate(file.last_sent)})
-                        </>
-                        : <span>{filename}<i className='material-icons'>done</i></span>
-                    : <span>{filename}</span>
+                        <i className='material-icons'>done_all</i>
+                        : <i className='material-icons'>done</i>
+                    : <></>
                 }
             </div>
-            <div className='col l1 m2 s2' style={colStyle}>
+            <div className='col s3'>
+                {(file.send_result_ok) ?
+                    <span>{simpleDate(file.last_sent)}</span>
+                    : <></>
+                }
+            </div>
+            <div className='col s1 center'>
                 {(file.send_result_ok) ?
                     <a href={linkUrl(file.id)} target="_blank" rel="noopener noreferrer">
                         <i className='material-icons'>link</i>
                     </a>
-                    : <span className='btn-small' onClick={() => onConvert(filename)}>
-                        <i className='material-icons'>shuffle</i>
-                    </span>
+                    : (isCold) ?
+                        <></>
+                        : (isConverting) ?
+                            <span className='btn-flat disabled'><i className='material-icons'>shuffle</i></span>
+                            :
+                            <span className='btn-flat teal white-text' onClick={(e) => {
+                                e.stopPropagation();
+                                onConvert(filename)
+                            }}>
+                                <i className='material-icons'>shuffle</i>
+                            </span>
 
                 }
             </div>
-            <div className='col l1 m2 s2' style={colStyle}>
-                {(file.send_result_ok) ?
+            <div className='col s1 center'>
+                {(file.send_result_ok || isCold) ?
                     <></>
-                    : <span className={delButtonClass} onClick={onClickDel}>
+                    : <span className={delButtonClass} onClick={(e) => {
+                        e.stopPropagation();
+                        onClickDel(filename);
+                    }}>
                         <i className='material-icons'>{delIcon}</i>
                     </span>
                 }
             </div>
-        </div>
+        </div >
     )
 }
 
-const colStyle = { border: '1px solid grey', display: 'flex' }
-const rowStyle = { backgroundColor: 'lightgrey' }
-
 // for fun
-const sortDesc = (key) => {
-    return (a, b) => {
-        return (b[key] > a[key]) ? 1 :
-            (a[key] > b[key]) ? -1 : 0;
+
+const myReducer = (state, action) => {
+    switch (action.type) {
+        case 'SET':
+            return Object.assign({}, state, { selForDel: action.payload, initial: false });
+
+        case 'SET_DELETING':
+            return Object.assign({}, state, { deleting: action.payload });
+
+        default:
+
+            return state;
     }
+
 }
 
 const simpleDate = (dateStr) => dateStr.slice(0, 10);
-const linkUrl = (id) => 'https://moneybird.com/api/vs/' + adminCode + '/financial_statements/' + id;
+const linkUrl = (id) => baseUrlMB + '/financial_statements/' + id;

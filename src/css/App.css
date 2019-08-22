@@ -347,3 +347,31 @@ span.export-stats {
     text-align: right;
 	padding-right: 8px;
 }
+.file-row {
+	display: flex;
+	height: 4em;
+	border-top: 1px solid lightgrey;
+	color: #616161;
+	margin-bottom: 0;
+}
+
+.file-row-header {
+	border-top: none;
+	color: #212121;
+	height: 3em;
+}
+
+.file-row a {
+	display: flex;
+}
+.file-row > div.col {
+	display: flex;
+	align-items: center;
+	padding: 0;
+}
+.file-row > div.col.center {
+	justify-content: center;
+}
+div.col span {
+	margin: 0 5px; 
+}
