@@ -4,6 +4,7 @@ import { fetchAWSAPI } from '../actions/apiActions-Bank';
 import { useDispatch, useSelector } from 'react-redux';
 import { FileZone } from '../constants/file-helpers';
 import { BankFiles } from './Bankmutations-Files';
+import { BankConfig } from './Bankmutations-config';
 import { setBank } from '../actions/actions';
 import { doSnack } from '../actions/actions';
 
@@ -30,7 +31,7 @@ export const ActiveAccount = (props) => {
     }
     const onFileConvert = (filename) => {
         const storeSetFunc = (content) => {
-            if (content.LOADING || content.ERROR) {
+            if (content.LOADING || content.ERROR || content.INIT) {
                 return setBank({ type: 'setCsv', content })
             } else {
                 return setBank({ type: 'setCsv', content: { file: filename, content } })
@@ -86,20 +87,26 @@ export const ActiveAccount = (props) => {
                 <Loader apiData={bankData.convertResult} className='upload-zone' />
                 : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
             }
-            <p>(Placeholder for config section)</p>
+            <BankConfig config={'none'} activeCsv={'none'} 
+                errors={{csv_read_errors: [1,2,3]}} files={{data: [1,2,3,4]}}/>
+            {/* {(bankData.convertResult.hasAllData && bankData.convertResult.data && bankData.convertResult.data.errors)?
+            <BankConfig config={bankData.config.data} activeCsv={bankData.activeCsv} 
+                errors={bankData.convertResult.data.errors} files={bankData.files}/>
+            : <></>
+            } */}
             {(!bankData.files.hasAllData && !bankData.files.hasError) ?
                 <Loader apiData={bankData.files} />
-                : (bankData.files.data.length > 0) ?
+                : (bankData.files.data && bankData.files.data.length > 0) ?
                     <> {(bankData.files.isLoading) ?
                         <div style={{ position: 'relative' }}>
-                            <div className="progress" style={{ position: 'absolute' }}>
+                            <div className="progress" style={{ position: 'absolute', top: '4.5em' }}>
                                 <div className="indeterminate"></div>
                             </div>
                         </div>
                         : <></>}
                         <BankFiles files={bankData.files.data} onFileConvert={onFileConvert} />
                     </>
-                    : <></>
+                    : <p>Got error, try again</p>
 
 
             }

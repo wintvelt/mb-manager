@@ -356,6 +356,7 @@ span.export-stats {
 }
 
 .file-row-header {
+	margin-top: 2em;
 	border-top: none;
 	color: #212121;
 	height: 3em;
@@ -374,4 +375,9 @@ span.export-stats {
 }
 div.col span {
 	margin: 0 5px; 
+}
+
+span.select {
+	font-size: 16px;
+	padding-right: 8px;
 }

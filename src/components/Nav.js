@@ -20,7 +20,7 @@ const ConnectedNav = (props) => {
 		{ path: "/inkomend", text: "Inkomend" },
 		{ path: "/betalingen", text: "Betalingen" },
 		{ path: "/export", text: "Export" },
-		{ path: "/bankmutations", text: "Tranascties", badge: "NIEUW" }
+		{ path: "/bankmutations", text: "Transacties", badge: "NIEUW" }
 	]
 	return (
 		<nav className="nav-extended" style={{ marginBottom: "32px" }}>

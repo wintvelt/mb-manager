@@ -127,12 +127,13 @@ function set(apiData, something, resultsMap) {
         return (!resultsMap)? results
             : resultsMap(results)
     }
+    if (something.INIT) return newApiData();
     if (something.LOADING) return setLoading(apiData, something.page, something.type, something.loadingMsg);
     if (something.ERROR) return setError(apiData, something.message);
     if (something.type && something.stuff) {
         return addData(apiData, resultsFunc(something.stuff), something.type, something.page)
     };
-    return this.setData(resultsFunc(something));
+    return setData(resultsFunc(something));
 }
 
 // Component for loading state of API
