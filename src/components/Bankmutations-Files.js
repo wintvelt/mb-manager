@@ -9,7 +9,7 @@ const baseUrlMB = 'https://moneybird.com/' + adminCode;
 
 let counter = 0;
 
-export const BankFiles = ({ files, onFileConvert }) => {
+export const BankFiles = ({ files, onFileConvert, isLoading }) => {
     const { accessToken, bankData } = useSelector(store => store);
     const dispatch = useDispatch();
     const [state, stateDispatch] = useReducer(myReducer, { selForDel: null, initial: true, deleting: null });
@@ -57,6 +57,13 @@ export const BankFiles = ({ files, onFileConvert }) => {
                 <div className='col s1 center'><span>Acties</span></div>
                 <div className='col s1'></div>
             </div>
+            {(isLoading) ?
+                        <div style={{ position: 'relative' }}>
+                            <div className="progress" style={{ position: 'absolute', top: '-10px' }}>
+                                <div className="indeterminate"></div>
+                            </div>
+                        </div>
+                        : <></>}
             {files.map((file) => {
                 return <FileRow key={file.filename} file={file} selForDel={state.selForDel} deleting={state.deleting}
                     isConverting={bankData.convertResult.isLoading}
@@ -74,7 +81,8 @@ const FileRow = ({ file, selForDel, isConverting, onClickDel, onCancelSel, onCon
     const isHot = (selForDel && selForDel === filename);
     const isCold = (deleting && deleting === filename);
     const [delButtonClass, delIcon] = (isHot) ?
-        ['btn-flat red white-text', 'delete_forever'] : ['btn-flat grey-text', 'delete'];
+        ['btn-flat waves-effect waves-light red white-text', 'delete_forever'] 
+        : ['btn-flat waves-effect waves-light grey-text', 'delete'];
     const rowStyle = (isCold) ? { color: '#e0e0e0' } : {};
     return (
         <div className='row file-row' onClick={onCancelSel} style={rowStyle}>
@@ -105,7 +113,7 @@ const FileRow = ({ file, selForDel, isConverting, onClickDel, onCancelSel, onCon
                         : (isConverting) ?
                             <span className='btn-flat disabled'><i className='material-icons'>shuffle</i></span>
                             :
-                            <span className='btn-flat teal white-text' onClick={(e) => {
+                            <span className='btn-flat waves-effect waves-light teal white-text' onClick={(e) => {
                                 e.stopPropagation();
                                 onConvert(filename)
                             }}>

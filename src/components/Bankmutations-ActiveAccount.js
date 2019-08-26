@@ -7,6 +7,7 @@ import { BankFiles } from './Bankmutations-Files';
 import { BankConfig } from './Bankmutations-config';
 import { setBank } from '../actions/actions';
 import { doSnack } from '../actions/actions';
+import { BankActiveCsv } from './Bankmutations-ActiveCsv';
 
 export const ActiveAccount = (props) => {
     const { accessToken } = useSelector(store => store);
@@ -23,31 +24,22 @@ export const ActiveAccount = (props) => {
         } else {
             let reader = new FileReader();
             reader.onload = (e) => {
-                dispatch(setBank({ type: 'setCsv', content: { file: file.name, content: e.target.result } }));
+                dispatch(setBank({ type: 'setCsv', content: e.target.result }));
                 convertCsvData(file.name, e.target.result)
             };
             reader.readAsText(file);
         }
     }
     const onFileConvert = (filename) => {
-        const storeSetFunc = (content) => {
-            if (content.LOADING || content.ERROR || content.INIT) {
-                return setBank({ type: 'setCsv', content })
-            } else {
-                return setBank({ type: 'setCsv', content: { file: filename, content } })
-            }
-        }
         const getCsvOptions = {
             stuff: bankData.activeCsv,
             path: '/files/' + bankData.activeAccount.value + '/' + filename,
-            storeSetFunc,
+            storeSetFunc: (content) => setBank({ type: 'setCsv', content }),
             errorMsg: 'Fout bij ophalen csv, melding van AWS: ',
             accessToken,
             loadingMsg: 'Even geduld terwijl we csv bestand ophalen',
             dispatch,
-            callback: (csv_content) => {
-                convertCsvData(filename, csv_content)
-            }
+            callback: (data) => convertCsvData(filename, data)
         }
         fetchAWSAPI(getCsvOptions);
     }
@@ -87,30 +79,21 @@ export const ActiveAccount = (props) => {
                 <Loader apiData={bankData.convertResult} className='upload-zone' />
                 : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
             }
-            <BankConfig config={'none'} activeCsv={'none'} 
-                errors={{csv_read_errors: [1,2,3]}} files={{data: [1,2,3,4]}}/>
-            {/* {(bankData.convertResult.hasAllData && bankData.convertResult.data && bankData.convertResult.data.errors)?
-            <BankConfig config={bankData.config.data} activeCsv={bankData.activeCsv} 
-                errors={bankData.convertResult.data.errors} files={bankData.files}/>
-            : <></>
-            } */}
+            {(bankData.convertResult.hasAllData && bankData.convertResult.data && bankData.convertResult.data.errors) ?
+                <BankConfig account={bankData.activeAccount.value}
+                    config={bankData.config.data} convertResult={bankData.convertResult.data}
+                    files={bankData.files} />
+                : <></>
+            }
+            <BankActiveCsv activeCsv={bankData.activeCsv} />
             {(!bankData.files.hasAllData && !bankData.files.hasError) ?
                 <Loader apiData={bankData.files} />
                 : (bankData.files.data && bankData.files.data.length > 0) ?
-                    <> {(bankData.files.isLoading) ?
-                        <div style={{ position: 'relative' }}>
-                            <div className="progress" style={{ position: 'absolute', top: '4.5em' }}>
-                                <div className="indeterminate"></div>
-                            </div>
-                        </div>
-                        : <></>}
-                        <BankFiles files={bankData.files.data} onFileConvert={onFileConvert} />
-                    </>
-                    : <p>Got error, try again</p>
-
-
+                    <BankFiles files={bankData.files.data} isLoading={bankData.files.isLoading} onFileConvert={onFileConvert} />
+                    : (bankData.files.data.length === 0) ? <p>Simply empty list</p>
+                        : <p>Got error, try again</p>
             }
-            <pre>(deleteFile){JSON.stringify(bankData.deleteFile, null, 2)}</pre>
+            <pre>(config){JSON.stringify(bankData.config, null, 2)}</pre>
             <pre>(convertResult){JSON.stringify(bankData.convertResult, null, 2)}</pre>
             <pre>(activeCsv){JSON.stringify(bankData.activeCsv, null, 2)}</pre>
         </div>

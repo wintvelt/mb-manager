@@ -61,7 +61,8 @@ export const newApiData = (data, time, type) => {
         notAsked: !hasData,
         hasData: hasData,
         data: newData,
-        time: (!time && data) ? Date.now() : null
+        time: (!time && data) ? Date.now() : null,
+        origin: null
     })
 }
 
@@ -73,7 +74,7 @@ export const api = {
     set
 }
 
-function setLoading(apiData, page = 1, type, loadingMsg) {
+function setLoading(apiData, page = 1, type, loadingMsg, origin) {
     const newType = type || 'NOTYPE';
     const loadingList = apiData.loading[newType] || [];
     var newLoading = Object.assign({}, apiData.loading);
@@ -83,11 +84,14 @@ function setLoading(apiData, page = 1, type, loadingMsg) {
         isLoading: true,
         hasError: false,
         loading: newLoading,
-        loadingMsg
+        loadingMsg,
+        origin
     })
 }
 
-function addData(apiData, data, type, page = 1) {
+function addData(apiData, data, type, page = 1, origin) {
+    if (apiData.origin !== origin) return apiData;
+
     const newType = type || 'NOTYPE';
     const loadingList = apiData.loading[newType] || [];
     var newLoading = Object.assign({}, apiData.loading);
@@ -110,29 +114,36 @@ function setData(data, time) {
     return Object.assign({}, initApiData, {
         hasData: true,
         hasAllData: true,
-        data: data,
+        data,
         time: (time) ? time : Date.now()
     });
 }
 
-function setError(apiData, message) {
-    return Object.assign({}, apiData, initApiDataFlags, {
-        hasError: true,
-        errorMsg: message
-    })
+function setError(apiData, message, origin) {
+    return (apiData.origin === origin) ?
+        Object.assign({}, apiData, initApiDataFlags, {
+            hasError: true,
+            errorMsg: message
+        })
+        : apiData;
 }
 
 function set(apiData, something, resultsMap) {
     const resultsFunc = (results) => {
-        return (!resultsMap)? results
+        return (!resultsMap) ? results
             : resultsMap(results)
     }
     if (something.INIT) return newApiData();
-    if (something.LOADING) return setLoading(apiData, something.page, something.type, something.loadingMsg);
-    if (something.ERROR) return setError(apiData, something.message);
+    if (something.LOADING) return setLoading(apiData, something.page, something.type, something.loadingMsg, something.origin);
+    if (something.ERROR) return setError(apiData, something.message, something.origin);
     if (something.type && something.stuff) {
-        return addData(apiData, resultsFunc(something.stuff), something.type, something.page)
+        return addData(apiData, resultsFunc(something.stuff), something.type, something.page, something.origin)
     };
+    if (something.data && something.origin) {
+        if (something.origin === apiData.origin) {
+            return {...setData(resultsFunc(something.data)), origin: something.origin};
+        } else return apiData;
+    }
     return setData(resultsFunc(something));
 }
 

@@ -65,7 +65,7 @@ const sortDesc = (key) => {
     }
 }
 
-const parseCsv = ({ filename, content }) => {
+const parseCsv = (content) => {
     // need to parse csv string first
     const semiColons = (content.match(/;/g) || []).length;
     const commas = (content.match(/,/g) || []).length;
@@ -82,5 +82,5 @@ const parseCsv = ({ filename, content }) => {
         if (!row[row.length - 1]) row = row.slice(0, -1); // remove last empty fields if needed
         return row;
     });
-    return { filename, content: parsedContent };
+    return parsedContent;
 }

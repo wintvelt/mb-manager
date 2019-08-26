@@ -381,3 +381,18 @@ span.select {
 	font-size: 16px;
 	padding-right: 8px;
 }
+input[type=text].csv {
+    height: 34px;
+	padding-top: 10px;
+}
+
+.csv-cell {
+	padding: 4px;
+    max-width: 144px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.csv-text {
+	font-size: 85%;
+}

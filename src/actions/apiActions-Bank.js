@@ -23,10 +23,10 @@ export const fetchAWSAPI = (params) => {
 
 const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc, 
     errorMsg, method = 'GET', body, loadingMsg, callback=null }) => {
+    console.log('fetching: '+url);
     if (stuff.hasData && accessToken.hasData) console.log('fetching again');
     const safeBody = (!body || typeof body === 'string') ? body : JSON.stringify(body);
-    if (method === 'POST') console.log('loading:' + loadingMsg);
-    dispatch(storeSetFunc({ LOADING: true, loadingMsg }));
+    dispatch(storeSetFunc({ LOADING: true, loadingMsg, origin: url }));
     return fetch(url, {
         mode: "cors", cache: 'no-cache',
         method,
@@ -51,14 +51,15 @@ const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc,
             }
         })
         .then(stuffData => {
-            dispatch(storeSetFunc(stuffData));
+            dispatch(storeSetFunc({ data: stuffData, origin: url }));
             if (callback) {
-                callback(stuffData);
+                return callback(stuffData);
             };
         })
         .catch(err => {
-            dispatch(storeSetFunc({ ERROR: true, message: err.message }));
+            dispatch(storeSetFunc({ ERROR: true, message: err.message, origin: url }));
             const msg = errorMsg + '"' + err.message + '"';
+            console.error({error: msg});
             dispatch(doSnackError(msg));
         })
 }
