@@ -27,7 +27,7 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
             method: 'POST',
             body: curConfig,
             path: '/config/' + account,
-            storeSetFunc: (content) => setBank({ type: 'setConfig', content}),
+            storeSetFunc: (content) => setBank({ type: 'setConfig', content }),
             errorMsg: 'Fout bij opslaan config, melding van AWS: ',
             accessToken,
             dispatch,
@@ -35,17 +35,17 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
         fetchAWSAPI(configSave);
     }
     const onSelect = (id, key, selection) => {
-        console.log({id, key, selection});
-        const newValue = (Array.isArray(selection))?
-            selection.map(it => it.value) : (selection)? selection.value || selection : '';
-        const payload = { 
-            field: id, 
-            key, 
+        console.log({ id, key, selection });
+        const newValue = (Array.isArray(selection)) ?
+            selection.map(it => it.value) : (selection) ? selection.value || selection : '';
+        const payload = {
+            field: id,
+            key,
             newValue
         }
-        setCurConfig({type: 'SET_FIELD', payload});
+        setCurConfig({ type: 'SET_FIELD', payload });
     }
-    if (errors.field_errors && files.data && files.data.length > 0 && !confirmed) {
+    if (errors && errors.field_errors && files.data && files.data.length > 0 && !confirmed) {
         return <Confirmation files={files.data.length} errors={errors.field_errors.length}
             onClear={onClear} onCancel={onCancel} />
     }
@@ -53,10 +53,10 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
     return <div className='row card'>
         <div className='card-title center'>csv instellingen</div>
         <div className='card-content'>
-            <CsvConfig config={config} errors={errors} onSelect={onSelect}/>
+            <CsvConfig config={config} errors={errors} onSelect={onSelect} />
             <FieldsConfig config={config} curConfig={curConfig} errors={errors} csv={csv} onSelect={onSelect} />
         </div>
-        <pre>(curConfig){JSON.stringify(curConfig, null, 2)}</pre>
+        {/* <pre>(curConfig){JSON.stringify(curConfig, null, 2)}</pre> */}
         <div className='card-action col s12 right-align'>
             <span className={saveClass} onClick={onSave}>Save</span>
         </div>
@@ -127,7 +127,9 @@ const SepSelect = ({ options, selected, onChange }) => {
 const CsvErrors = (props) => {
     const { errors } = props;
     return <div className='col s2'>
-        {errors.csv_read_errors && errors.csv_read_errors.map(it => <p key={it} className='red-text text-lighten-1'>{it}</p>)}
+        {errors && errors.csv_read_errors && errors.csv_read_errors.map(it => {
+            return <p key={it} className='red-text text-lighten-1'>{it}</p>
+        })}
     </div>
 }
 
@@ -138,12 +140,12 @@ const configReducer = (state, action) => {
             const oldFieldConfig = state[field] || state.details[field];
             let newFieldConfig;
             if (key) {
-                newFieldConfig = {...oldFieldConfig};
+                newFieldConfig = { ...oldFieldConfig };
                 newFieldConfig[key] = newValue;
             } else {
-                const newerValue = (Array.isArray(newValue) && newValue.length === 1)? newValue[0] : newValue;
+                const newerValue = (Array.isArray(newValue) && newValue.length === 1) ? newValue[0] : newValue;
                 if (oldFieldConfig && oldFieldConfig.hasOwnProperty('field')) {
-                    newFieldConfig = { ...oldFieldConfig, field: newerValue};
+                    newFieldConfig = { ...oldFieldConfig, field: newerValue };
                 } else {
                     newFieldConfig = newerValue;
                 }

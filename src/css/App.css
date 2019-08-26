@@ -414,3 +414,15 @@ input[type=text].csv {
 .csv-menu.csv-menu-open {
     margin: 0;
 }
+.csv-card {
+	position: absolute;
+	width: 100%; 
+	z-index: 99;
+	top: -64px;
+}
+.csv-scroll-area {
+	overflow: scroll;
+	margin: 16px 32px 32px 32px;
+	border-left: 2px solid grey;
+	border-right: 2px solid grey;
+}

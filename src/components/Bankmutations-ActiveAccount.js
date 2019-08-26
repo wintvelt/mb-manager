@@ -11,7 +11,7 @@ import { BankActiveCsv } from './Bankmutations-ActiveCsv';
 
 export const ActiveAccount = (props) => {
     const { accessToken } = useSelector(store => store);
-    const { bankData } = props;
+    const { bankData, admin } = props;
     const dispatch = useDispatch();
     const fileHandler = (files) => {
         let errorMsg = '';
@@ -81,13 +81,14 @@ export const ActiveAccount = (props) => {
                     <Loader apiData={bankData.activeCsv} className='upload-zone' />
                     : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
             }
-            {(bankData.convertResult.hasAllData && bankData.convertResult.data && bankData.convertResult.data.errors) ?
+            <BankActiveCsv activeCsv={bankData.activeCsv} />
+            {(bankData.convertResult.hasAllData && bankData.convertResult.data && 
+                (bankData.convertResult.data.errors || admin )) ?
                 <BankConfig account={bankData.activeAccount.value}
                     config={bankData.config.data} convertResult={bankData.convertResult.data}
                     files={bankData.files} />
                 : <></>
             }
-            <BankActiveCsv activeCsv={bankData.activeCsv} />
             {(!bankData.files.hasAllData && !bankData.files.hasError) ?
                 <Loader apiData={bankData.files} />
                 : (bankData.files.data && bankData.files.data.length > 0) ?

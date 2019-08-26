@@ -20,11 +20,10 @@ export const BankActiveCsv = (props) => {
             onClearCsv={onClearCsv} />
         {(data && csvVisible) ?
             <div style={{ width: '100%', height: '0', position: 'relative' }}>
-                <div className='card grey lighten-3'
-                    style={{ position: 'absolute', width: '100%', zIndex: 99, top: '-64px' }} >
+                <div className='csv-card card grey lighten-3'>
                     <Header filename={filename} headState='csv-menu-open'
                         btnClass={btnClass} onClick={() => setCvsVisible(false)} />
-                    <div style={{ overflow: 'scroll', margin: '16px 32px 32px 32px' }}>
+                    <div className='csv-scroll-area'>
                         <CsvTable rowData={data} />
                     </div>
                 </div>

@@ -28,7 +28,7 @@ const forField = (id, config, curConfig, csv, field_errors = []) => {
             : curFConfig
         : '';
     const changed = (JSON.stringify(initFConfig) !== JSON.stringify(curFConfig));
-    const fieldErrors = (field_errors.filter(err => (err.field === id)).length > 0) ?
+    const fieldErrors = (field_errors && field_errors.filter(err => (err.field === id)).length > 0) ?
         field_errors.filter(err => (err.field === id))[0].errors
         : [];
     const headers = csv[0];
@@ -67,7 +67,8 @@ export const FieldsConfig = (props) => {
 
 const FieldConfig = ({ props }) => {
     const { id, label, isReq, isDate, isMulti, options, config, curConfig, csv, errors, onSelect } = props;
-    const { mappedField, changed, fieldErrors, curFConfig, examples } = forField(id, config, curConfig, csv, errors && errors.field_errors);
+    const { mappedField, changed, fieldErrors, curFConfig, examples } =
+        forField(id, config, curConfig, csv, errors && errors.field_errors);
     const headers = csv[0];
     let mapOptions = (options) ? options.map(it => { return { label: it, value: it } })
         : [...headers].map(f => { return { value: f, label: f } });

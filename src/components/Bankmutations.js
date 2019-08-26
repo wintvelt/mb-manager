@@ -9,9 +9,10 @@ import { ActiveAccount } from './Bankmutations-ActiveAccount';
 let counter = 0;
 const maxCounter = 100;
 
-const Bankmutations = () => {
+const Bankmutations = (props) => {
     counter++;
     console.log('rendering ' + counter);
+    const admin = (props.location && props.location.search && props.location.search === '?admin=true');
     const { accounts, bankData, accessToken } = useSelector(store => store);
     const dispatch = useDispatch();
     if (accounts.notAsked && counter < 20) fetchData(accounts, accessToken, dispatch);
@@ -26,7 +27,7 @@ const Bankmutations = () => {
     if (accounts.hasData) return (
         <div className="container">
             <h4>Transacties van rekening {accountComp(accounts.data, bankData.activeAccount, onChange)}</h4>
-            <ActiveAccount bankData={bankData}/>
+            <ActiveAccount bankData={bankData} admin={admin}/>
         </div>
     );
     if (accessToken.hasData && !accounts.hasError) return (
