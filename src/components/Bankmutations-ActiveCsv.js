@@ -4,20 +4,19 @@ export const BankActiveCsv = (props) => {
     const { activeCsv } = props;
     const { data, origin } = activeCsv;
     const [csvVisible, setCvsVisible] = useState(false);
-    const filename = (origin) ? origin.split('/').slice(-1)[0] : '(geen actieve csv)';
+    const filename = (origin) ? origin.split('/').slice(-1)[0] : '';
     const cardClass = (data) ? 'card s12 flex' : 's12 flex grey-text';
     const btnClass = (data) ? 'btn btn-flat waves-effect waves-light' : 'btn btn-flat waves-effect waves-light disabled';
     return <div>
-        <div className={cardClass} style={{ minHeight: '36px', padding: '4px', margin: '7px 0 14px 0' }}>
-            <span style={{ flex: '1 1 auto', padding: '0 8px' }}>{filename}</span>
-            <button className={btnClass} onClick={() => setCvsVisible(true)}>
-                <i className='material-icons'>arrow_drop_down</i>
-            </button>
-        </div>
+        <Header filename={filename} headClass={cardClass} btnClass={btnClass} 
+            btnIcon='arrow_drop_down' onClick={() => setCvsVisible(true)} />
         {(data) ?
             <div style={{ width: '100%', height: '0', position: 'relative' }}>
-                <div style={{ overflow: 'scroll' }} style={{position: 'absolute', width: '100%'}}>
-                    <CsvTable rowData={data} />
+                <div className='card' style={{ position: 'absolute', width: '100%' }} >
+                    <Header filename={filename} btnClass={card} btnIcon='close' onClick={() => setCvsVisible(false)} />
+                    <div style={{ overflow: 'scroll' }}>
+                        <CsvTable rowData={data} />
+                    </div>
                 </div>
             </div>
             : <></>
@@ -48,4 +47,20 @@ const CsvRow = (props) => {
                 </td>
         })}
     </tr>
+}
+
+const Header = (props) => {
+    const { filename, headClass, btnClass, btnIcon, onClick } = props;
+    const headerStyle = {
+        minHeight: '36px',
+        padding: '4px',
+        margin: '7px 0 14px 0',
+        justifyContent: 'flex-end'
+    }
+    return <div className={headClass} style={headerStyle}>
+        <span style={{ flex: '1 1 auto', padding: '0 8px' }}>{filename}</span>
+        <button className={btnClass} onClick={onClick}>
+            <i className='material-icons'>{btnIcon}</i>
+        </button>
+    </div>
 }
