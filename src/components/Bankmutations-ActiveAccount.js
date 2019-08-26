@@ -77,7 +77,9 @@ export const ActiveAccount = (props) => {
         <div>
             {(bankData.convertResult.isLoading) ?
                 <Loader apiData={bankData.convertResult} className='upload-zone' />
-                : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
+                : (bankData.activeCsv.isLoading) ?
+                    <Loader apiData={bankData.activeCsv} className='upload-zone' />
+                    : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
             }
             {(bankData.convertResult.hasAllData && bankData.convertResult.data && bankData.convertResult.data.errors) ?
                 <BankConfig account={bankData.activeAccount.value}
@@ -89,7 +91,8 @@ export const ActiveAccount = (props) => {
             {(!bankData.files.hasAllData && !bankData.files.hasError) ?
                 <Loader apiData={bankData.files} />
                 : (bankData.files.data && bankData.files.data.length > 0) ?
-                    <BankFiles files={bankData.files.data} isLoading={bankData.files.isLoading} onFileConvert={onFileConvert} />
+                    <BankFiles files={bankData.files.data} isLoading={bankData.files.isLoading}
+                        onFileConvert={onFileConvert} />
                     : (bankData.files.data.length === 0) ? <p>Simply empty list</p>
                         : <p>Got error, try again</p>
             }

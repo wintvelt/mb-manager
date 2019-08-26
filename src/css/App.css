@@ -396,3 +396,21 @@ input[type=text].csv {
 .csv-text {
 	font-size: 85%;
 }
+
+.csv-menu {
+    display: flex;
+    justify-content: flex-end;
+	margin: 7px 0 14px 0;
+}
+.csv-menu.flex > * {
+	margin-right: 8px;
+}
+.csv-menu > *:last-child {
+	margin-right: 0;
+}
+.white-text .csv-buttons button {
+    color: white !important;
+}
+.csv-menu.csv-menu-open {
+    margin: 0;
+}

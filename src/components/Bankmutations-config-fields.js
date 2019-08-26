@@ -66,7 +66,7 @@ export const FieldsConfig = (props) => {
 }
 
 const FieldConfig = ({ props }) => {
-    const { id, label, isReq, isDate, isNum, isMulti, options, config, curConfig, csv, errors, onSelect } = props;
+    const { id, label, isReq, isDate, isMulti, options, config, curConfig, csv, errors, onSelect } = props;
     const { mappedField, changed, fieldErrors, curFConfig, examples } = forField(id, config, curConfig, csv, errors && errors.field_errors);
     const headers = csv[0];
     let mapOptions = (options) ? options.map(it => { return { label: it, value: it } })

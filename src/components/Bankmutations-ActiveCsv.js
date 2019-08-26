@@ -1,20 +1,30 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setBank } from '../actions/actions';
 
 export const BankActiveCsv = (props) => {
     const { activeCsv } = props;
     const { data, origin } = activeCsv;
+    const dispatch = useDispatch();
     const [csvVisible, setCvsVisible] = useState(false);
     const filename = (origin) ? origin.split('/').slice(-1)[0] : '';
-    const cardClass = (data) ? 'card s12 flex' : 's12 flex grey-text';
-    const btnClass = (data) ? 'btn btn-flat waves-effect waves-light' : 'btn btn-flat waves-effect waves-light disabled';
+    const onClearCsv = () => {
+        dispatch(setBank({ type: 'setCsv', content: { INIT: true } }));
+    }
+    const headState = (data) ? 'csv-menu-enabled' : 'csv-menu-disabled';
+    const btnClass = (data) ? 'btn btn-flat waves-effect waves-light'
+        : 'btn btn-flat waves-effect waves-light disabled';
     return <div>
-        <Header filename={filename} headClass={cardClass} btnClass={btnClass} 
-            btnIcon='arrow_drop_down' onClick={() => setCvsVisible(true)} />
-        {(data) ?
+        <Header filename={filename} headState={headState} btnClass={btnClass}
+            onClick={() => setCvsVisible(true)}
+            onClearCsv={onClearCsv} />
+        {(data && csvVisible) ?
             <div style={{ width: '100%', height: '0', position: 'relative' }}>
-                <div className='card' style={{ position: 'absolute', width: '100%' }} >
-                    <Header filename={filename} btnClass={card} btnIcon='close' onClick={() => setCvsVisible(false)} />
-                    <div style={{ overflow: 'scroll' }}>
+                <div className='card grey lighten-3'
+                    style={{ position: 'absolute', width: '100%', zIndex: 99, top: '-64px' }} >
+                    <Header filename={filename} headState='csv-menu-open'
+                        btnClass={btnClass} onClick={() => setCvsVisible(false)} />
+                    <div style={{ overflow: 'scroll', margin: '16px 32px 32px 32px' }}>
                         <CsvTable rowData={data} />
                     </div>
                 </div>
@@ -50,17 +60,26 @@ const CsvRow = (props) => {
 }
 
 const Header = (props) => {
-    const { filename, headClass, btnClass, btnIcon, onClick } = props;
-    const headerStyle = {
-        minHeight: '36px',
-        padding: '4px',
-        margin: '7px 0 14px 0',
-        justifyContent: 'flex-end'
-    }
-    return <div className={headClass} style={headerStyle}>
-        <span style={{ flex: '1 1 auto', padding: '0 8px' }}>{filename}</span>
-        <button className={btnClass} onClick={onClick}>
-            <i className='material-icons'>{btnIcon}</i>
-        </button>
+    const { filename, headState, btnClass, onClick, onClearCsv } = props;
+    const headClass = (headState === 'csv-menu-enabled') ? 'csv-menu card s12 flex'
+        : (headState === 'csv-menu-open') ?
+            'csv-menu csv-menu-open s12 flex'
+            : (filename) ? 'csv-menu s12 flex grey-text'
+                : 'csv-menu s12 flex white-text';
+    const clearFunc = (headState === 'csv-menu-open') ? onClick : onClearCsv;
+    return <div className={headClass}>
+        <span>{filename}</span>
+        <div className='csv-buttons'>
+            {(headState === 'csv-menu-open') ?
+                <></>
+                :
+                <button className={btnClass} onClick={onClick}>
+                    <i className='material-icons'>loupe</i>
+                </button>
+            }
+            <button className={btnClass} onClick={clearFunc}>
+                <i className='material-icons'>clear</i>
+            </button>
+        </div>
     </div>
 }
