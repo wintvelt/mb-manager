@@ -24,7 +24,7 @@ export const ActiveAccount = (props) => {
         } else {
             let reader = new FileReader();
             reader.onload = (e) => {
-                dispatch(setBank({ type: 'setCsv', content: e.target.result }));
+                dispatch(setBank({ type: 'setCsvWithOrigin', content: { data: e.target.result, filename: file.name }}));
                 convertCsvData(file.name, e.target.result)
             };
             reader.readAsText(file);
@@ -94,12 +94,12 @@ export const ActiveAccount = (props) => {
                 : (bankData.files.data && bankData.files.data.length > 0) ?
                     <BankFiles files={bankData.files.data} isLoading={bankData.files.isLoading}
                         onFileConvert={onFileConvert} />
-                    : (bankData.files.data.length === 0) ? <p>Simply empty list</p>
+                    : (bankData.files.data && bankData.files.data.length === 0) ? <p>Simply empty list</p>
                         : <p>Got error, try again</p>
             }
             <pre>(config){JSON.stringify(bankData.config, null, 2)}</pre>
             <pre>(convertResult){JSON.stringify(bankData.convertResult, null, 2)}</pre>
-            <pre>(activeCsv){JSON.stringify(bankData.activeCsv, null, 2)}</pre>
+            <pre>(files){JSON.stringify(bankData.files, null, 2)}</pre>
         </div>
     );
 }

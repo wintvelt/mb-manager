@@ -39,6 +39,11 @@ export const setBank = (state, payload) => {
             const newCsv = api.set(oldBankData.activeCsv, payload.content, parseCsv);
             return Object.assign({}, oldBankData, { activeCsv: newCsv });
 
+        case 'setCsvWithOrigin':
+            const newCsvWithOrigin = api.setData(parseCsv(payload.content.data), 
+                null, payload.content.filename);
+            return Object.assign({}, oldBankData, { activeCsv: newCsvWithOrigin });
+
         case 'setConvertResult':
             const newConvertResult = api.set(oldBankData.convertResult, payload.content);
             return Object.assign({}, oldBankData, { convertResult: newConvertResult });

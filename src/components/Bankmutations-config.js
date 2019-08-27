@@ -7,10 +7,9 @@ import { FieldsConfig } from './Bankmutations-config-fields';
 import { fetchAWSAPI } from '../actions/apiActions-Bank';
 
 
-
 export const BankConfig = ({ account, config, convertResult, files }) => {
     const { errors, csv } = convertResult;
-    const { accessToken } = useSelector(store => store);
+    const { accessToken, bankData } = useSelector(store => store);
     const dispatch = useDispatch();
     const [confirmed, setConfirmed] = useState(false);
     const [curConfig, setCurConfig] = useReducer(configReducer, config);
@@ -24,6 +23,7 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
     }
     const onSave = () => {
         const configSave = {
+            stuff: bankData.config,
             method: 'POST',
             body: curConfig,
             path: '/config/' + account,
@@ -32,10 +32,10 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
             accessToken,
             dispatch,
         }
+        dispatch(setBank({ type: 'setConvertResult', content: { INIT: true } }));
         fetchAWSAPI(configSave);
     }
     const onSelect = (id, key, selection) => {
-        console.log({ id, key, selection });
         const newValue = (Array.isArray(selection)) ?
             selection.map(it => it.value) : (selection) ? selection.value || selection : '';
         const payload = {
@@ -56,7 +56,7 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
             <CsvConfig config={config} errors={errors} onSelect={onSelect} />
             <FieldsConfig config={config} curConfig={curConfig} errors={errors} csv={csv} onSelect={onSelect} />
         </div>
-        {/* <pre>(curConfig){JSON.stringify(curConfig, null, 2)}</pre> */}
+        <pre>(curConfig){JSON.stringify(curConfig, null, 2)}</pre>
         <div className='card-action col s12 right-align'>
             <span className={saveClass} onClick={onSave}>Save</span>
         </div>
@@ -97,17 +97,27 @@ const CsvConfig = (props) => {
     ];
     const selected = separatorOptions.filter(it => (it.value === separator))[0];
 
-    const onChange = (selected) => {
+    const onSepChange = (selected) => {
         onSelect('separator', null, selected);
     }
+    const onPaypalChange = (val) => {
+        onSelect('paypal_special', null, val);
+    }
 
-    return <div className='row flex'>
-        <div className='col s2 right-align'>csv conversie:</div>
-        <SepSelect options={separatorOptions} selected={selected} onChange={onChange} />
-        <div className='col s2'></div>
-        <CsvErrors errors={errors} />
-        <div className='col s3'></div>
-    </div>
+    return <>
+        <div className='row flex'>
+            <div className='col s2 right-align'>csv conversie:</div>
+            <SepSelect options={separatorOptions} selected={selected} onChange={onSepChange} />
+            <div className='col s2'></div>
+            <CsvErrors errors={errors} />
+            <div className='col s3'></div>
+        </div>
+        <div className='row flex'>
+            <div className='col s2 right-align'>Paypal filter:</div>
+            <PaypalSelect val={config.paypal_special} onChange={onPaypalChange} />
+            <div className='col s7'></div>
+        </div>
+    </>
 }
 
 // further helpers
@@ -130,6 +140,20 @@ const CsvErrors = (props) => {
         {errors && errors.csv_read_errors && errors.csv_read_errors.map(it => {
             return <p key={it} className='red-text text-lighten-1'>{it}</p>
         })}
+    </div>
+}
+
+const PaypalSelect = (props) => {
+    const {val, onChange} = props;
+    return <div className='col s3'>
+        <div className="switch">
+            <label>
+                Uit
+                <input type="checkbox" value={val} onChange={(e) => onChange(e.target.checked)}/>
+                <span className="lever"></span>
+                Aan
+            </label>
+        </div>
     </div>
 }
 

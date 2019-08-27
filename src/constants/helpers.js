@@ -110,11 +110,12 @@ function addData(apiData, data, type, page = 1, origin) {
     });
 }
 
-function setData(data, time) {
+function setData(data, time, origin) {
     return Object.assign({}, initApiData, {
         hasData: true,
         hasAllData: true,
         data,
+        origin,
         time: (time) ? time : Date.now()
     });
 }

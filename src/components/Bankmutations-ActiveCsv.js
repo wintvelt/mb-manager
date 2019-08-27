@@ -10,6 +10,7 @@ export const BankActiveCsv = (props) => {
     const filename = (origin) ? origin.split('/').slice(-1)[0] : '';
     const onClearCsv = () => {
         dispatch(setBank({ type: 'setCsv', content: { INIT: true } }));
+        dispatch(setBank({ type: 'convertResult', content: { INIT: true } }));
     }
     const headState = (data) ? 'csv-menu-enabled' : 'csv-menu-disabled';
     const btnClass = (data) ? 'btn btn-flat waves-effect waves-light'
