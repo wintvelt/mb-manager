@@ -1,5 +1,5 @@
 // Component for Active account (sub of Bankmutations)
-import React from 'react';
+import React, { useState } from 'react';
 import { fetchAWSAPI } from '../actions/apiActions-Bank';
 import { useDispatch, useSelector } from 'react-redux';
 import { FileZone } from '../constants/file-helpers';
@@ -12,6 +12,7 @@ import { BankActiveCsv } from './Bankmutations-ActiveCsv';
 export const ActiveAccount = (props) => {
     const { accessToken } = useSelector(store => store);
     const { bankData, admin } = props;
+    const [ isOpen, setisOpen] = useState(false);
     const dispatch = useDispatch();
     const fileHandler = (files) => {
         let errorMsg = '';
@@ -73,6 +74,9 @@ export const ActiveAccount = (props) => {
         }
         fetchAWSAPI(convertCsvOptions);
     }
+    const onClickAdmin = () => {
+        setisOpen(!isOpen);
+    }
     return (
         <div>
             {(bankData.convertResult.isLoading) ?
@@ -82,8 +86,8 @@ export const ActiveAccount = (props) => {
                     : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
             }
             <BankActiveCsv activeCsv={bankData.activeCsv} />
-            {(bankData.convertResult.hasAllData && bankData.convertResult.data && 
-                (bankData.convertResult.data.errors || admin )) ?
+            {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data && 
+                (bankData.convertResult.data.errors || isOpen )) ?
                 <BankConfig account={bankData.activeAccount.value}
                     config={bankData.config.data} convertResult={bankData.convertResult.data}
                     files={bankData.files} />
@@ -100,6 +104,10 @@ export const ActiveAccount = (props) => {
             <pre>(config){JSON.stringify(bankData.config, null, 2)}</pre>
             <pre>(convertResult){JSON.stringify(bankData.convertResult, null, 2)}</pre>
             <pre>(files){JSON.stringify(bankData.files, null, 2)}</pre>
+            {(admin)? <AdminButton isOpen={isOpen} onClick={onClickAdmin} 
+                enabled={(bankData.config.hasAllData && bankData.convertResult.hasAllData)}/>
+             : <></>
+            }
         </div>
     );
 }
@@ -114,4 +122,14 @@ const Loader = ({ apiData, className }) => {
             </div>
         </div>
     )
+}
+
+const AdminButton = (props) => {
+    const { onClick, isOpen, enabled } = props;
+    const btnClassBasic = 'btn btn-floating btn-small orange admin';
+    const btnClass = (enabled)? btnClassBasic : btnClassBasic + ' disabled';
+    const icon = (isOpen)? 'close' : 'settings';
+    return <button className={btnClass} onClick={onClick}>
+        <i className='material-icons'>{icon}</i>
+    </button>
 }

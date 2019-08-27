@@ -373,7 +373,7 @@ span.export-stats {
 .file-row > div.col.center {
 	justify-content: center;
 }
-div.col span {
+div.col span, div.col a {
 	margin: 0 5px; 
 }
 
@@ -425,4 +425,10 @@ input[type=text].csv {
 	margin: 16px 32px 32px 32px;
 	border-left: 2px solid grey;
 	border-right: 2px solid grey;
+}
+
+.admin {
+	position: absolute;
+	top: 97px;
+	right: 43px;
 }

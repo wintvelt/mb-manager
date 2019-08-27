@@ -106,7 +106,7 @@ const FileRow = ({ file, selForDel, isConverting, onClickDel, onCancelSel, onCon
             <div className='col s1 center'>
                 {(file.send_result_ok) ?
                     <a href={linkUrl(file.id)} target="_blank" rel="noopener noreferrer">
-                        <i className='material-icons'>link</i>
+                        <i className='material-icons'>launch</i>
                     </a>
                     : (isCold) ?
                         <></>
