@@ -45,10 +45,12 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
         }
         setCurConfig({ type: 'SET_FIELD', payload });
     }
-    if (errors && errors.field_errors && files.data && files.data.length > 0 && !confirmed) {
+    if (errors && errors.field_errors && files.data && files.data.length > 1 && !confirmed) {
         return <Confirmation files={files.data.length} errors={errors.field_errors.length}
             onClear={onClear} onCancel={onCancel} />
     }
+    if (!config) return <div>Some error</div>
+    
     const saveClass = (changed) ? 'btn' : 'btn disabled';
     return <div className='row card'>
         <div className='card-title center'>csv instellingen</div>

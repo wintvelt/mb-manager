@@ -12,7 +12,7 @@ import { BankActiveCsv } from './Bankmutations-ActiveCsv';
 export const ActiveAccount = (props) => {
     const { accessToken } = useSelector(store => store);
     const { bankData, admin } = props;
-    const [ isOpen, setisOpen] = useState(false);
+    const [isOpen, setisOpen] = useState(false);
     const dispatch = useDispatch();
     const fileHandler = (files) => {
         let errorMsg = '';
@@ -25,7 +25,7 @@ export const ActiveAccount = (props) => {
         } else {
             let reader = new FileReader();
             reader.onload = (e) => {
-                dispatch(setBank({ type: 'setCsvWithOrigin', content: { data: e.target.result, filename: file.name }}));
+                dispatch(setBank({ type: 'setCsvWithOrigin', content: { data: e.target.result, filename: file.name } }));
                 convertCsvData(file.name, e.target.result)
             };
             reader.readAsText(file);
@@ -48,7 +48,7 @@ export const ActiveAccount = (props) => {
         const postBody = {
             csv_filename: filename,
             csv_content: data,
-            convert_only: true
+            convert_only: false
         }
         const loadingMsg = `bezig met converteren ${filename}`;
         const getFilesOptions = {
@@ -86,8 +86,8 @@ export const ActiveAccount = (props) => {
                     : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
             }
             <BankActiveCsv activeCsv={bankData.activeCsv} />
-            {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data && 
-                (bankData.convertResult.data.errors || isOpen )) ?
+            {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
+                (bankData.convertResult.data.errors || isOpen)) ?
                 <BankConfig account={bankData.activeAccount.value}
                     config={bankData.config.data} convertResult={bankData.convertResult.data}
                     files={bankData.files} />
@@ -104,9 +104,9 @@ export const ActiveAccount = (props) => {
             <pre>(config){JSON.stringify(bankData.config, null, 2)}</pre>
             <pre>(convertResult){JSON.stringify(bankData.convertResult, null, 2)}</pre>
             <pre>(files){JSON.stringify(bankData.files, null, 2)}</pre>
-            {(admin)? <AdminButton isOpen={isOpen} onClick={onClickAdmin} 
-                enabled={(bankData.config.hasAllData && bankData.convertResult.hasAllData)}/>
-             : <></>
+            {(admin) ? <AdminButton isOpen={isOpen} onClick={onClickAdmin}
+                enabled={(bankData.config.hasAllData && bankData.convertResult.hasAllData)} />
+                : <></>
             }
         </div>
     );
@@ -127,8 +127,8 @@ const Loader = ({ apiData, className }) => {
 const AdminButton = (props) => {
     const { onClick, isOpen, enabled } = props;
     const btnClassBasic = 'btn btn-floating btn-small orange admin';
-    const btnClass = (enabled)? btnClassBasic : btnClassBasic + ' disabled';
-    const icon = (isOpen)? 'close' : 'settings';
+    const btnClass = (enabled) ? btnClassBasic : btnClassBasic + ' disabled';
+    const icon = (isOpen) ? 'close' : 'settings';
     return <button className={btnClass} onClick={onClick}>
         <i className='material-icons'>{icon}</i>
     </button>
