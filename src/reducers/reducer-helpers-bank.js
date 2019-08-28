@@ -6,6 +6,7 @@ const defaultBank = { value: '243233339071268359', label: "KBC 1213" }; // KBC 1
 export const initBankData = {
     activeAccount: null,
     config: newApiData(),
+    savedConfig: newApiData(),
     files: newApiData(),
     activeCsv: newApiData(),
     convertResult: newApiData(),
@@ -31,6 +32,10 @@ export const setBank = (state, payload) => {
             const newConfig = api.set(oldBankData.config, payload.content);
             return Object.assign({}, oldBankData, { config: newConfig });
 
+        case 'setSavedConfig':
+            const savedConfig = api.set(oldBankData.savedConfig, payload.content);
+            return Object.assign({}, oldBankData, { config: savedConfig });
+
         case 'setFiles':
             const newFiles = api.set(oldBankData.files, payload.content, onlyCsv);
             return Object.assign({}, oldBankData, { files: newFiles });
@@ -40,7 +45,7 @@ export const setBank = (state, payload) => {
             return Object.assign({}, oldBankData, { activeCsv: newCsv });
 
         case 'setCsvWithOrigin':
-            const newCsvWithOrigin = api.setData(parseCsv(payload.content.data), 
+            const newCsvWithOrigin = api.setData(parseCsv(payload.content.data),
                 null, payload.content.filename);
             return Object.assign({}, oldBankData, { activeCsv: newCsvWithOrigin });
 

@@ -27,7 +27,7 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
             method: 'POST',
             body: curConfig,
             path: '/config/' + account,
-            storeSetFunc: (content) => setBank({ type: 'setConfig', content }),
+            storeSetFunc: (content) => setBank({ type: 'setSavedConfig', content }),
             errorMsg: 'Fout bij opslaan config, melding van AWS: ',
             accessToken,
             dispatch,
@@ -50,7 +50,7 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
             onClear={onClear} onCancel={onCancel} />
     }
     if (!config) return <div>Some error</div>
-    
+
     const saveClass = (changed) ? 'btn' : 'btn disabled';
     return <div className='row card'>
         <div className='card-title center'>csv instellingen</div>
