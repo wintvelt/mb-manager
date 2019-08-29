@@ -47,7 +47,7 @@ const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc,
             try {
                 return JSON.parse(string)
             } catch (error) {
-                return string;
+                return (string === 'no data')? '': string;
             }
         })
         .then(stuffData => {

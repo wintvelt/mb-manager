@@ -55,10 +55,20 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
     return <div className='row card'>
         <div className='card-title center'>csv instellingen</div>
         <div className='card-content'>
+            {(errors.moneybird_error) ?
+                <div className='row'>
+                    <div className='col s5 right-align'>Foutmelding van Moneybird bij upload</div>
+                    <div className='col s7'>
+                        <pre className='red-text text-lighten-1'>
+                            {JSON.stringify(errors.moneybird_error, null, 2)}
+                        </pre>
+                    </div>
+                </div>
+                : <></>
+            }
             <CsvConfig config={config} errors={errors} onSelect={onSelect} />
             <FieldsConfig config={config} curConfig={curConfig} errors={errors} csv={csv} onSelect={onSelect} />
         </div>
-        <pre>(curConfig){JSON.stringify(curConfig, null, 2)}</pre>
         <div className='card-action col s12 right-align'>
             <span className={saveClass} onClick={onSave}>Save</span>
         </div>
@@ -146,12 +156,12 @@ const CsvErrors = (props) => {
 }
 
 const PaypalSelect = (props) => {
-    const {val, onChange} = props;
+    const { val, onChange } = props;
     return <div className='col s3'>
         <div className="switch">
             <label>
                 Uit
-                <input type="checkbox" value={val} onChange={(e) => onChange(e.target.checked)}/>
+                <input type="checkbox" value={val} onChange={(e) => onChange(e.target.checked)} />
                 <span className="lever"></span>
                 Aan
             </label>

@@ -46,13 +46,10 @@ export const ActiveAccount = (props) => {
         fetchAWSAPI(getCsvOptions);
     }
     const maybeConvertCsvData = (filename, data) => {
-        console.log('checking maybe');
         // check if filename is already converted
         if (fileInList(filename, bankData.files)) {
-            console.log('should ask');
-            setAskConfirm({ ask: true, filename, data});
+            setAskConfirm({ ask: true, filename, data });
         } else {
-            console.log('converting');
             convertCsvData(filename, data);
         }
     }
@@ -91,11 +88,10 @@ export const ActiveAccount = (props) => {
     }
     const onConfirmConvert = (ok) => {
         if (ok) {
-            console.log({askConfirm});
             convertCsvData(askConfirm.filename, askConfirm.data);
         } else {
             dispatch(setBank({ type: 'setCsv', content: { INIT: true } }));
-            setAskConfirm({ask:false});
+            setAskConfirm({ ask: false });
         }
     }
     return (
@@ -114,17 +110,18 @@ export const ActiveAccount = (props) => {
                     files={bankData.files} />
                 : <></>
             }
-            {(askConfirm.ask)?
+            {(askConfirm.ask) ?
                 <Confirmation onClick={onConfirmConvert} filename={askConfirm.filename} />
                 : <></>
             }
-            {(!bankData.files.hasAllData && !bankData.files.hasError) ?
-                <Loader apiData={bankData.files} />
+            {(bankData.files.hasError) ?
+                <p>Got error, try again</p>
                 : (bankData.files.data && bankData.files.data.length > 0) ?
                     <BankFiles files={bankData.files.data} isLoading={bankData.files.isLoading}
                         onFileConvert={onFileConvert} />
-                    : (bankData.files.data && bankData.files.data.length === 0) ? <p>Simply empty list</p>
-                        : <p>Got error, try again</p>
+                    : (bankData.files.isLoading) ?
+                        <Loader apiData={bankData.files} />
+                        : <p>Simply empty list</p>
             }
             <pre>(config){JSON.stringify(bankData.config, null, 2)}</pre>
             <pre>(convertResult){JSON.stringify(bankData.convertResult, null, 2)}</pre>
@@ -161,11 +158,9 @@ const AdminButton = (props) => {
 
 const fileInList = (filename, files) => {
     const shortFilename = filename.split('.')[0];
-    console.log({files});
     return (files.data && files.data.length > 0 &&
         files.data.filter(f => {
             const fileFromPath = f.filename.split('/').slice(1)[0];
-            console.log({fileFromPath, shortFilename});
             return (fileFromPath === shortFilename && f.send_result_ok)
         }).length > 0)
 }
@@ -181,7 +176,7 @@ const Confirmation = ({ filename, onClick }) => {
                     <span className="card-title">Vraagje</span>
                     <div className="card-content">
                         <p>Het bestand {filename} heb je al eerder naar Moneybird doorgestuurd.
-                        Weet je zeker dat je dit opnieuw wilt doen? 
+                        Weet je zeker dat je dit opnieuw wilt doen?
                         Had je het bijbehorende bestand uit Moneybird al verwijderd?</p>
                     </div>
                     <div className="card-action right-align">

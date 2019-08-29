@@ -19,11 +19,9 @@ export const setBank = (state, payload) => {
 
     switch (payload.type) {
         case 'setDefault':
-            console.log('setting default');
             return Object.assign({}, initBankData, { activeAccount: defaultBank });
 
         case 'setActiveAccount':
-            console.log('setting active bank');
             return (oldActive && oldActive === payload.content) ?
                 Object.assign({}, oldActive)
                 : Object.assign({}, initBankData, { activeAccount: payload.content })
