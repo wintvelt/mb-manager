@@ -94,7 +94,9 @@ const fetchActiveStuff = (bankData, accessToken, dispatch) => {
 
 // Helpers for components
 const accountOptions = (accountData) => {
-    return accountData.map(account => { return { value: account.id, label: account.name } })
+    return accountData
+        .filter(account => (account.active))
+        .map(account => { return { value: account.id, label: account.name } })
 }
 
 const accountComp = (accountData, selected, onChange) => {
