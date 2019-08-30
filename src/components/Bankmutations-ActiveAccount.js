@@ -60,7 +60,7 @@ export const ActiveAccount = (props) => {
         const postBody = {
             csv_filename: filename,
             csv_content: data,
-            convert_only: false
+            convert_only: true
         }
         const getFilesOptions = {
             stuff: bankData.files,
@@ -92,6 +92,7 @@ export const ActiveAccount = (props) => {
     const onConfirmConvert = (ok) => {
         if (ok) {
             convertCsvData(askConfirm.filename, askConfirm.data);
+            setAskConfirm({ ask: false });
         } else {
             dispatch(setBank({ type: 'setCsv', content: { INIT: true } }));
             setAskConfirm({ ask: false });
@@ -110,7 +111,7 @@ export const ActiveAccount = (props) => {
                 : <></>
             }
             {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
-                bankData.convertResult.data.errors) ?
+                (bankData.convertResult.data.errors || (admin && adminIsOpen))) ?
                 (admin && adminIsOpen) ?
                     <BankConfig account={bankData.activeAccount.value}
                         config={bankData.config.data} convertResult={bankData.convertResult.data}
@@ -139,7 +140,7 @@ export const ActiveAccount = (props) => {
                 <p>Er ging iets mis, probeer het later nog eens..</p>
                 : (bankData.files.data && bankData.files.data.length > 0) ?
                     <BankFiles files={bankData.files.data} isLoading={bankData.files.isLoading}
-                        onFileConvert={onFileConvert} admin={admin}/>
+                        onFileConvert={onFileConvert} admin={admin} />
                     : (bankData.files.isLoading) ?
                         <Loader apiData={bankData.files} />
                         : <></>

@@ -55,7 +55,7 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
     return <div className='row card'>
         <div className='card-title center'>csv instellingen</div>
         <div className='card-content'>
-            {(errors.moneybird_error) ?
+            {(errors && errors.moneybird_error) ?
                 <div className='row'>
                     <div className='col s5 right-align'>Foutmelding van Moneybird bij upload</div>
                     <div className='col s7'>

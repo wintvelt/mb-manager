@@ -3,6 +3,7 @@ import React from 'react';
 import Select from 'react-select';
 
 const fields = [
+    { id: 'identifier', label: 'Check rekeningnummer' },
     { id: 'date', label: 'Datum:', isReq: true, isDate: true },
     { id: 'valutation_date', label: 'Valuta-datum:', isDate: true },
     { id: 'message', label: 'Omschrijving:', isReq: true, isMulti: true },
