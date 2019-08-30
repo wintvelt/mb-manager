@@ -84,12 +84,13 @@ const FileRow = ({ file, selForDel, isConverting, onClickDel, onCancelSel, onCon
         ['btn-flat waves-effect waves-light red white-text', 'delete_forever'] 
         : ['btn-flat waves-effect waves-light grey-text', 'delete'];
     const rowStyle = (isCold) ? { color: '#e0e0e0' } : {};
+    const greenClass = (file.send_result_ok)? ' green-text' : '';
     return (
         <div className='row file-row' onClick={onCancelSel} style={rowStyle}>
             <div className='col s6'>
                 <span>{filename}</span>
             </div>
-            <div className='col s1 center'>
+            <div className={'col s1 center'+greenClass}>
                 {(file.last_modified.json) ?
                     (file.send_result_ok) ?
                         <i className='material-icons'>done_all</i>
@@ -97,7 +98,7 @@ const FileRow = ({ file, selForDel, isConverting, onClickDel, onCancelSel, onCon
                     : <></>
                 }
             </div>
-            <div className='col s3'>
+            <div className={'col s3'+greenClass}>
                 {(file.send_result_ok) ?
                     <span>{simpleDate(file.last_sent)}</span>
                     : <></>

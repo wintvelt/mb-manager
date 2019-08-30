@@ -12,8 +12,8 @@ export const fetchMBAPI = (params) => {
 }
 
 export const fetchAWSAPI = (params) => {
-    // const base_url_AWS = 'https://87xzyymsji.execute-api.eu-central-1.amazonaws.com/Prod';
-    const base_url_AWS = 'http://localhost:3030';
+    const base_url_AWS = 'https://87xzyymsji.execute-api.eu-central-1.amazonaws.com/Prod';
+    // const base_url_AWS = 'http://localhost:3030';
     const url = base_url_AWS + params.path;
 
     const options = Object.assign({}, params, { url });

@@ -26,7 +26,10 @@ export const ActiveAccount = (props) => {
         } else {
             let reader = new FileReader();
             reader.onload = (e) => {
-                dispatch(setBank({ type: 'setCsvWithOrigin', content: { data: e.target.result, filename: file.name } }));
+                dispatch(setBank({
+                    type: 'setCsvWithOrigin',
+                    content: { data: e.target.result, filename: file.name }
+                }));
                 maybeConvertCsvData(file.name, e.target.result)
             };
             reader.readAsText(file);
@@ -102,12 +105,30 @@ export const ActiveAccount = (props) => {
                     <Loader apiData={bankData.activeCsv} className='upload-zone' />
                     : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
             }
-            <BankActiveCsv activeCsv={bankData.activeCsv} />
+            {(admin) ?
+                <BankActiveCsv activeCsv={bankData.activeCsv} />
+                : <></>
+            }
             {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
-                (bankData.convertResult.data.errors || adminIsOpen)) ?
-                <BankConfig account={bankData.activeAccount.value}
-                    config={bankData.config.data} convertResult={bankData.convertResult.data}
-                    files={bankData.files} />
+                bankData.convertResult.data.errors) ?
+                (admin && adminIsOpen) ?
+                    <BankConfig account={bankData.activeAccount.value}
+                        config={bankData.config.data} convertResult={bankData.convertResult.data}
+                        files={bankData.files} />
+                    : <div className="row">
+                        <div className="col s12 orange lighten-1 card">
+                            <button className="btn-flat btn waves-effect close"
+                                onClick={() => {
+                                    dispatch(setBank({ type: 'setConvertResult', content: { INIT: true } }));
+                                }}>
+                                <i className='material-icons'>close</i></button>
+                            <div className="card-content center">
+                                <p>Dit bestand is niet converteerbaar helaas.
+                                    Misschien hoort het bestand bij een andere bankrekening?</p>
+                                <p>Neem anders contact op met Wouter voor meer hulp.</p>
+                            </div>
+                        </div>
+                    </div>
                 : <></>
             }
             {(askConfirm.ask) ?
@@ -115,17 +136,14 @@ export const ActiveAccount = (props) => {
                 : <></>
             }
             {(bankData.files.hasError) ?
-                <p>Got error, try again</p>
+                <p>Er ging iets mis, probeer het later nog eens..</p>
                 : (bankData.files.data && bankData.files.data.length > 0) ?
                     <BankFiles files={bankData.files.data} isLoading={bankData.files.isLoading}
                         onFileConvert={onFileConvert} />
                     : (bankData.files.isLoading) ?
                         <Loader apiData={bankData.files} />
-                        : <p>Simply empty list</p>
+                        : <></>
             }
-            <pre>(config){JSON.stringify(bankData.config, null, 2)}</pre>
-            <pre>(convertResult){JSON.stringify(bankData.convertResult, null, 2)}</pre>
-            <pre>(files){JSON.stringify(bankData.files, null, 2)}</pre>
             {(admin) ? <AdminButton adminIsOpen={adminIsOpen} onClick={onClickAdmin}
                 enabled={(bankData.config.hasAllData && bankData.convertResult.hasAllData)} />
                 : <></>
@@ -186,7 +204,8 @@ const Confirmation = ({ filename, onClick }) => {
                             OK</span>
                         <span className="btn-flat hide-on-med-and-down red-text text-lighten-3" onClick={onCancel}>
                             Nee, Annuleren</span>
-                        <span className="btn-flat hide-on-med-and-down teal-text" onClick={onConfirm}>Ja, Verwerk</span>
+                        <span className="btn-flat hide-on-med-and-down teal-text"
+                            onClick={onConfirm}>Ja, Verwerk</span>
                     </div>
                 </div>
             </div>
