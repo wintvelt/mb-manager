@@ -139,7 +139,7 @@ export const ActiveAccount = (props) => {
                 <p>Er ging iets mis, probeer het later nog eens..</p>
                 : (bankData.files.data && bankData.files.data.length > 0) ?
                     <BankFiles files={bankData.files.data} isLoading={bankData.files.isLoading}
-                        onFileConvert={onFileConvert} />
+                        onFileConvert={onFileConvert} admin={admin}/>
                     : (bankData.files.isLoading) ?
                         <Loader apiData={bankData.files} />
                         : <></>
