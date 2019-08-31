@@ -30,5 +30,5 @@ For each csv upload:
 Files cannot be sent to Moneybird more than once.
 
 TODO:
-- [ ] Check between 1213 and 1804 files
 - [ ] Add download option (server + client-side)
+- [ ] New API call to also delete json + summary file upon delete call (client + server)

@@ -60,7 +60,7 @@ export const ActiveAccount = (props) => {
         const postBody = {
             csv_filename: filename,
             csv_content: data,
-            convert_only: true
+            convert_only: false
         }
         const getFilesOptions = {
             stuff: bankData.files,

@@ -2,10 +2,7 @@
 import React, { useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setBank, doSnack } from '../actions/actions';
-import { fetchAWSAPI } from '../actions/apiActions-Bank';
-
-const adminCode = "243231934476453244";
-const baseUrlMB = 'https://moneybird.com/' + adminCode;
+import { fetchAWSAPI, base_url_AWS, adminCode } from '../actions/apiActions-Bank';
 
 let counter = 0;
 
@@ -30,13 +27,13 @@ export const BankFiles = (props) => {
         if (state.initial) dispatch(doSnack('Klik nog een keer op delete om bestand definitief te verwijderen.'));
         if (state.selForDel === filename) {
             const postBody = {
-                filename
+                csv_filename: filename
             }
             const deleteFileOptions = {
                 method: 'DELETE',
                 body: postBody,
                 stuff: bankData.deleteFile,
-                path: '/files/' + bankData.activeAccount.value,
+                path: '/convert/' + bankData.activeAccount.value,
                 storeSetFunc: (content) => setBank({ type: 'deleteFile', content }),
                 errorMsg: 'Fout bij verwijderen: ',
                 loadingMsg: `Bezig met verwijderen van bestand ${filename}`,
@@ -77,8 +74,10 @@ export const BankFiles = (props) => {
 const FileRow = (props) => {
     const { file, selForDel, isConverting, onClickDel, onCancelSel, onConvert, deleting, admin } = props;
     const filenames = file.filename.split('/');
-    const fileFirstname = filenames[filenames.length - 1];
-    const filename = fileFirstname + '.' + Object.keys(file.last_modified).filter(ext => (ext !== 'json'))[0];
+    const fileFirstname = filenames.slice(-1);
+    const fileExt = '.' + Object.keys(file.last_modified).filter(ext => (ext !== 'json'))[0];
+    const filename = fileFirstname + fileExt;
+    const fullFilename = file.filename + fileExt;
 
     const isHot = (selForDel && selForDel === filename);
     const isCold = (deleting && deleting === filename);
@@ -87,10 +86,14 @@ const FileRow = (props) => {
         : ['btn-flat waves-effect waves-light grey-text', 'delete'];
     const rowStyle = (isCold) ? { color: '#e0e0e0' } : {};
     const greenClass = (file.send_result_ok) ? ' green-text' : '';
+    const downloadLink = `${base_url_AWS}/download/${fullFilename}`;
     return (
         <div className='row file-row' onClick={onCancelSel} style={rowStyle}>
             <div className='col s6'>
-                <span>{filename}</span>
+                {(isCold) ?
+                    <span>{filename}</span>
+                    : <a href={downloadLink}>{filename}</a>
+                }
             </div>
             <div className={'col s1 center' + greenClass}>
                 {(file.last_modified.json) ?
@@ -158,4 +161,4 @@ const myReducer = (state, action) => {
 }
 
 const simpleDate = (dateStr) => dateStr.slice(0, 10);
-const linkUrl = (id) => baseUrlMB + '/financial_statements/' + id;
+const linkUrl = (id) => 'https://moneybird.com/' + adminCode + '/financial_statements/' + id;
