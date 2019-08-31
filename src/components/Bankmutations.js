@@ -102,7 +102,7 @@ const accountOptions = (accountData) => {
 const accountComp = (accountData, selected, onChange) => {
     const options = accountOptions(accountData);
     return (options.length > 1) ?
-        <div style={{ display: "inline-block", width: "300px" }}>
+        <div style={{ display: "inline-block", width: "320px" }}>
             <Select
                 options={options}
                 styles={customStyles}
