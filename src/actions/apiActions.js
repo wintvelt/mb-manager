@@ -171,7 +171,7 @@ function getMBMulti(params) {
 
 export function getContacts() {
 	const params = {
-		storeField: 'accounts',
+		storeField: 'contacts',
 		path: '/contacts',
 		storeSetMultiFunc: addContacts,
 		errorMsg: 'Fout bij ophalen contacten. Melding van Moneybird: ',

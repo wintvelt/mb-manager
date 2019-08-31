@@ -2,8 +2,8 @@
 import { doSnackError } from '../actions/actions';
 
 
-// export const base_url_AWS = 'https://87xzyymsji.execute-api.eu-central-1.amazonaws.com/Prod';
-export const base_url_AWS = 'http://localhost:3030';
+export const base_url_AWS = 'https://87xzyymsji.execute-api.eu-central-1.amazonaws.com/Prod';
+// export const base_url_AWS = 'http://localhost:3030';
 
 export const adminCode = "243231934476453244";
 export const base_url_MB = 'https://moneybird.com/api/v2/' + adminCode;
