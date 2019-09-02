@@ -90,7 +90,7 @@ function setLoading(apiData, page = 1, type, loadingMsg, origin) {
 }
 
 function addData(apiData, data, type, page = 1, origin) {
-    if (apiData.origin !== origin) return apiData;
+    if (origin && apiData.origin !== origin) return apiData;
 
     const newType = type || 'NOTYPE';
     const loadingList = apiData.loading[newType] || [];
@@ -102,12 +102,20 @@ function addData(apiData, data, type, page = 1, origin) {
     const newAllData = onlyNew(newData, apiData.data);
     return Object.assign({}, apiData, initApiDataFlags, {
         isLoading: !(loadingCount === 0),
-        hasAllData: (loadingCount === 0),
+        // hasAllData: (loadingCount === 0),
         hasData: (newAllData.length > 0),
         data: newAllData,
         loading: newLoading,
         time: Date.now()
     });
+}
+
+function setDone(apiData, origin) {
+    if (apiData.origin !== origin) return apiData;
+    return {...apiData,
+        isLoading: false,
+        hasAllData: true
+    }
 }
 
 function setData(data, time, origin) {
@@ -135,14 +143,18 @@ function set(apiData, something, resultsMap) {
             : resultsMap(results)
     }
     if (something.INIT) return newApiData();
-    if (something.LOADING) return setLoading(apiData, something.page, something.type, something.loadingMsg, something.origin);
+    if (something.LOADING) {
+        return setLoading(apiData, something.page,
+            something.type, something.loadingMsg, something.origin);
+    };
     if (something.ERROR) return setError(apiData, something.message, something.origin);
+    if (something.DONE) return setDone(apiData, something.origin);
     if (something.type && something.stuff) {
         return addData(apiData, resultsFunc(something.stuff), something.type, something.page, something.origin)
     };
     if (something.data && something.origin) {
         if (something.origin === apiData.origin) {
-            return {...setData(resultsFunc(something.data)), origin: something.origin};
+            return { ...setData(resultsFunc(something.data)), origin: something.origin };
         } else return apiData;
     }
     return setData(resultsFunc(something));

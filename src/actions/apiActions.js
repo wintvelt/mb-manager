@@ -159,6 +159,8 @@ function getMBMulti(params) {
 				dispatch(storeSetMultiFunc({ stuff: resultList, type, page }));
 				if (resultList.length > 0) {
 					dispatch(getMBMulti({ ...params, page: page + 1 }));
+				} else {
+					dispatch(storeSetMultiFunc({ DONE: true }));
 				}
 			})
 			.catch(err => {
@@ -198,7 +200,7 @@ export function getIncoming(incomingType) {
 export function getReceived(idList) {
 	return function (dispatch, getState) {
 		const { received, accessToken } = getState();
-		if (received.hasData && accessToken.hasData && !idList) {
+		if (received.hasAllData && accessToken.hasData && !idList) {
 			return received;
 		}
 		if (!idList) {
@@ -212,6 +214,11 @@ export function getReceived(idList) {
 					}
 				})
 				.catch(error => {
+					Object.keys(error).forEach(key => {
+						console.log(key, error[key]);
+					});
+					console.log({error});
+	
 					const msg = "Ophalen is helaas mislukt. Server gaf de fout \""
 						+ error.message + "\".";
 					dispatch(doSnackError(msg));
@@ -226,9 +233,15 @@ export function getReceived(idList) {
 				dispatch(addReceived({stuff: resultList, type: 'received'}));
 				if (nextIds.length > 0) {
 					dispatch(getReceived(nextIds));
+				} else {
+					dispatch(addReceived({ DONE: true, type: 'received'}));
 				}
 			})
 			.catch(error => {
+				Object.keys(error).forEach(key => {
+					console.log(key, error[key]);
+				});
+				console.log({error});
 				const msg = "Ophalen is helaas mislukt. Server gaf de fout \""
 					+ error.message + "\".";
 				dispatch(doSnackError(msg));
@@ -347,9 +360,11 @@ function getPagedList(url = '', access_token, filter = "", page = 1) {
 }
 
 function handleError(res) {
-	if (res.ok) {
+	if (res.ok && res.status >= 200 && res.status <= 299) {
+		console.log({res});
 		return res.json();
 	} else {
+		console.log({res});
 		throw Error('Request rejected with status: ' + res.status + " " + res.statusText);
 	}
 }
