@@ -361,10 +361,8 @@ function getPagedList(url = '', access_token, filter = "", page = 1) {
 
 function handleError(res) {
 	if (res.ok && res.status >= 200 && res.status <= 299) {
-		console.log({res});
 		return res.json();
 	} else {
-		console.log({res});
 		throw Error('Request rejected with status: ' + res.status + " " + res.statusText);
 	}
 }
