@@ -162,7 +162,7 @@ input[type='file'].upload-zone {
 	width: 400px;
 	height: auto;
 	overflow: visible;
-	top: 64px;
+	top: -29px;
 	will-change: transform;
 	transition: 200ms ease-in-out;
 }
@@ -171,6 +171,7 @@ input[type='file'].upload-zone {
 	left: 400px;
 	top: 0;
 }
+
 .main-with-sidenav {
 	will-change: transform;
 	transform: translateX(0) scale(1);
@@ -435,4 +436,8 @@ input[type=text].csv {
 .card button.btn.close {
 	position: absolute;
 	right: 0;
+}
+
+.nav-content .tab.active {
+	border-bottom: 2px solid white;
 }

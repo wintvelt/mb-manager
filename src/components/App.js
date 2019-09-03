@@ -34,7 +34,7 @@ const ConnectedApp = (props) => {
 			    }}/>
 			    <Switch>
 			    	<Route exact path="/" component={Home} />
-				    <PrivateRoute path="/contacten" component={Contacts} 
+				    <PrivateRoute exact path="/contacten/lijst" component={Contacts} 
 				    	isConnected={props.isConnected}/>
 				    <PrivateRoute path="/inkomend" component={Incoming} 
 				    	isConnected={props.isConnected}/>

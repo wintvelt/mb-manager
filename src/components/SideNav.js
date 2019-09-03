@@ -21,7 +21,7 @@ export class SideNavWrapper extends Component {
           React.cloneElement(child, { sideNavOpen: this.state.sideNavOpen, toggleSideNav: this.toggleSideNav })
         );
     
-        return <div>{childrenWithProps}</div>
+        return <div style={{position: 'relative'}}>{childrenWithProps}</div>
     }
 }
 
