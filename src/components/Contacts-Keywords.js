@@ -46,11 +46,11 @@ const ContactKeywords = (props) => {
             }
         });
         const count = batchList.length;
-        dispatch(doSnack(`Wijzigingen voor ${count} contact${(count === 1)? 'en': ''} doorgestuurd aan Moneybird`));
+        dispatch(doSnack(`Wijzigingen voor ${count} contact${(count === 1) ? 'en' : ''} doorgestuurd aan Moneybird`));
         dispatch(batchContactCustomUpdate(batchList));
-        
+
         dispatch(getContacts(true)); // reload contacts
-        setState({type: 'RESET_KEYWORDS'}); // reset state
+        setState({ type: 'RESET_KEYWORDS' }); // reset state
     }
     if (ledgers.notAsked) dispatch(getLedgers());
     if (customFields.notAsked) dispatch(getCustomFields());
@@ -119,6 +119,10 @@ const ContactKeywords = (props) => {
                 </SideNav>
                 <MainWithSideNav>
                     <div className="section">
+                        <div className='row'>
+                            <h5>Keywords editor voor contacten</h5>
+                            <p>Om beter betalingen aan facturen en bonnetjes te matchen</p>
+                        </div>
                         <div className='row'>
                             <button className={saveClass} onClick={onSubmit}>Wijzigingen opslaan</button>
                         </div>
