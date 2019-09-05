@@ -8,6 +8,7 @@ import Nav from './Nav';
 import Snackbar from './Snackbar';
 import Connection from './Connection';
 import Contacts from './Contacts';
+import ContactKeywords from './Contacts-Keywords';
 import Incoming from './Incoming';
 import Received from './Received';
 import Export from './Export';
@@ -35,6 +36,8 @@ const ConnectedApp = (props) => {
 			    <Switch>
 			    	<Route exact path="/" component={Home} />
 				    <PrivateRoute exact path="/contacten/lijst" component={Contacts} 
+				    	isConnected={props.isConnected}/>
+				    <PrivateRoute exact path="/contacten/keywords" component={ContactKeywords} 
 				    	isConnected={props.isConnected}/>
 				    <PrivateRoute path="/inkomend" component={Incoming} 
 				    	isConnected={props.isConnected}/>

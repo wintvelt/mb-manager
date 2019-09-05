@@ -441,3 +441,23 @@ input[type=text].csv {
 .nav-content .tab.active {
 	border-bottom: 2px solid white;
 }
+
+ul.flex.simple-table {
+	display: flex;
+	align-items: baseline;
+}
+ul.flex.simple-table.header {
+	align-items: flex-end;
+}
+ul.simple-table.header > li {
+	font-weight: bold;
+}
+ul.simple-table > li {
+	text-overflow: ellipsis;
+    white-space: nowrap;
+	overflow: hidden;
+	margin: 8px;
+}
+li.simple-table:nth-child(even) {
+	background-color: #e4e4e4;
+}

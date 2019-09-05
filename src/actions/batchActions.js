@@ -117,7 +117,7 @@ export function batchPaymentUpdate(batchList) {
 }
 
 // to process a list of custom field-changes in a contact
-// batchList = [ { contactId, fieldId, customFieldValue } ]
+// batchList = [ { contactId, fieldId, newValue } ]
 export function batchContactCustomUpdate(batchList) {
 	return function(dispatch, getState) {
 		const { batchError, accessToken } = getState();

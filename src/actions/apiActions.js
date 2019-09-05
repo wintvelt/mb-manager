@@ -144,14 +144,14 @@ export function getCustomFields() {
 
 // Get paged data from Moneybird
 function getMBMulti(params) {
-	const { storeField, path, storeSetMultiFunc, filter, errorMsg, type, page } = params;
+	const { storeField, path, storeSetMultiFunc, filter, errorMsg, type, page, reload } = params;
 	return function (dispatch, getState) {
 		const url = base_url + path;
 		const storeState = getState();
 		const accessToken = storeState.accessToken;
 		const stuff = storeState[storeField];
 		if (!stuff) console.log('DID NOT FIND dataState in Store');
-		if (stuff.hasAllData && accessToken.hasData) return stuff;
+		if (stuff.hasAllData && accessToken.hasData && !reload) return stuff;
 
 		dispatch(storeSetMultiFunc({ LOADING: true, type, page }));
 		return getPagedList(url, accessToken.data, filter, page)
@@ -171,14 +171,15 @@ function getMBMulti(params) {
 	}
 }
 
-export function getContacts() {
+export function getContacts(reload) {
 	const params = {
 		storeField: 'contacts',
 		path: '/contacts',
 		storeSetMultiFunc: addContacts,
 		errorMsg: 'Fout bij ophalen contacten. Melding van Moneybird: ',
 		type: 'contacts',
-		page: 1
+		page: 1,
+		reload
 	}
 	return getMBMulti(params);
 }

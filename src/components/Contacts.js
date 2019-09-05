@@ -252,6 +252,7 @@ class ConnectedContacts extends Component {
 							stdLedgerFilter={this.state.stdLedgerFilter}
 							EOLOptions={EOLOptions}
 							EOLfilter={this.state.EOLfilter}
+							MBFilter = {this.state.MBFilter}
 							payOptions={payOptions}
 							payFilter={this.state.payFilter}
 							ownerOptions={ownerOptions}

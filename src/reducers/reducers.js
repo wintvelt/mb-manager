@@ -80,7 +80,7 @@ function rootReducer(state = initialState, action) {
       const newAccounts = api.set(state.accounts, action.payload);
       return Object.assign({}, state, {
         accounts: newAccounts,
-        bankData: (newAccounts.hasAllData)? setBank(state, { type: 'setDefault' }) : state.bankData,
+        bankData: (newAccounts.hasAllData) ? setBank(state, { type: 'setDefault' }) : state.bankData,
         accessVerified: (!action.payload.ERROR)
       })
     }
@@ -213,13 +213,22 @@ function rootReducer(state = initialState, action) {
       if (!state.contacts.hasData || state.contacts.data.length === 0) return state;
       const newContacts = state.contacts.data.map((contact) => {
         if (contact.id === action.payload.contactId && contact.custom_fields) {
-          const newCustomFields = contact.custom_fields.map((field) => {
+          let changed = false;
+          let newCustomFields = contact.custom_fields.map((field) => {
             if (field.id === action.payload.fieldId) {
+              changed = true;
               return Object.assign({}, field, { value: action.payload.newValue })
             } else {
               return field;
             }
           });
+          if (!changed) {
+            newCustomFields = [...newCustomFields, {
+              id: action.payload.fieldId,
+              name: 'Keywords', // hard coded shortcut
+              value: action.payload.newValue
+            }];
+          };
           return Object.assign({}, contact, { custom_fields: newCustomFields });
         } else {
           return contact;
