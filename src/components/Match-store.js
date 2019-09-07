@@ -15,6 +15,9 @@ export const initialMatch = {
 export const matchReducer = (matchStuff, action) => {
     const { content } = action;
     switch (action.type) {
+        case 'setInit':
+            return initialMatch;
+
         case 'setInvoices':
             const newInvoices = api.set(matchStuff.invoices, content);
             return { ...matchStuff, invoices: newInvoices };
@@ -46,7 +49,6 @@ const onlyIds = (arr) => {
 const getMulti = (params) => {
     const { ids, type, path, stuff, accessToken,
         storeSetFunc, dispatch, errorMsg, loadingMsg } = params;
-    dispatch(storeSetFunc({ INIT: true }));
     const idArr = arrOfArr(ids);
     const paramsArr = idArr.map(idList => {
         return {
@@ -80,6 +82,8 @@ const getSequential = (paramsArr, finalCallback) => {
 
 export const fetchMatchData = (params) => {
     const { matchStuff, filterState, accessToken, dispatch } = params;
+    // reset match record in store
+    dispatch(setMatch({ type: 'setInit' }));
     // set filter for period
     let filterQuery = encodeURI(`?filter=period:${filterState.current.period.value}`);
     // get invoice ids and invoices

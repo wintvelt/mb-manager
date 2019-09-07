@@ -27,13 +27,15 @@ export class SideNavWrapper extends Component {
 
 export const SideNav = (props) => {
     const icon = (props.sideNavOpen)? "chevron_left" : "menu";
+    const btnClassBase = "btn btn-flat waves-effect waves-light btn-sidenav teal-text"
+    const btnClass = (props.sideNavOpen)? btnClassBase + ' open' : btnClassBase;
     const sideStyle = (props.sideNavOpen)? "translateX(0%)" : "translateX(-100%)";
     return (
         <div className="sidenav" style={{transform: sideStyle}}>
             <ul>
                 {props.children}
             </ul>
-            <div className="btn-small waves-effect waves-light grey btn-sidenav" onClick={props.toggleSideNav}>
+            <div className={btnClass} onClick={props.toggleSideNav}>
                 <i className="material-icons">{icon}</i>
             </div>
         </div>
