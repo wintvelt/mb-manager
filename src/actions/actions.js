@@ -8,7 +8,7 @@ import { DO_SNACK, DO_SNACK_ERROR,
   ADD_RECEIVED, SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT,
-  SET_BANK
+  SET_BANK, SET_MATCH
   } from "../constants/action-types";
 
 export function setAccessToken(payload) {
@@ -31,6 +31,9 @@ export function setAccounts(payload) {
 }
 export function setBank(payload) {
   return { type: SET_BANK, payload };
+}
+export function setMatch(payload) {
+  return { type: SET_MATCH, payload };
 }
 
 export function setCustomFields(payload) {

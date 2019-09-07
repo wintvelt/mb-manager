@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 const menu = [
 	{ path: "/contacten", link: "/contacten/lijst", text: "Contacten" },
 	{ path: "/inkomend", text: "Inkomend" },
-	{ path: "/betalingen", text: "Betalingen" },
+	{ path: "/betalingen", link: "/betalingen/match", text: "Betalingen" },
 	{ path: "/export", text: "Export" },
 	{ path: "/bankmutations", text: "Transacties", badge: "NIEUW" }
 ];
@@ -21,6 +21,11 @@ const subMenusFor = (activePath) => {
 				{ path: '/contacten/keywords', text: 'Keywords', badge: 'NIEUW' },
 			]
 
+		case 'betalingen':
+			return [
+				{ path: '/betalingen/lijst', text: 'Lijst' },
+				{ path: '/betalingen/match', text: 'Matchen', badge: 'NIEUW' },
+			]
 		default:
 			return [];
 	}

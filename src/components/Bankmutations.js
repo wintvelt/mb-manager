@@ -5,6 +5,7 @@ import { fetchMBAPI, fetchAWSAPI } from '../actions/apiActions-Bank';
 import { setAccounts, setBank } from '../actions/actions';
 import Select from 'react-select';
 import { ActiveAccount } from './Bankmutations-ActiveAccount';
+import { Link } from 'react-router-dom';
 
 let counter = 0;
 const maxCounter = 100;
@@ -15,7 +16,7 @@ const Bankmutations = (props) => {
     const admin = (props.location && props.location.search && props.location.search === '?admin=true');
     const { accounts, bankData, accessToken } = useSelector(store => store);
     const dispatch = useDispatch();
-    if (accounts.notAsked && counter < 20) fetchData(accounts, accessToken, dispatch);
+    if (accounts.notAsked && counter < maxCounter) fetchData(accounts, accessToken, dispatch);
     if (bankData.activeAccount && bankData.config.notAsked && counter < maxCounter) {
         console.log('fetching details');
         fetchActiveStuff(bankData, accessToken, dispatch)
@@ -27,7 +28,7 @@ const Bankmutations = (props) => {
     if (accounts.hasData) return (
         <div className="container">
             <h4>Transacties van rekening {accountComp(accounts.data, bankData.activeAccount, onChange)}</h4>
-            <ActiveAccount bankData={bankData} admin={admin}/>
+            <ActiveAccount bankData={bankData} admin={admin} />
         </div>
     );
     if (accessToken.hasData && !accounts.hasError) return (
@@ -46,11 +47,21 @@ const Bankmutations = (props) => {
                 </div>
             </div>
         </div>
-
     );
     // no data, no connection
     return (
-        <div className="container">No connection</div>
+        <div className="container">
+            <div className="section center">
+                <h5>Helaas, er is geen verbinding..</h5>
+                <p>Probeer anders eerst connectie te maken..</p>
+                <div>
+                    <Link to="/connection" className="flex flex-center">
+                        <i className="material-icons">account_circle</i>
+                        <span>Connectie</span>
+                    </Link>
+                </div>
+            </div>
+        </div>
     );
 
 };
@@ -74,7 +85,7 @@ const fetchActiveStuff = (bankData, accessToken, dispatch) => {
     const getConfigOptions = {
         stuff: bankData.config,
         path: '/config/' + bankData.activeAccount.value,
-        storeSetFunc: (content) => setBank({ type: 'setConfig', content}),
+        storeSetFunc: (content) => setBank({ type: 'setConfig', content }),
         errorMsg: 'Fout bij ophalen config, melding van AWS: ',
         accessToken,
         dispatch,
@@ -83,7 +94,7 @@ const fetchActiveStuff = (bankData, accessToken, dispatch) => {
     const getFilesOptions = {
         stuff: bankData.files,
         path: '/files/' + bankData.activeAccount.value,
-        storeSetFunc: (content) => setBank({ type: 'setFiles', content}),
+        storeSetFunc: (content) => setBank({ type: 'setFiles', content }),
         errorMsg: 'Fout bij ophalen files, melding van AWS: ',
         accessToken,
         loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',

@@ -461,3 +461,8 @@ ul.simple-table > li {
 li.simple-table:nth-child(even) {
 	background-color: #e4e4e4;
 }
+
+.select__single-value {
+	line-height: 1.3em;
+	padding-bottom: 4px;
+}

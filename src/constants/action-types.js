@@ -12,6 +12,7 @@ export const SET_BATCH_ERROR = "SET_BATCH_ERROR";
 export const SET_LEDGERS = "SET_LEDGERS";
 export const SET_ACCOUNTS = "SET_ACCOUNTS";
 export const SET_BANK = 'SET_BANK';
+export const SET_MATCH = 'SET_MATCH';
 export const SET_CUSTOM_FIELDS = "SET_CUSTOM_FIELDS";
 
 export const ADD_INCOMING = "ADD_INCOMING";

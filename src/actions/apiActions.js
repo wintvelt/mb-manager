@@ -156,7 +156,7 @@ function getMBMulti(params) {
 		dispatch(storeSetMultiFunc({ LOADING: true, type, page }));
 		return getPagedList(url, accessToken.data, filter, page)
 			.then(resultList => {
-				dispatch(storeSetMultiFunc({ stuff: resultList, type, page }));
+				dispatch(storeSetMultiFunc({ data: resultList, type, page }));
 				if (resultList.length > 0) {
 					dispatch(getMBMulti({ ...params, page: page + 1 }));
 				} else {

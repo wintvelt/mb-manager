@@ -90,8 +90,9 @@ function setLoading(apiData, page = 1, type, loadingMsg, origin) {
 }
 
 function addData(apiData, data, type, page = 1, origin) {
-    if (origin && apiData.origin !== origin) return apiData;
-
+    if (origin && apiData.origin !== origin && (!type || apiData.type === type)) {
+        return apiData;
+    }
     const newType = type || 'NOTYPE';
     const loadingList = apiData.loading[newType] || [];
     var newLoading = Object.assign({}, apiData.loading);
@@ -111,7 +112,7 @@ function addData(apiData, data, type, page = 1, origin) {
 }
 
 function setDone(apiData, origin) {
-    if (apiData.origin !== origin) return apiData;
+    if (origin && apiData.origin !== origin) return apiData;
     return {...apiData,
         isLoading: false,
         hasAllData: true
@@ -139,8 +140,8 @@ function setError(apiData, message, origin) {
 
 function set(apiData, something, resultsMap) {
     const resultsFunc = (results) => {
-        return (!resultsMap) ? results
-            : resultsMap(results)
+        if (resultsMap) return resultsMap(results);
+        return results;
     }
     if (something.INIT) return newApiData();
     if (something.LOADING) {
@@ -149,8 +150,8 @@ function set(apiData, something, resultsMap) {
     };
     if (something.ERROR) return setError(apiData, something.message, something.origin);
     if (something.DONE) return setDone(apiData, something.origin);
-    if (something.type && something.stuff) {
-        return addData(apiData, resultsFunc(something.stuff), something.type, something.page, something.origin)
+    if (something.type && something.data) {
+        return addData(apiData, resultsFunc(something.data), something.type, something.page, something.origin)
     };
     if (something.data && something.origin) {
         if (something.origin === apiData.origin) {

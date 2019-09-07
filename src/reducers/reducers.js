@@ -10,13 +10,14 @@ import {
   ADD_RECEIVED, SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT,
-  SET_BANK
+  SET_BANK, SET_MATCH
 } from "../constants/action-types";
 import {
   setLedgerInRow, setCustomFieldInRow, setPaymentInRow
 } from './reducer-helpers';
 import { newApiData, api } from '../constants/helpers';
 import { initBankData, setBank } from './reducer-helpers-bank';
+import { initialMatch, matchReducer } from "../components/Match-store";
 
 // initial state also exported to root (to set default when initializing)
 export const initialState = {
@@ -36,6 +37,7 @@ export const initialState = {
   syncPending: false,
   lastSync: "",
   bankData: initBankData,
+  matchStuff: initialMatch,
   batchMsg: {},
   batchError: false
 };
@@ -87,6 +89,10 @@ function rootReducer(state = initialState, action) {
     case SET_BANK: {
       const newBankData = setBank(state, action.payload);
       return Object.assign({}, state, { bankData: newBankData })
+    }
+    case SET_MATCH: {
+      const newMatchStuff = matchReducer(state.matchStuff, action.payload);
+      return Object.assign({}, state, { matchStuff: newMatchStuff })
     }
     case SET_CUSTOM_FIELDS: {
       return Object.assign({}, state, {

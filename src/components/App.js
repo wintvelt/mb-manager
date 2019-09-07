@@ -11,6 +11,7 @@ import Contacts from './Contacts';
 import ContactKeywords from './Contacts-Keywords';
 import Incoming from './Incoming';
 import Received from './Received';
+import MatchBankTransactions from './Match';
 import Export from './Export';
 import Bankmutations from './Bankmutations';
 import Secret from './Secret';
@@ -41,7 +42,9 @@ const ConnectedApp = (props) => {
 				    	isConnected={props.isConnected}/>
 				    <PrivateRoute path="/inkomend" component={Incoming} 
 				    	isConnected={props.isConnected}/>
-				    <PrivateRoute path="/betalingen" component={Received} 
+				    <PrivateRoute exact path="/betalingen/lijst" component={Received} 
+				    	isConnected={props.isConnected}/>
+				    <PrivateRoute exact path="/betalingen/match" component={MatchBankTransactions} 
 				    	isConnected={props.isConnected}/>
 				    <PrivateRoute path="/export" component={Export} 
 				    	isConnected={props.isConnected}/>
