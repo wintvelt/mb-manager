@@ -33,7 +33,21 @@ const MatchMain = (props) => {
 }
 
 const Payment = (props) => {
-    
+    // state (processed, open etc)
+    // date yyyy-mm-dd
+    // message
+    // amount
+    // amount_open
+    // payments
+        // (invoice_id) type (afgeleide)
+        // (invoice_id) factuurnr
+        // (invoice_id) contact.company_name
+        // (invoice_id) date
+        // (invoice_id) total_price_incl_tax_base
+        // (invoice_id) details
+            // amount
+            // description
+
 }
 
 // helper component for dev
