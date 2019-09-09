@@ -10,20 +10,25 @@ const MatchMain = (props) => {
             <div className='row'>
                 <h5>Matchen van betalingen aan bonnetjes</h5>
                 <p>{invoices.data && invoices.data.length + ' invoices opgehaald'}</p>
-                {loadComp(invoiceIds, 'Ophalen IDs van bonnetjes', 'Foutje', 'IDs van bonnetjes binnen')}
-                {loadComp(invoices, 'Ophalen bonnetjes', 'Foutje', 'Bonnetjes binnen')}
                 {loadComp(paymentIds, 'Ophalen IDs van betalingen', 'Foutje', 'IDs van betalingen binnen')}
                 {loadComp(payments, 'Ophalen betalingen', 'Foutje', 'Betalingen binnen')}
+                {loadComp(invoiceIds, 'Ophalen IDs van bonnetjes', 'Foutje', 'IDs van bonnetjes binnen')}
+                {loadComp(invoices, 'Ophalen bonnetjes', 'Foutje', 'Bonnetjes binnen')}
             </div>
         </div>
     }
     if (payments.hasAllData && paymentIds.hasAllData) {
-        const data = payments.data.filter(p => (!filterState.onlyOpen || p.state !== 'processed'));
+        const data = payments.data.filter(p => {
+            return (
+                (!filterState.onlyOpen || p.state !== 'processed')
+                && (!filterState.onlyMatched || (p.related && p.related.length > 0))
+            )
+        });
         return <div>
             <h5>No worries, got data</h5>
             <ul>
                 {data.map(payment => {
-                    return <Payment key={payment.id} payment={payment} invoices={invoices} />
+                    return <Payment key={payment.id} payment={payment}/>
                 })}
                 <Pre data={data} id='financial_account_id' />
             </ul>
@@ -39,8 +44,8 @@ const MatchMain = (props) => {
 }
 
 const Payment = (props) => {
-    const { payment, invoices } = props;
-    const { id, state, date, message, amount, amount_open, payments, ledger_account_bookings } = payment;
+    const { payment } = props;
+    const { id, state, date, message, amount, amount_open, payments, ledger_account_bookings, related } = payment;
     // (invoice_id) type (afgeleide)
     // (invoice_id) factuurnr
     // (invoice_id) contact.company_name
@@ -73,8 +78,8 @@ const Payment = (props) => {
                 ledger_account_bookings.map(bkg => <Booking key={bkg.id} type='ledger' item={bkg} />)
                 : <></>
             }
-            {(amount_open !== '0.0' && invoices.hasData) ?
-                <ConnectRow payment={payment} invoices={invoices} />
+            {(amount_open !== '0.0' && related) ?
+                <ConnectRow payment={payment} />
                 : <></>
             }
         </ul>
@@ -135,7 +140,7 @@ const baseInvUrl = 'https://moneybird.com/243231934476453244/documents/';
 // helper for invoice line
 const Booking = (props) => {
     const { item, type } = props;
-    const { id, invoice_id, price_base, price } = item;
+    const { invoice_id, price_base, price } = item;
     const amount = (type === 'inv') ? flip(price_base) : price;
     const btnClass = btnBaseClass + ' grey';
     const icon = (type === 'inv') ? 'note' : 'euro_symbol';
@@ -172,8 +177,8 @@ const flip = (str) => {
 
 // helper to connect payment to invoice
 const ConnectRow = (props) => {
-    const { payment, invoices } = props;
-    const closeInvoices = getRelated(payment, invoices.data);
+    const { payment } = props;
+    const { related } = payment;
     return <li className='grey lighten-2'>
         <ul className='flex payment'>
             <li className='book-icon'>
@@ -183,24 +188,13 @@ const ConnectRow = (props) => {
             </li>
             <li style={{ flex: 1 }}>
                 <ul>
-                    {(closeInvoices.map(inv => {
+                    {(related.map(inv => {
                         return <ConnectOption key={inv.id} inv={inv} />
                     }))}
                 </ul>
             </li>
         </ul>
     </li>
-}
-const THRESHOLD = 1;
-
-const getRelated = (payment, invoices) => {
-    const { amount, date, message } = payment;
-    const amt = parseFloat(amount);
-    const related = [...invoices].filter(inv => {
-        const diff = parseFloat(flip(inv.total_price_incl_tax_base)) - amt;
-        return (diff > -THRESHOLD && diff < THRESHOLD)
-    })
-    return related;
 }
 
 const ConnectOption = (props) => {

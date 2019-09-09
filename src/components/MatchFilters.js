@@ -35,11 +35,14 @@ export const initialFilters = {
         account: { label: initAccount.name, value: initAccount.id }
     },
     changed: true,
-    onlyOpen: false
+    onlyOpen: false,
+    onlyMatched: false,
+    hasRelated: false
 }
 
 export const MatchFilters = (props) => {
-    const { accounts, filterState, onChangeFilters, onChangeShow, onSubmit } = props;
+    const { accounts, filterState, hasRelated,
+        onChangeFilters, onChangeOnlyOpen, onChangeMatched, onSubmit } = props;
     const accountOptions = [initAccount, ...accounts]
         .map(account => {
             return { label: account.name, value: account.id }
@@ -47,10 +50,8 @@ export const MatchFilters = (props) => {
     const btnClass = (filterState.changed) ? 'btn' : 'btn disabled';
     return (
         <li>
-            <div>
-                <span>Selectie van betalingen</span>
-            </div>
             <ul className='sidenav-dropdown'>
+                <li><div><h5>Selectie van betalingen</h5></div></li>
                 <li>
                     <Select
                         options={periodOptions}
@@ -78,16 +79,31 @@ export const MatchFilters = (props) => {
                         <button className={btnClass} onClick={onSubmit}>Betalingen ophalen</button>
                     </div>
                 </li>
+                <li><div className='divider'></div></li>
+                <li><div><h5>Filters</h5></div></li>
                 <li>
                     <div className="switch">
                         <label>
-                            Alle transacties tonen
-										<input type="checkbox"
+                            <span className='switch-label right-align'>Alle transacties tonen</span>
+                            <input type="checkbox"
                                 checked={filterState.onlyOpen}
-                                onChange={onChangeShow} />
+                                onChange={onChangeOnlyOpen} />
                             <span className="lever"></span>
-                            Alleen openstaand
-						</label>
+                            <span className='switch-label'>Alleen openstaand</span>
+                        </label>
+                    </div>
+                </li>
+                <li>
+                    <div className='switch'>
+                        <label>
+                            <span className='switch-label right-align'>Alle transacties tonen</span>
+                            <input type="checkbox"
+                                checked={filterState.onlyMatched}
+                                onChange={onChangeMatched}
+                                disabled={!hasRelated} />
+                            <span className="lever"></span>
+                            <span className='switch-label'>Alleen met suggesties</span>
+                        </label>
                     </div>
                 </li>
             </ul>
@@ -112,7 +128,10 @@ export const filterReducer = (state, action) => {
             return { ...state, fetched: newFet, changed: false }
 
         case 'SET_ONLYOPEN':
-            return {...state, onlyOpen: !state.onlyOpen}
+            return { ...state, onlyOpen: !state.onlyOpen }
+
+        case 'SET_MATCHED':
+            return { ...state, onlyMatched: !state.onlyMatched }
 
         default:
             return state;

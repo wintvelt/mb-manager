@@ -6,10 +6,11 @@ import { fetchMBAPI } from '../actions/apiActions-Bank';
 // includes reducers and helpers
 
 export const initialMatch = {
-    invoiceIds: newApiData(),
     paymentIds: newApiData(),
-    invoices: newApiData(),
-    payments: newApiData()
+    payments: newApiData(),
+    hasRelated: false,
+    invoiceIds: newApiData(),
+    invoices: newApiData()
 }
 
 export const matchReducer = (matchStuff, action) => {
@@ -24,7 +25,7 @@ export const matchReducer = (matchStuff, action) => {
 
         case 'setPayments':
             const newPayments = api.set(matchStuff.payments, content);
-            return { ...matchStuff, payments: newPayments };
+            return { ...matchStuff, payments: newPayments, hasRelated: false };
 
         case 'setInvoiceIds':
             const newInvoiceIds = api.set(matchStuff.invoiceIds, content, onlyIds);
@@ -33,6 +34,18 @@ export const matchReducer = (matchStuff, action) => {
         case 'setInvoices':
             const newInvoices = api.set(matchStuff.invoices, content);
             return { ...matchStuff, invoices: newInvoices };
+
+        case 'autoMatch':
+            const bookings = matchStuff.invoices.data.filter(it => (it.type === content.type));
+            let newHasRelated = matchStuff.hasRelated;
+            const newPaymentsData = matchStuff.payments.data.map(p => {
+                const related = getRelated(p, bookings);
+                if (related && related.length > 0) newHasRelated = true;
+                const newRelated = (p.related) ? [...p.related, ...related] : related;
+                return { ...p, related: newRelated, hasRelated: newHasRelated }
+            })
+            const newPaymentsApi = api.setData(newPaymentsData, null, matchStuff.payments.origin);
+            return { ...matchStuff, payments: newPaymentsApi, hasRelated: newHasRelated }
 
         default:
             return matchStuff;
@@ -44,11 +57,16 @@ const onlyIds = (arr) => {
     return outArr;
 }
 
+const flip = (str) => {
+    if (!str) return str;
+    return (str.slice(0, 1) === '-') ? str.slice(1) : '-' + str;
+}
+
 
 // API helpers for filtered receipts & payments
 const getMulti = (params) => {
     const { ids, type, path, stuff, accessToken,
-        storeSetFunc, dispatch, errorMsg, loadingMsg } = params;
+        storeSetFunc, dispatch, errorMsg, loadingMsg, callback } = params;
     const idArr = arrOfArr(ids);
     const paramsArr = idArr.map(idList => {
         return {
@@ -61,11 +79,13 @@ const getMulti = (params) => {
             accessToken,
             loadingMsg,
             dispatch,
-            type
+            type,
+            callback: null
         }
     });
     getSequential(paramsArr, () => {
         dispatch(storeSetFunc({ DONE: true }));
+        if (callback) callback();
     });
 }
 
@@ -87,7 +107,69 @@ export const fetchMatchData = (params) => {
     // set filter for period
     let filterQuery = encodeURI(`?filter=period:${filterState.current.period.value},
         state:saved|open|paid|pending_payment|late`);
-    // get payment Ids and payments
+    // setup fetch for invoice ids and invoices
+    const invoicePath = '/documents/purchase_invoices/synchronization.json';
+    const invIdParams = {
+        stuff: matchStuff.invoiceIds,
+        path: invoicePath + filterQuery,
+        storeSetFunc: (content) => setMatch({ type: 'setInvoiceIds', content }),
+        errorMsg: 'Fout bij ophalen invoice IDs, melding van Moneybird: ',
+        accessToken,
+        loadingMsg: 'Even geduld terwijl we invoice IDs ophalen',
+        dispatch,
+        callback: (ids) => {
+            getMulti({
+                ids: onlyIds(ids),
+                type: 'purchase_invoice',
+                path: invoicePath,
+                stuff: matchStuff.invoices,
+                accessToken,
+                storeSetFunc: (content) => setMatch({ type: 'setInvoices', content }),
+                dispatch,
+                errorMsg: 'Fout bij ophalen facturen, melding van Moneybird: ',
+                loadingMsg: 'Even geduld terwijl we facturen ophalen',
+                callback: () => {
+                    // auto match docs to payments after all docs are in
+                    dispatch(setMatch({
+                        type: 'autoMatch',
+                        content: { type: 'purchase_invoice' }
+                    }))
+                }
+            })
+        }
+    }
+    // setup fetch for receipt ids and receipts
+    const receiptPath = '/documents/receipts/synchronization.json';
+    const recIdParams = {
+        stuff: matchStuff.invoiceIds,
+        path: receiptPath + filterQuery,
+        storeSetFunc: (content) => setMatch({ type: 'setInvoiceIds', content }),
+        errorMsg: 'Fout bij ophalen IDs van bonnetjes, melding van Moneybird: ',
+        accessToken,
+        loadingMsg: 'Even geduld terwijl we IDs van bonnetjes ophalen',
+        dispatch,
+        callback: (ids) => {
+            getMulti({
+                ids: onlyIds(ids),
+                type: 'receipt',
+                path: receiptPath,
+                stuff: matchStuff.invoices,
+                accessToken,
+                storeSetFunc: (content) => setMatch({ type: 'setInvoices', content }),
+                dispatch,
+                errorMsg: 'Fout bij ophalen bonnetjes, melding van Moneybird: ',
+                loadingMsg: 'Even geduld terwijl we bonnetjs ophalen',
+                callback: () => {
+                    // auto match docs to payments after all docs are in
+                    dispatch(setMatch({
+                        type: 'autoMatch',
+                        content: { type: 'receipt' }
+                    }))
+                }
+            })
+        }
+    }
+    // get payment Ids and payments, with callback to fetch invoices and receipts
     const paymentPath = '/financial_mutations/synchronization.json';
     const curAccount = filterState.current.account.value;
     if (curAccount) filterQuery += encodeURI(`,financial_account_id:${curAccount}`);
@@ -109,61 +191,27 @@ export const fetchMatchData = (params) => {
                 storeSetFunc: (content) => setMatch({ type: 'setPayments', content }),
                 dispatch,
                 errorMsg: 'Fout bij ophalen betalingen, melding van Moneybird: ',
-                loadingMsg: 'Even geduld terwijl we betalingen ophalen'
+                loadingMsg: 'Even geduld terwijl we betalingen ophalen',
+                callback: () => {
+                    fetchMBAPI(invIdParams);
+                    fetchMBAPI(recIdParams);
+                }
             })
         }
     }
     fetchMBAPI(payIdParams);
-    // get invoice ids and invoices
-    const invoicePath = '/documents/purchase_invoices/synchronization.json';
-    const invIdParams = {
-        stuff: matchStuff.invoiceIds,
-        path: invoicePath + filterQuery,
-        storeSetFunc: (content) => setMatch({ type: 'setInvoiceIds', content }),
-        errorMsg: 'Fout bij ophalen invoice IDs, melding van Moneybird: ',
-        accessToken,
-        loadingMsg: 'Even geduld terwijl we invoice IDs ophalen',
-        dispatch,
-        callback: (ids) => {
-            getMulti({
-                ids: onlyIds(ids),
-                type: 'purchase_invoice',
-                path: invoicePath,
-                stuff: matchStuff.invoices,
-                accessToken,
-                storeSetFunc: (content) => setMatch({ type: 'setInvoices', content }),
-                dispatch,
-                errorMsg: 'Fout bij ophalen facturen, melding van Moneybird: ',
-                loadingMsg: 'Even geduld terwijl we facturen ophalen'
-            })
-        }
-    }
-    fetchMBAPI(invIdParams);
-    // get receipt ids and receipts
-    const receiptPath = '/documents/receipts/synchronization.json';
-    const recIdParams = {
-        stuff: matchStuff.invoiceIds,
-        path: receiptPath + filterQuery,
-        storeSetFunc: (content) => setMatch({ type: 'setInvoiceIds', content }),
-        errorMsg: 'Fout bij ophalen IDs van bonnetjes, melding van Moneybird: ',
-        accessToken,
-        loadingMsg: 'Even geduld terwijl we IDs van bonnetjes ophalen',
-        dispatch,
-        callback: (ids) => {
-            getMulti({
-                ids: onlyIds(ids),
-                type: 'receipt',
-                path: receiptPath,
-                stuff: matchStuff.invoices,
-                accessToken,
-                storeSetFunc: (content) => setMatch({ type: 'setInvoices', content }),
-                dispatch,
-                errorMsg: 'Fout bij ophalen bonnetjes, melding van Moneybird: ',
-                loadingMsg: 'Even geduld terwijl we bonnetjs ophalen'
-            })
-        }
-    }
-    fetchMBAPI(recIdParams);
+}
+
+const THRESHOLD = 1;
+
+const getRelated = (payment, invoiceData) => {
+    const { amount, date, message } = payment;
+    const amt = parseFloat(amount);
+    const related = invoiceData.filter(inv => {
+        const diff = parseFloat(flip(inv.total_price_incl_tax_base)) - amt;
+        return (diff > -THRESHOLD && diff < THRESHOLD)
+    })
+    return related;
 }
 
 // generic helpers
