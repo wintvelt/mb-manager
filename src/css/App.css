@@ -474,13 +474,16 @@ li.simple-table:nth-child(even) {
 .payment > li {
 	padding: 8px;
 }
+.payment > li a:hover {
+	background-color: white;
+}
 .amount-container {
 	display: flex;
     flex-direction: column;
     align-items: flex-end;
 }
-.booking .amount-container {
-	margin-right: 128px;
+.booking .amount-container, .connect .amount-container {
+	margin-right: 64px;
 }
 .amount {
 	display: flex;
@@ -522,9 +525,7 @@ ul.flex.payment a.btn:hover {
 	height: 100%;
 	bottom: 50%;
 }
-.connect .amount-container {
-	margin-right: 128px;
-}
+
 .state-ding {
 	width: 20px;
 	height: 20px;
@@ -543,4 +544,26 @@ li.connect:hover {
 .payment i.tiny {
 	vertical-align: middle;
     padding-bottom: 3px;
+}
+.score-bar.outer{
+	border: 2px solid #1e88e5;
+	border-radius: 6px;
+	background-color: white;
+}
+.score-bar.inner{
+	height: 14px;
+	background-color: #1e88e5;
+	border-radius: 4px;
+}
+.payment [type="checkbox"]+span.checkbox-span {
+	padding-left: 12px;
+}
+.payment .btn-floating.disabled {
+	background-color: white !important;
+	border: 2px solid grey;
+}
+.payment .btn-floating.disabled i {
+	color: grey !important;
+	width: 36px;
+	line-height: 36px;
 }

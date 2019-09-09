@@ -39,6 +39,7 @@ export const matchReducer = (matchStuff, action) => {
             const bookings = matchStuff.invoices.data.filter(it => (it.type === content.type));
             let newHasRelated = matchStuff.hasRelated;
             const newPaymentsData = matchStuff.payments.data.map(p => {
+                if (p.state === 'processed') return p;
                 const related = getRelated(p, bookings);
                 if (related && related.length > 0) newHasRelated = true;
                 const newRelated = (p.related) ? [...p.related, ...related] : related;
@@ -105,13 +106,13 @@ export const fetchMatchData = (params) => {
     // reset match record in store
     dispatch(setMatch({ type: 'setInit' }));
     // set filter for period
-    let filterQuery = encodeURI(`?filter=period:${filterState.current.period.value},
-        state:saved|open|paid|pending_payment|late`);
+    const filterQuery = encodeURI(`?filter=period:${filterState.current.period.value}`);
+    const invFilterQuery = filterQuery + encodeURI(',state:saved|open|late');
     // setup fetch for invoice ids and invoices
     const invoicePath = '/documents/purchase_invoices/synchronization.json';
     const invIdParams = {
         stuff: matchStuff.invoiceIds,
-        path: invoicePath + filterQuery,
+        path: invoicePath + invFilterQuery,
         storeSetFunc: (content) => setMatch({ type: 'setInvoiceIds', content }),
         errorMsg: 'Fout bij ophalen invoice IDs, melding van Moneybird: ',
         accessToken,
@@ -142,7 +143,7 @@ export const fetchMatchData = (params) => {
     const receiptPath = '/documents/receipts/synchronization.json';
     const recIdParams = {
         stuff: matchStuff.invoiceIds,
-        path: receiptPath + filterQuery,
+        path: receiptPath + invFilterQuery,
         storeSetFunc: (content) => setMatch({ type: 'setInvoiceIds', content }),
         errorMsg: 'Fout bij ophalen IDs van bonnetjes, melding van Moneybird: ',
         accessToken,
@@ -172,10 +173,10 @@ export const fetchMatchData = (params) => {
     // get payment Ids and payments, with callback to fetch invoices and receipts
     const paymentPath = '/financial_mutations/synchronization.json';
     const curAccount = filterState.current.account.value;
-    if (curAccount) filterQuery += encodeURI(`,financial_account_id:${curAccount}`);
+    const paymentFilterQuery = (curAccount)? filterQuery + encodeURI(`,financial_account_id:${curAccount}`) : filterQuery;
     const payIdParams = {
         stuff: matchStuff.paymentIds,
-        path: paymentPath + filterQuery,
+        path: paymentPath + paymentFilterQuery,
         storeSetFunc: (content) => setMatch({ type: 'setPaymentIds', content }),
         errorMsg: 'Fout bij ophalen IDs van betalingen, melding van Moneybird: ',
         accessToken,
@@ -202,19 +203,46 @@ export const fetchMatchData = (params) => {
     fetchMBAPI(payIdParams);
 }
 
-const THRESHOLD = 1;
+const THRESHOLD_AMOUNT = 1;
+const THRESHOLD_DAYS = 3;
 
 const getRelated = (payment, invoiceData) => {
     const { amount, date, message } = payment;
     const amt = parseFloat(amount);
-    const related = invoiceData.filter(inv => {
-        const diff = parseFloat(flip(inv.total_price_incl_tax_base)) - amt;
-        return (diff > -THRESHOLD && diff < THRESHOLD)
+    const related = invoiceData.map(inv => {
+        const invAmt = flip(inv.total_price_incl_tax_base);
+        const amDiff = parseFloat(invAmt) - amt;
+        const amountScore =
+            (amount === invAmt) ? 10
+                : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 5
+                    : 0;
+        const kwObj = inv.contact && inv.contact.custom_fields &&
+            inv.contact.custom_fields.find(cf => (cf.name === 'Keywords'));
+        const keywords = (kwObj) ? kwObj.value.split(',') : []
+        let kwScore = 0;
+        for (const kw of keywords) {
+            if (message.includes(kw)) kwScore += 5;
+        }
+        const dateScore =
+            (date === inv.date) ? 3
+                : (daysDiff(date, inv.date) < THRESHOLD_DAYS) ? 1
+                    : 0;
+        const totalScore = dateScore + amountScore + kwScore;
+        const scores = [amountScore, kwScore, dateScore];
+        return { ...inv, total_price_incl_tax_base: invAmt, totalScore, scores }
     })
+        .filter(inv => (inv.totalScore > 5))
+        .sort(scoreSort)
     return related;
 }
 
 // generic helpers
+// compare function for sort
+const scoreSort = (a,b) => {
+    return (a.totalScore < b.totalScore)? 1
+    : (a.totalScore > b.totalScore)? -1
+    : 0;
+}
 // to cut array in slices of 50
 const arrOfArr = (inArr, size = 50, prevArr = []) => {
     const outArr = [...prevArr, inArr.slice(0, size)]
@@ -223,4 +251,13 @@ const arrOfArr = (inArr, size = 50, prevArr = []) => {
         return outArr;
     };
     return arrOfArr(newInArr, size, outArr);
+}
+
+// to calc days difference
+const daysDiff = (a, b) => {
+    const d1 = new Date(a);
+    const d2 = new Date(b);
+    const timeDiff = d2.getTime() - d1.getTime();
+    const dDiff = timeDiff / (1000 * 3600 * 24);
+    return (dDiff < 0) ? -dDiff : dDiff;
 }

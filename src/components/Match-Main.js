@@ -24,14 +24,18 @@ const MatchMain = (props) => {
                 && (!filterState.onlyMatched || (p.related && p.related.length > 0))
             )
         });
-        return <div>
-            <h5>No worries, got data</h5>
-            <ul>
+        const Payments = () => {
+            return <ul>
                 {data.map(payment => {
-                    return <Payment key={payment.id} payment={payment}/>
+                    return <Payment key={payment.id} payment={payment} />
                 })}
                 <Pre data={data} id='financial_account_id' />
             </ul>
+        }
+
+        return <div>
+            <h5>No worries, got data</h5>
+            <Payments />
         </div>
     }
     if (invoices.notAsked && payments.notAsked) {
@@ -142,14 +146,14 @@ const Booking = (props) => {
     const { item, type } = props;
     const { invoice_id, price_base, price } = item;
     const amount = (type === 'inv') ? flip(price_base) : price;
-    const btnClass = btnBaseClass + ' grey';
+    const btnClass = btnBaseClass + ' disabled';
     const icon = (type === 'inv') ? 'note' : 'euro_symbol';
     return <li className='booking'>
         <ul className='flex payment'>
             <li className='book-icon'>
-                <a className={btnClass} href='#' target='_blank' rel='noopener noreferrer'>
+                <div className={btnClass}>
                     <i className='material-icons'>{icon}</i>
-                </a>
+                </div>
             </li>
             <li style={{ flex: 1 }}>
                 {(type === 'inv') ?
@@ -182,8 +186,8 @@ const ConnectRow = (props) => {
     return <li className='grey lighten-2'>
         <ul className='flex payment'>
             <li className='book-icon'>
-                <span className={btnBaseClass + ' grey'} href='#' target='_blank' rel='noopener noreferrer'>
-                    <i className='material-icons'>link</i>
+                <span className={btnBaseClass + ' grey'}>
+                    <i className='material-icons'>expand_more</i>
                 </span>
             </li>
             <li style={{ flex: 1 }}>
@@ -199,10 +203,16 @@ const ConnectRow = (props) => {
 
 const ConnectOption = (props) => {
     const { inv } = props;
-    const link = baseInvUrl+inv.id;
+    const link = baseInvUrl + inv.id;
     return <li className='connect'>
         <ul className='flex payment'>
             <li><StateDing state={inv.state} /></li>
+            <li style={{ minWidth: '80px' }}>
+                <div className='score-bar outer'>
+                    <div className='score-bar inner' style={{ width: scorePerc(inv.totalScore) }}></div>
+                </div>
+            </li>
+            <li style={{ minWidth: '50px' }}>{inv.totalScore}</li>
             <li style={{ minWidth: '92px' }}>{inv.date}</li>
             <li>{(inv.type === 'receipt') ? 'BON' : 'INK'}</li>
             <li style={{ flex: 1 }}>
@@ -219,6 +229,16 @@ const ConnectOption = (props) => {
     </li>
 }
 
+// helper for score calc
+const scorePerc = (score) => {
+    const perc = (score > 15) ? 100
+        : (score >= 10) ? 75
+            : (score >= 5) ? 50
+                : (score > 0) ? 10
+                    : 1;
+    return perc + '%';
+}
+
 const StateDing = (props) => {
     const { state } = props;
     const dingColor = (state === 'paid') ? 'green'
@@ -226,6 +246,10 @@ const StateDing = (props) => {
             : (state === 'late') ? 'red'
                 : 'orange'
     const dingClass = 'state-ding ' + dingColor;
+    return <label className='flex'>
+        <input type="checkbox" />
+        <span className='checkbox-span'></span>
+    </label>
     return <div className={dingClass}></div>
 }
 
