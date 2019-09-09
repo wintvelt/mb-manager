@@ -46,6 +46,9 @@ const MatchBankTransactions = () => {
     const onChangeFilters = (payload) => {
         setFilterState({ type: 'SET_FILTER', payload });
     }
+    const onChangeShow = () => {
+        setFilterState({ type: 'SET_ONLYOPEN' });
+    }
     const onSubmit = () => {
         // load invoices, receipts, payments
         fetchMatchData({matchStuff, filterState, accessToken, dispatch});
@@ -57,7 +60,7 @@ const MatchBankTransactions = () => {
         return <SideNavWrapper>
             <SideNav>
                 <MatchFilters accounts={activeAccounts} filterState={filterState}
-                    onChangeFilters={onChangeFilters} onSubmit={onSubmit} />
+                    onChangeFilters={onChangeFilters} onChangeShow={onChangeShow} onSubmit={onSubmit} />
             </SideNav>
             <MainWithSideNav>
                 <MatchMain 

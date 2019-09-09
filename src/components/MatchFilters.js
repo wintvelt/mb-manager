@@ -34,11 +34,12 @@ export const initialFilters = {
         period: periodOptions[1],
         account: { label: initAccount.name, value: initAccount.id }
     },
-    changed: true
+    changed: true,
+    onlyOpen: false
 }
 
 export const MatchFilters = (props) => {
-    const { accounts, filterState, onChangeFilters, onSubmit } = props;
+    const { accounts, filterState, onChangeFilters, onChangeShow, onSubmit } = props;
     const accountOptions = [initAccount, ...accounts]
         .map(account => {
             return { label: account.name, value: account.id }
@@ -77,6 +78,18 @@ export const MatchFilters = (props) => {
                         <button className={btnClass} onClick={onSubmit}>Betalingen ophalen</button>
                     </div>
                 </li>
+                <li>
+                    <div className="switch">
+                        <label>
+                            Alle transacties tonen
+										<input type="checkbox"
+                                checked={filterState.onlyOpen}
+                                onChange={onChangeShow} />
+                            <span className="lever"></span>
+                            Alleen openstaand
+						</label>
+                    </div>
+                </li>
             </ul>
         </li>
     );
@@ -97,6 +110,9 @@ export const filterReducer = (state, action) => {
         case 'SET_FETCHED':
             const newFet = { account: { ...current.account }, period: { ...current.period } };
             return { ...state, fetched: newFet, changed: false }
+
+        case 'SET_ONLYOPEN':
+            return {...state, onlyOpen: !state.onlyOpen}
 
         default:
             return state;
