@@ -113,7 +113,8 @@ function addData(apiData, data, type, page = 1, origin) {
 
 function setDone(apiData, origin) {
     if (origin && apiData.origin !== origin) return apiData;
-    return {...apiData,
+    return {
+        ...apiData,
         isLoading: false,
         hasAllData: true
     }
@@ -162,18 +163,36 @@ function set(apiData, something, resultsMap) {
 }
 
 // Component for loading state of API
-export const loadComp = (apiEl, txtLoading, txtError, txtOK) => {
+export const loadComp = (apiEl, txtLoading, txtError, txtOK, refData) => {
+    const progPerc = (apiEl.hasData && refData) ?
+        (100 * apiEl.data.length / refData.length) + '%'
+        : '50%';
+    const [iconClass, icon] = (apiEl.hasAllData) ? ['green-text', 'done']
+        : ['grey-text', (apiEl.hasData || apiEl.isLoading) ? 'timelapse' : 'radio_button_unchecked'];
     return (
-        (apiEl.hasData) ?
-            <p className="flex"><i className="material-icons green-text">done</i>
-                <span>{apiEl.data.length + " " + txtOK + " - " +
-                    since(apiEl.time)}</span></p>
-            : (apiEl.hasError) ?
-                <p className="flex"><i className="material-icons red-text">warning</i>
-                    <span>{txtError}</span></p>
-                :
-                <p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
-                    <span>{txtLoading}</span></p>
+        (refData && !apiEl.hasError) ?
+            (!apiEl.hasAllData && !apiEl.notAsked) ?
+                <p className="flex" style={{ alignItems: 'flex-end' }}>
+                    <i className={'material-icons ' + iconClass}>{icon}</i>
+                    {txtOK}
+                    <span className="progress" style={{ width: '200px', margin: '8px' }}>
+                        <span className="determinate" style={{ width: progPerc }}></span>
+                    </span>
+                    {`${(apiEl.data && apiEl.data.length) || 0} van ${refData.length} (${since(apiEl.time)})`}
+                </p>
+                : <p className='flex' style={{minHeight: '24px'}}></p>
+            : (apiEl.hasData) ?
+                <p className="flex" >
+                    <i className={'material-icons green-text'}>done</i>
+                    <span>{apiEl.data.length + " " + txtOK + " - " +
+                        since(apiEl.time)}</span>
+                </p >
+                : (apiEl.hasError) ?
+                    <p className="flex"><i className="material-icons red-text">warning</i>
+                        <span>{txtError}</span></p>
+                    :
+                    <p className="flex"><i className="material-icons grey-text">radio_button_unchecked</i>
+                        <span>{txtLoading}</span></p>
     );
 }
 

@@ -37,16 +37,26 @@ export const matchReducer = (matchStuff, action) => {
 
         case 'autoMatch':
             const bookings = matchStuff.invoices.data.filter(it => (it.type === content.type));
-            let newHasRelated = matchStuff.hasRelated;
+            let newHasToppers = matchStuff.hasToppers;
             const newPaymentsData = matchStuff.payments.data.map(p => {
                 if (p.state === 'processed') return p;
                 const related = getRelated(p, bookings);
-                if (related && related.length > 0) newHasRelated = true;
-                const newRelated = (p.related) ? [...p.related, ...related] : related;
-                return { ...p, related: newRelated, hasRelated: newHasRelated }
+                const newRelated = (p.related) ? [...p.related, ...related] : [...related];
+                const hasToppers = (newRelated.find(rel => (rel.totalScore > 10))) ? true : false
+                newHasToppers = newHasToppers || hasToppers;
+                return {
+                    ...p,
+                    related: newRelated.sort(scoreSort),
+                    thresholds: [10, ...[5, 2, 1].filter(num => (newRelated.find(it => (it.totalScore > num)) > 0)), 0],
+                    hasToppers
+                }
             })
             const newPaymentsApi = api.setData(newPaymentsData, null, matchStuff.payments.origin);
-            return { ...matchStuff, payments: newPaymentsApi, hasRelated: newHasRelated }
+            return {
+                ...matchStuff,
+                payments: newPaymentsApi,
+                hasToppers: newHasToppers
+            }
 
         default:
             return matchStuff;
@@ -173,7 +183,7 @@ export const fetchMatchData = (params) => {
     // get payment Ids and payments, with callback to fetch invoices and receipts
     const paymentPath = '/financial_mutations/synchronization.json';
     const curAccount = filterState.current.account.value;
-    const paymentFilterQuery = (curAccount)? filterQuery + encodeURI(`,financial_account_id:${curAccount}`) : filterQuery;
+    const paymentFilterQuery = (curAccount) ? filterQuery + encodeURI(`,financial_account_id:${curAccount}`) : filterQuery;
     const payIdParams = {
         stuff: matchStuff.paymentIds,
         path: paymentPath + paymentFilterQuery,
@@ -229,19 +239,23 @@ const getRelated = (payment, invoiceData) => {
                     : 0;
         const totalScore = dateScore + amountScore + kwScore;
         const scores = [amountScore, kwScore, dateScore];
-        return { ...inv, total_price_incl_tax_base: invAmt, totalScore, scores }
+        return {
+            ...inv,
+            total_price_incl_tax_base: invAmt,
+            totalScore,
+            scores
+        }
     })
-        .filter(inv => (inv.totalScore > 5))
-        .sort(scoreSort)
+        .filter(inv => (inv.totalScore > 0));
     return related;
 }
 
 // generic helpers
 // compare function for sort
-const scoreSort = (a,b) => {
-    return (a.totalScore < b.totalScore)? 1
-    : (a.totalScore > b.totalScore)? -1
-    : 0;
+const scoreSort = (a, b) => {
+    return (a.totalScore < b.totalScore) ? 1
+        : (a.totalScore > b.totalScore) ? -1
+            : 0;
 }
 // to cut array in slices of 50
 const arrOfArr = (inArr, size = 50, prevArr = []) => {

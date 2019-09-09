@@ -518,12 +518,15 @@ ul.flex.payment a.btn:hover {
     left: 45%;
 }
 .pay-icon::after {
-    height: 28%;
+    height: 48%;
 	top: 50%;
 }
 .book-icon::before {
-	height: 100%;
-	bottom: 50%;
+	height: 98%;
+	top: 0;
+}
+.pay-card li:last-child .book-icon::before {
+	height: 48%;
 }
 
 .state-ding {

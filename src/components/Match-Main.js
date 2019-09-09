@@ -1,19 +1,15 @@
 // Match-Main.js
-import React from 'react';
+import React, { useState } from 'react';
 import { loadComp } from '../constants/helpers';
 
 const MatchMain = (props) => {
     const { matchStuff, filterState } = props;
     const { invoices, payments, invoiceIds, paymentIds } = matchStuff;
     if (payments.isLoading || paymentIds.isLoading) {
-        return <div className="section">
+        return <div className="container">
             <div className='row'>
                 <h5>Matchen van betalingen aan bonnetjes</h5>
-                <p>{invoices.data && invoices.data.length + ' invoices opgehaald'}</p>
-                {loadComp(paymentIds, 'Ophalen IDs van betalingen', 'Foutje', 'IDs van betalingen binnen')}
-                {loadComp(payments, 'Ophalen betalingen', 'Foutje', 'Betalingen binnen')}
-                {loadComp(invoiceIds, 'Ophalen IDs van bonnetjes', 'Foutje', 'IDs van bonnetjes binnen')}
-                {loadComp(invoices, 'Ophalen bonnetjes', 'Foutje', 'Bonnetjes binnen')}
+                {loadComp(payments, 'Ophalen betalingen', 'Foutje', 'Betalingen', paymentIds.data)}
             </div>
         </div>
     }
@@ -21,7 +17,7 @@ const MatchMain = (props) => {
         const data = payments.data.filter(p => {
             return (
                 (!filterState.onlyOpen || p.state !== 'processed')
-                && (!filterState.onlyMatched || (p.related && p.related.length > 0))
+                && (!filterState.onlyMatched || p.hasToppers)
             )
         });
         const Payments = () => {
@@ -29,12 +25,14 @@ const MatchMain = (props) => {
                 {data.map(payment => {
                     return <Payment key={payment.id} payment={payment} />
                 })}
-                <Pre data={data} id='financial_account_id' />
             </ul>
         }
 
-        return <div>
-            <h5>No worries, got data</h5>
+        return <div className='container'>
+            <div className='row'>
+                <button className='btn right'>Selectie Koppelen</button>
+            </div>
+            {loadComp(invoices, 'Ophalen bonnetjes', 'Foutje', 'Bonnetjes', invoiceIds.data)}
             <Payments />
         </div>
     }
@@ -43,13 +41,12 @@ const MatchMain = (props) => {
     }
     return <div>
         <h5>something else?</h5>
-        <pre></pre>
     </div>
 }
 
 const Payment = (props) => {
     const { payment } = props;
-    const { id, state, date, message, amount, amount_open, payments, ledger_account_bookings, related } = payment;
+    const { id, state, date, message, amount, amount_open, payments, ledger_account_bookings } = payment;
     // (invoice_id) type (afgeleide)
     // (invoice_id) factuurnr
     // (invoice_id) contact.company_name
@@ -59,7 +56,7 @@ const Payment = (props) => {
     // amount
     // description
     return <li className='row card'>
-        <ul>
+        <ul className='pay-card'>
             <li>
                 <ul className='flex payment'>
                     <li className='pay-icon'><PayState state={state} id={id} /></li>
@@ -82,7 +79,7 @@ const Payment = (props) => {
                 ledger_account_bookings.map(bkg => <Booking key={bkg.id} type='ledger' item={bkg} />)
                 : <></>
             }
-            {(amount_open !== '0.0' && related) ?
+            {(amount_open !== '0.0') ?
                 <ConnectRow payment={payment} />
                 : <></>
             }
@@ -182,20 +179,48 @@ const flip = (str) => {
 // helper to connect payment to invoice
 const ConnectRow = (props) => {
     const { payment } = props;
-    const { related } = payment;
+    const { related, thresholds } = payment;
+    const [state, setState] = useState(10);
+    if (related && related.length > 0) {
+        const relatedShown = related.filter(inv => (inv.totalScore > state));
+        const hasMore = (related.length - relatedShown.length > 0);
+        const btnClass = (hasMore) ? btnBaseClass + ' grey' : btnBaseClass + ' grey';
+        const icon = (hasMore) ? 'expand_more' : 'expand_less';
+        const direction = (hasMore) ? 1 : -1;
+        const onMore = (direction) => {
+            const newThreshold = (direction > 0) ?
+                thresholds[thresholds.indexOf(state) + direction]
+                : 10;
+            setState(newThreshold);
+        }
+        return <li className='grey lighten-2'>
+            <ul className='flex payment'>
+                <li className='book-icon'>
+                    <button className={btnClass} onClick={() => onMore(direction)}>
+                        <i className='material-icons'>{icon}</i>
+                    </button>
+                </li>
+                <li style={{ flex: 1 }}>
+                    {(relatedShown.length > 0) ?
+                        <ul>
+                            {(relatedShown.map(inv => {
+                                return <ConnectOption key={inv.id} inv={inv} />
+                            }))}
+                        </ul>
+                        : <span className='btn-flat' onClick={() => onMore(1)}>Klik om suggesties te zien</span>
+                    }
+                </li>
+            </ul>
+        </li>
+    }
     return <li className='grey lighten-2'>
         <ul className='flex payment'>
             <li className='book-icon'>
-                <span className={btnBaseClass + ' grey'}>
-                    <i className='material-icons'>expand_more</i>
+                <span className={btnBaseClass + ' disabled'}>
+                    <i className='material-icons'>close</i>
                 </span>
             </li>
             <li style={{ flex: 1 }}>
-                <ul>
-                    {(related.map(inv => {
-                        return <ConnectOption key={inv.id} inv={inv} />
-                    }))}
-                </ul>
             </li>
         </ul>
     </li>
