@@ -217,14 +217,18 @@ const THRESHOLD_AMOUNT = 1;
 const THRESHOLD_DAYS = 3;
 
 const getRelated = (payment, invoiceData) => {
-    const { amount, date, message } = payment;
+    const { amount, amount_open, date, message } = payment;
     const amt = parseFloat(amount);
     const related = invoiceData.map(inv => {
         const invAmt = flip(inv.total_price_incl_tax_base);
         const amDiff = parseFloat(invAmt) - amt;
         const amountScore =
-            (amount === invAmt) ? 10
-                : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 5
+            (amount === invAmt) ? 5
+                : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 3
+                    : 0;
+        const openScore =
+            (amount_open === invAmt) ? 5
+                : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 3
                     : 0;
         const kwObj = inv.contact && inv.contact.custom_fields &&
             inv.contact.custom_fields.find(cf => (cf.name === 'Keywords'));
@@ -237,8 +241,8 @@ const getRelated = (payment, invoiceData) => {
             (date === inv.date) ? 3
                 : (daysDiff(date, inv.date) < THRESHOLD_DAYS) ? 1
                     : 0;
-        const totalScore = dateScore + amountScore + kwScore;
-        const scores = [amountScore, kwScore, dateScore];
+        const totalScore = dateScore + amountScore + openScore+ kwScore;
+        const scores = [amountScore, openScore, kwScore, dateScore];
         return {
             ...inv,
             total_price_incl_tax_base: invAmt,

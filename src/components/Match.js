@@ -27,7 +27,7 @@ Otherwise match contact keywords, and show all open invoices from contact
 
 (TODO: link logic configurable in setup for admin, retrieved/saved on AWS)
 */
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { SideNavWrapper, SideNav, MainWithSideNav } from './SideNav';
 import { MatchFilters, filterReducer, initialFilters } from './MatchFilters';
@@ -41,7 +41,11 @@ const MatchBankTransactions = () => {
     const { accessToken, accounts, matchStuff } = useSelector(store => store);
     const dispatch = useDispatch();
     const [filterState, setFilterState] = useReducer(filterReducer, initialFilters);
-    if (accounts.notAsked) dispatch(getAccounts());
+
+    if (accounts.notAsked) {
+        dispatch(getAccounts());
+        fetchMatchData({matchStuff, filterState, accessToken, dispatch});
+    }
 
     const onChangeFilters = (payload) => {
         setFilterState({ type: 'SET_FILTER', payload });
@@ -51,6 +55,13 @@ const MatchBankTransactions = () => {
     }
     const onChangeMatched = () => {
         setFilterState({ type: 'SET_MATCHED' });
+    }
+    const onChangeSelection = (payId, invId, amount) => {
+        const payload = { payId, invId, amount};
+        setFilterState({ type: 'SET_SELECTION', payload})
+    }
+    const onChangeOnlySelection = () => {
+        setFilterState({ type: 'SET_ONLY_SELECTION' });
     }
     const onSubmit = () => {
         // load invoices, receipts, payments
@@ -66,12 +77,16 @@ const MatchBankTransactions = () => {
                 <MatchFilters accounts={activeAccounts} filterState={filterState} hasToppers={hasToppers}
                     onChangeFilters={onChangeFilters} onChangeOnlyOpen={onChangeOnlyOpen} 
                     onChangeMatched={onChangeMatched}
+                    onChangeOnlySelection={onChangeOnlySelection}
                     onSubmit={onSubmit} />
             </SideNav>
             <MainWithSideNav>
                 <MatchMain 
                     filterState={filterState} 
-                    matchStuff={matchStuff}/>
+                    matchStuff={matchStuff}
+                    accounts={activeAccounts}
+                    selected={filterState.selection}
+                    setSelected={onChangeSelection}/>
             </MainWithSideNav>
         </SideNavWrapper>
     }

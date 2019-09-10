@@ -570,3 +570,7 @@ li.connect:hover {
 	width: 36px;
 	line-height: 36px;
 }
+.payment span.grey.lighten-2 {
+	padding: 2px 4px;
+	border-radius: 4px;
+}

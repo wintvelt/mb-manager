@@ -3,8 +3,13 @@ import React, { useState } from 'react';
 import { loadComp } from '../constants/helpers';
 
 const MatchMain = (props) => {
-    const { matchStuff, filterState } = props;
+    const { matchStuff, filterState, accounts, selected, setSelected } = props;
     const { invoices, payments, invoiceIds, paymentIds } = matchStuff;
+
+    const onSubmit = () => {
+        console.log({ selected });
+    }
+
     if (payments.isLoading || paymentIds.isLoading) {
         return <div className="container">
             <div className='row'>
@@ -18,22 +23,22 @@ const MatchMain = (props) => {
             return (
                 (!filterState.onlyOpen || p.state !== 'processed')
                 && (!filterState.onlyMatched || p.hasToppers)
+                && (!filterState.onlySelection || selected.find(s => (s.payId === p.id)))
             )
         });
-        const Payments = () => {
-            return <ul>
-                {data.map(payment => {
-                    return <Payment key={payment.id} payment={payment} />
-                })}
-            </ul>
-        }
+        const btnClass = (selected.length > 0) ? 'btn right' : 'btn right disabled';
+        const btnText = (selected.length === 1) ?
+            `${selected.length} betaling koppelen`
+            : (selected.length > 1) ?
+                `${selected.length} betalingen koppelen`
+                : 'Selectie koppelen';
 
         return <div className='container'>
             <div className='row'>
-                <button className='btn right'>Selectie Koppelen</button>
+                <button className={btnClass} onClick={onSubmit}>{btnText}</button>
             </div>
             {loadComp(invoices, 'Ophalen bonnetjes', 'Foutje', 'Bonnetjes', invoiceIds.data)}
-            <Payments />
+            <Payments data={data} accounts={accounts} selected={selected} onSelect={setSelected} />
         </div>
     }
     if (invoices.notAsked && payments.notAsked) {
@@ -44,17 +49,27 @@ const MatchMain = (props) => {
     </div>
 }
 
+const Payments = (props) => {
+    const { data, accounts, selected, onSelect } = props;
+
+    return <ul>
+        {data.map(payment => {
+            return <Payment key={payment.id} payment={payment} accounts={accounts}
+                selected={selected} onSelect={onSelect} />
+        })}
+    </ul>
+}
+
+
 const Payment = (props) => {
-    const { payment } = props;
-    const { id, state, date, message, amount, amount_open, payments, ledger_account_bookings } = payment;
-    // (invoice_id) type (afgeleide)
-    // (invoice_id) factuurnr
-    // (invoice_id) contact.company_name
-    // (invoice_id) date
-    // (invoice_id) total_price_incl_tax_base
-    // (invoice_id) details
-    // amount
-    // description
+    const { payment, accounts, selected, onSelect } = props;
+    const { id, state, date, message, amount, amount_open, financial_account_id,
+        payments, ledger_account_bookings } = payment;
+    const account = accounts.find(ac => (ac.id === financial_account_id));
+    const accountName = (account) ? `${account.name}` : '';
+    const spanClass = 'grey lighten-2';
+    const paySelObj = selected.find(it => (it.payId === id));
+    const paySelected = paySelObj && paySelObj.invId;
     return <li className='row card'>
         <ul className='pay-card'>
             <li>
@@ -62,7 +77,8 @@ const Payment = (props) => {
                     <li className='pay-icon'><PayState state={state} id={id} /></li>
                     <li style={{ flex: '1' }}>
                         <p style={{ fontSize: '110%' }}>
-                            <span className='grey lighten-3'>{date}</span>
+                            <span className={spanClass}>{date}</span>
+                            <span className={spanClass}>{accountName}</span>
                             {message}
                         </p>
                     </li>
@@ -79,10 +95,7 @@ const Payment = (props) => {
                 ledger_account_bookings.map(bkg => <Booking key={bkg.id} type='ledger' item={bkg} />)
                 : <></>
             }
-            {(amount_open !== '0.0') ?
-                <ConnectRow payment={payment} />
-                : <></>
-            }
+            <ConnectRow payment={payment} selected={paySelected} onSelect={onSelect} />
         </ul>
     </li>
 }
@@ -178,22 +191,31 @@ const flip = (str) => {
 
 // helper to connect payment to invoice
 const ConnectRow = (props) => {
-    const { payment } = props;
-    const { related, thresholds } = payment;
-    const [state, setState] = useState(10);
-    if (related && related.length > 0) {
-        const relatedShown = related.filter(inv => (inv.totalScore > state));
-        const hasMore = (related.length - relatedShown.length > 0);
-        const btnClass = (hasMore) ? btnBaseClass + ' grey' : btnBaseClass + ' grey';
-        const icon = (hasMore) ? 'expand_more' : 'expand_less';
-        const direction = (hasMore) ? 1 : -1;
-        const onMore = (direction) => {
-            const newThreshold = (direction > 0) ?
-                thresholds[thresholds.indexOf(state) + direction]
-                : 10;
-            setState(newThreshold);
-        }
-        return <li className='grey lighten-2'>
+    const [shownState, setShownState] = useState(10);
+    const { payment, selected, onSelect } = props;
+    const { id, related, thresholds, amount_open } = payment;
+    const onSelectInv = (invId, amount) => {
+        onSelect(id, invId, flip(amount));
+    }
+    const myRelated = related || [];
+    const relatedShown = myRelated.filter(inv => (inv.totalScore > shownState));
+    const hasMore = (myRelated.length - relatedShown.length > 0);
+    const btnColor = (selected) ? btnBaseClass + ' blue' : btnBaseClass + ' grey';
+    const btnClass = (myRelated.length > 0) ?
+        (hasMore) ? btnColor : btnColor
+        : btnColor + ' disabled';
+    const icon = (myRelated.length > 0) ?
+        (hasMore) ? 'expand_more' : 'expand_less'
+        : 'close';
+    const direction = (hasMore) ? 1 : -1;
+    const onMore = (direction) => {
+        const newThreshold = (direction > 0) ?
+            thresholds[thresholds.indexOf(shownState) + direction]
+            : 10;
+        setShownState(newThreshold);
+    }
+    return (amount_open !== '0.0') ?
+        <li className='grey lighten-2'>
             <ul className='flex payment'>
                 <li className='book-icon'>
                     <button className={btnClass} onClick={() => onMore(direction)}>
@@ -201,43 +223,36 @@ const ConnectRow = (props) => {
                     </button>
                 </li>
                 <li style={{ flex: 1 }}>
-                    {(relatedShown.length > 0) ?
-                        <ul>
-                            {(relatedShown.map(inv => {
-                                return <ConnectOption key={inv.id} inv={inv} />
-                            }))}
-                        </ul>
-                        : <span className='btn-flat' onClick={() => onMore(1)}>Klik om suggesties te zien</span>
+                    {(myRelated.length > 0) ?
+                        (relatedShown.length > 0) ?
+                            <ul>
+                                {(relatedShown.map(inv => {
+                                    return <ConnectOption key={inv.id} inv={inv} onSelect={onSelectInv} selected={selected} />
+                                }))}
+                            </ul>
+                            : <span className='btn-flat' onClick={() => onMore(1)}>Klik om suggesties te zien</span>
+                        : <></>
                     }
                 </li>
             </ul>
         </li>
-    }
-    return <li className='grey lighten-2'>
-        <ul className='flex payment'>
-            <li className='book-icon'>
-                <span className={btnBaseClass + ' disabled'}>
-                    <i className='material-icons'>close</i>
-                </span>
-            </li>
-            <li style={{ flex: 1 }}>
-            </li>
-        </ul>
-    </li>
+        : <></>
 }
 
 const ConnectOption = (props) => {
-    const { inv } = props;
+    const { inv, onSelect, selected } = props;
     const link = baseInvUrl + inv.id;
+    const onSelectInv = () => {
+        onSelect(inv.id, inv.total_price_incl_tax_base);
+    }
     return <li className='connect'>
-        <ul className='flex payment'>
-            <li><StateDing state={inv.state} /></li>
+        <ul className='flex payment' onClick={onSelectInv}>
+            <li><StateDing selected={selected} id={inv.id} /></li>
             <li style={{ minWidth: '80px' }}>
                 <div className='score-bar outer'>
                     <div className='score-bar inner' style={{ width: scorePerc(inv.totalScore) }}></div>
                 </div>
             </li>
-            <li style={{ minWidth: '50px' }}>{inv.totalScore}</li>
             <li style={{ minWidth: '92px' }}>{inv.date}</li>
             <li>{(inv.type === 'receipt') ? 'BON' : 'INK'}</li>
             <li style={{ flex: 1 }}>
@@ -245,6 +260,10 @@ const ConnectOption = (props) => {
                     {inv.reference} - {inv.contact && inv.contact.company_name}
                     {'\u00A0'}<i className='material-icons tiny'>launch</i>
                 </a>
+                {(inv.details && inv.details.length > 1) ?
+                    <span>{inv.details.map(d => `${d.amount} ${amtFmt(d.price)}`).join(', ')}</span>
+                    : <></>
+                }
             </li>
             <li></li>
             <li style={{ color: '#757575' }}>
@@ -252,6 +271,13 @@ const ConnectOption = (props) => {
             </li>
         </ul>
     </li>
+}
+
+// helper for amount
+const amtFmt = (amtStr) => {
+    const [eur, cnt] = amtStr.split('.');
+    const cntStr = (cnt) ? (cnt.length === 1) ? cnt + '0' : cnt : '00';
+    return `€ ${eur},${cntStr}`;
 }
 
 // helper for score calc
@@ -265,17 +291,12 @@ const scorePerc = (score) => {
 }
 
 const StateDing = (props) => {
-    const { state } = props;
-    const dingColor = (state === 'paid') ? 'green'
-        : (state === 'payment_pending') ? 'blue'
-            : (state === 'late') ? 'red'
-                : 'orange'
-    const dingClass = 'state-ding ' + dingColor;
-    return <label className='flex'>
-        <input type="checkbox" />
+    const { selected, id } = props;
+    const checked = (selected === id);
+    return <div className='flex'>
+        <input type="checkbox" checked={checked} readOnly />
         <span className='checkbox-span'></span>
-    </label>
-    return <div className={dingClass}></div>
+    </div>
 }
 
 // helper component for dev
