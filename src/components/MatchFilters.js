@@ -106,7 +106,7 @@ export const MatchFilters = (props) => {
                 </li>
                 <li>
                     <div className='switch'>
-                        <label>
+                        <label className={(!hasToppers)? 'disabled' : ''}>
                             <span className='switch-label right-align'>Alle transacties tonen</span>
                             <input type="checkbox"
                                 checked={filterState.onlyMatched}
@@ -119,7 +119,7 @@ export const MatchFilters = (props) => {
                 </li>
                 <li>
                     <div className='switch'>
-                        <label>
+                        <label className={(!filterState.hasSelection)? 'disabled': ''}>
                             <span className='switch-label right-align'>Alles tonen</span>
                             <input type="checkbox"
                                 checked={filterState.onlySelection}
@@ -149,7 +149,10 @@ export const filterReducer = (state, action) => {
 
         case 'SET_FETCHED':
             const newFet = { account: { ...current.account }, period: { ...current.period } };
-            return { ...state, fetched: newFet, changed: false }
+            return {
+                ...state, fetched: newFet, changed: false,
+                selection: [], onlySelection: false, hasSelection: false
+            }
 
         case 'SET_ONLYOPEN':
             return { ...state, onlyOpen: !state.onlyOpen }

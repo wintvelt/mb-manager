@@ -27,14 +27,15 @@ Otherwise match contact keywords, and show all open invoices from contact
 
 (TODO: link logic configurable in setup for admin, retrieved/saved on AWS)
 */
-import React, { useReducer, useState } from 'react';
+import React, { useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { SideNavWrapper, SideNav, MainWithSideNav } from './SideNav';
 import { MatchFilters, filterReducer, initialFilters } from './MatchFilters';
 import MatchMain from './Match-Main';
 import { getAccounts } from '../actions/apiActions';
 import { Link } from 'react-router-dom';
-import { fetchMatchData } from './Match-store';
+import { fetchMatchData, connectSelection } from './Match-store';
+import { doSnack } from '../actions/actions';
 
 
 const MatchBankTransactions = () => {
@@ -66,7 +67,17 @@ const MatchBankTransactions = () => {
     const onSubmit = () => {
         // load invoices, receipts, payments
         fetchMatchData({matchStuff, filterState, accessToken, dispatch});
-        setFilterState({ type: 'SET_FETCHED'})
+        setFilterState({ type: 'SET_FETCHED'});
+    }
+
+    const onConnectBookings = () => {
+        // load invoices, receipts, payments
+        const callback = () => {
+            dispatch(doSnack(`${filterState.selection.length} connecties doorgestuurd aan Moneybird.`));
+            fetchMatchData({matchStuff, filterState, accessToken, dispatch});
+            setFilterState({ type: 'SET_FETCHED'});
+        }
+        connectSelection(matchStuff.connections, filterState.selection, accessToken, dispatch, callback);
     }
 
     if (accessToken.hasData && accounts.hasAllData) {
@@ -86,7 +97,8 @@ const MatchBankTransactions = () => {
                     matchStuff={matchStuff}
                     accounts={activeAccounts}
                     selected={filterState.selection}
-                    setSelected={onChangeSelection}/>
+                    setSelected={onChangeSelection}
+                    onConnectBookings={onConnectBookings}/>
             </MainWithSideNav>
         </SideNavWrapper>
     }

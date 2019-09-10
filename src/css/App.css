@@ -17,6 +17,10 @@ td, th {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	color: #757575;
+}
+.switch label.disabled {
+	color: #bdbdbd;
 }
 .switch-label {
 	flex: 1 1 100px;

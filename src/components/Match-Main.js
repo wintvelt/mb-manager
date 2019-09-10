@@ -1,21 +1,23 @@
 // Match-Main.js
 import React, { useState } from 'react';
 import { loadComp } from '../constants/helpers';
+import { Link } from 'react-router-dom';
+
 
 const MatchMain = (props) => {
-    const { matchStuff, filterState, accounts, selected, setSelected } = props;
+    const { matchStuff, filterState, accounts, selected, setSelected, onConnectBookings } = props;
     const { invoices, payments, invoiceIds, paymentIds } = matchStuff;
 
     const onSubmit = () => {
-        console.log({ selected });
+        onConnectBookings();
     }
 
     if (payments.isLoading || paymentIds.isLoading) {
         return <div className="container">
-            <div className='row'>
-                <h5>Matchen van betalingen aan bonnetjes</h5>
-                {loadComp(payments, 'Ophalen betalingen', 'Foutje', 'Betalingen', paymentIds.data)}
+            <div className='row flex' style={{ alignItems: 'baseline', minHeight: '50px' }}>
+                <h5 style={{ minHeight: '50px' }}>Matchen van betalingen aan bonnetjes</h5>
             </div>
+            {loadComp(payments, 'Ophalen betalingen', 'Foutje', 'Betalingen', paymentIds.data)}
         </div>
     }
     if (payments.hasAllData && paymentIds.hasAllData) {
@@ -32,21 +34,43 @@ const MatchMain = (props) => {
             : (selected.length > 1) ?
                 `${selected.length} betalingen koppelen`
                 : 'Selectie koppelen';
-
+        const curAccountName = (filterState.current.account.id === '') ?
+            '' : `voor de rekening ${filterState.current.account.label} `;
         return <div className='container'>
-            <div className='row'>
+            <div className='row flex' style={{ alignItems: 'baseline', minHeight: '50px' }}>
+                <h5 style={{ flex: 1 }}>Betalingen om te matchen</h5>
                 <button className={btnClass} onClick={onSubmit}>{btnText}</button>
             </div>
             {loadComp(invoices, 'Ophalen bonnetjes', 'Foutje', 'Bonnetjes', invoiceIds.data)}
-            <Payments data={data} accounts={accounts} selected={selected} onSelect={setSelected} />
+            {(data.length > 0 || !invoices.hasAllData) ?
+                <Payments data={data} accounts={accounts} selected={selected} onSelect={setSelected} />
+                : <div className='section center'>
+                    <h5>Woohoo! Geen openstaande betalingen.</h5>
+                    <p>{`Tenminste, ${curAccountName} voor de periode ${filterState.current.period.label}`}</p>
+                </div>
+            }
         </div>
     }
     if (invoices.notAsked && payments.notAsked) {
-        return <div>Maak eerst een selectie</div>
+        return <div className='section center'>
+            <h5>Maak eerst een selectie.</h5>
+            <p>En haal dan betalingen op met de groene button</p>
+        </div>
     }
-    return <div>
-        <h5>something else?</h5>
-    </div>
+    return (
+        <div className="container">
+            <div className="section center">
+                <h5>Helaas, er is geen verbinding..</h5>
+                <p>Probeer anders eerst connectie te maken..</p>
+                <div>
+                    <Link to="/connection" className="flex flex-center">
+                        <i className="material-icons">account_circle</i>
+                        <span>Connectie</span>
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 const Payments = (props) => {
@@ -194,8 +218,9 @@ const ConnectRow = (props) => {
     const [shownState, setShownState] = useState(10);
     const { payment, selected, onSelect } = props;
     const { id, related, thresholds, amount_open } = payment;
-    const onSelectInv = (invId, amount) => {
-        onSelect(id, invId, flip(amount));
+    const onSelectInv = (invId, invAmount) => {
+        const connectAmt = (parseFloat(invAmount) > parseFloat(amount_open)) ? invAmount : amount_open;
+        onSelect(id, invId, flip(connectAmt));
     }
     const myRelated = related || [];
     const relatedShown = myRelated.filter(inv => (inv.totalScore > shownState));
@@ -297,15 +322,6 @@ const StateDing = (props) => {
         <input type="checkbox" checked={checked} readOnly />
         <span className='checkbox-span'></span>
     </div>
-}
-
-// helper component for dev
-const Pre = (props) => {
-    const { data, id } = props;
-    const newData = data.map(it => it[id]);
-    return <pre>
-        {JSON.stringify(newData, null, 2)}
-    </pre>
 }
 
 export default MatchMain;

@@ -10,7 +10,8 @@ export const initialMatch = {
     payments: newApiData(),
     hasRelated: false,
     invoiceIds: newApiData(),
-    invoices: newApiData()
+    invoices: newApiData(),
+    connections: newApiData()
 }
 
 export const matchReducer = (matchStuff, action) => {
@@ -24,7 +25,7 @@ export const matchReducer = (matchStuff, action) => {
             return { ...matchStuff, paymentIds: newPaymentIds };
 
         case 'setPayments':
-            const newPayments = api.set(matchStuff.payments, content);
+            const newPayments = api.set(matchStuff.payments, content, sortByDate);
             return { ...matchStuff, payments: newPayments, hasRelated: false };
 
         case 'setInvoiceIds':
@@ -34,6 +35,10 @@ export const matchReducer = (matchStuff, action) => {
         case 'setInvoices':
             const newInvoices = api.set(matchStuff.invoices, content);
             return { ...matchStuff, invoices: newInvoices };
+
+        case 'setConnections':
+            const newConnections = api.set(matchStuff.connections, content);
+            return { ...matchStuff, connections: newConnections };
 
         case 'autoMatch':
             const bookings = matchStuff.invoices.data.filter(it => (it.type === content.type));
@@ -68,16 +73,53 @@ const onlyIds = (arr) => {
     return outArr;
 }
 
+const sortByDate = (arr) => {
+    return [...arr].sort((a, b) => {
+        return (a.date < b.date) ? 1
+            : (a.date > b.date) ? -1
+                : 0
+    })
+}
+
 const flip = (str) => {
     if (!str) return str;
     return (str.slice(0, 1) === '-') ? str.slice(1) : '-' + str;
+}
+
+// API helpers to process list of booking connections
+export const connectSelection = (stuff, selection, accessToken, dispatch, callback) => {
+    const storeSetFunc = (content) => setMatch({ type: 'setConnections', content });
+    const paramsArr = selection.map(connection => {
+        const { payId, invId, amount} = connection;
+        return {
+            method: 'PATCH',
+            stuff,
+            body: { 
+                booking_type: 'Document', 
+                booking_id: invId, 
+                price_base: amount,
+                description: 'Transactie gekoppeld uit Moblybird ;)'
+            },
+            path: `/financial_mutations/${payId}/link_booking.json`,
+            storeSetFunc,
+            errorMsg: 'Fout bij matchen van betalingen en facturen',
+            accessToken,
+            loadingMsg: 'Connecties doorsturen aan Moneybird',
+            dispatch,
+            callback: null
+        }
+    })
+    getSequential(paramsArr, () => {
+        dispatch(storeSetFunc({ DONE: true }));
+        if (callback) callback();
+    });
 }
 
 
 // API helpers for filtered receipts & payments
 const getMulti = (params) => {
     const { ids, type, path, stuff, accessToken,
-        storeSetFunc, dispatch, errorMsg, loadingMsg, callback } = params;
+        storeSetFunc, dispatch, errorMsg, loadingMsg, callback, skipDone } = params;
     const idArr = arrOfArr(ids);
     const paramsArr = idArr.map(idList => {
         return {
@@ -95,7 +137,7 @@ const getMulti = (params) => {
         }
     });
     getSequential(paramsArr, () => {
-        dispatch(storeSetFunc({ DONE: true }));
+        if (!skipDone) dispatch(storeSetFunc({ DONE: true }));
         if (callback) callback();
     });
 }
@@ -145,7 +187,8 @@ export const fetchMatchData = (params) => {
                         type: 'autoMatch',
                         content: { type: 'purchase_invoice' }
                     }))
-                }
+                },
+                skipDone: true
             })
         }
     }
@@ -224,25 +267,27 @@ const getRelated = (payment, invoiceData) => {
         const amDiff = parseFloat(invAmt) - amt;
         const amountScore =
             (amount === invAmt) ? 5
-                : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 3
+                : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 2
                     : 0;
         const openScore =
             (amount_open === invAmt) ? 5
-                : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 3
+                : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 2
                     : 0;
+        const detailScore = (inv.details && inv.details.length > 1) ?
+            (inv.details.find(d => (d.amount === '1 x' && d.price === flip(amount)))) ? 5 : 0 : 0;
         const kwObj = inv.contact && inv.contact.custom_fields &&
             inv.contact.custom_fields.find(cf => (cf.name === 'Keywords'));
-        const keywords = (kwObj) ? kwObj.value.split(',') : []
+        const keywords = (kwObj) ? kwObj.value.split(',').map(word => word.trim().toLowerCase()) : [];
         let kwScore = 0;
         for (const kw of keywords) {
-            if (message.includes(kw)) kwScore += 5;
+            if (message.toLowerCase().includes(kw)) kwScore += 5;
         }
         const dateScore =
             (date === inv.date) ? 3
                 : (daysDiff(date, inv.date) < THRESHOLD_DAYS) ? 1
                     : 0;
-        const totalScore = dateScore + amountScore + openScore+ kwScore;
-        const scores = [amountScore, openScore, kwScore, dateScore];
+        const totalScore = dateScore + amountScore + openScore + detailScore + kwScore;
+        const scores = [amountScore, openScore, detailScore, kwScore, dateScore];
         return {
             ...inv,
             total_price_incl_tax_base: invAmt,
