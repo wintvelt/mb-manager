@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 const menu = [
 	{ path: "/contacten", link: "/contacten/lijst", text: "Contacten" },
 	{ path: "/inkomend", text: "Inkomend" },
-	{ path: "/betalingen", link: "/betalingen/match", text: "Betalingen" },
+	{ path: "/betalingen", link: "/betalingen/match", text: "Betalingen", badge: 'NIEUW' },
 	{ path: "/export", text: "Export" },
 	{ path: "/bankmutations", text: "Transacties", badge: "NIEUW" }
 ];
