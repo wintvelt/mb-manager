@@ -25,8 +25,8 @@ export const fetchAWSAPI = (params) => {
 const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc,
     errorMsg, method = 'GET', body, loadingMsg, callback = null,
     type, page }) => {
-    console.log('fetching: ' + url);
-    if (stuff.hasData && accessToken.hasData) console.log('fetching again');
+    // console.log('fetching: ' + url);
+    // if (stuff.hasData && accessToken.hasData) console.log('fetching again');
     const safeBody = (!body || typeof body === 'string') ? body : JSON.stringify(body);
     let headers = new Headers();
     headers.append('Authorization', 'Bearer ' + accessToken.data);

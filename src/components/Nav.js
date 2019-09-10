@@ -18,7 +18,7 @@ const subMenusFor = (activePath) => {
 		case 'contacten':
 			return [
 				{ path: '/contacten/lijst', text: 'Lijst' },
-				{ path: '/contacten/keywords', text: 'Keywords', badge: 'NIEUW' },
+				{ path: '/contacten/keywords', text: 'Keywords' },
 			]
 
 		case 'betalingen':
