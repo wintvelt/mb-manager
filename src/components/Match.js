@@ -45,7 +45,7 @@ const MatchBankTransactions = () => {
 
     if (accounts.notAsked) {
         dispatch(getAccounts());
-        fetchMatchData({matchStuff, filterState, accessToken, dispatch});
+        fetchMatchData({ matchStuff, filterState, accessToken, dispatch });
     }
 
     const onChangeFilters = (payload) => {
@@ -58,26 +58,30 @@ const MatchBankTransactions = () => {
         setFilterState({ type: 'SET_MATCHED' });
     }
     const onChangeSelection = (payId, invId, amount) => {
-        const payload = { payId, invId, amount};
-        setFilterState({ type: 'SET_SELECTION', payload})
+        const payload = { payId, invId, amount };
+        setFilterState({ type: 'SET_SELECTION', payload })
     }
     const onChangeOnlySelection = () => {
         setFilterState({ type: 'SET_ONLY_SELECTION' });
     }
     const onSubmit = () => {
         // load invoices, receipts, payments
-        fetchMatchData({matchStuff, filterState, accessToken, dispatch});
-        setFilterState({ type: 'SET_FETCHED'});
+        fetchMatchData({ matchStuff, filterState, accessToken, dispatch });
+        setFilterState({ type: 'SET_FETCHED' });
     }
 
     const onConnectBookings = () => {
-        // load invoices, receipts, payments
-        const callback = () => {
-            dispatch(doSnack(`${filterState.selection.length} connecties doorgestuurd aan Moneybird.`));
-            fetchMatchData({matchStuff, filterState, accessToken, dispatch});
-            setFilterState({ type: 'SET_FETCHED'});
+        if (filterState.connectClicked) {
+            // load invoices, receipts, payments
+            const callback = () => {
+                dispatch(doSnack(`${filterState.selection.length} connecties doorgestuurd aan Moneybird.`));
+                fetchMatchData({ matchStuff, filterState, accessToken, dispatch });
+                setFilterState({ type: 'SET_FETCHED' });
+            }
+            connectSelection(matchStuff.connections, filterState.selection, accessToken, dispatch, callback);
+        } else {
+            setFilterState({ type: 'SET_CONNECT' });
         }
-        connectSelection(matchStuff.connections, filterState.selection, accessToken, dispatch, callback);
     }
 
     if (accessToken.hasData && accounts.hasAllData) {
@@ -86,19 +90,19 @@ const MatchBankTransactions = () => {
         return <SideNavWrapper>
             <SideNav>
                 <MatchFilters accounts={activeAccounts} filterState={filterState} hasToppers={hasToppers}
-                    onChangeFilters={onChangeFilters} onChangeOnlyOpen={onChangeOnlyOpen} 
+                    onChangeFilters={onChangeFilters} onChangeOnlyOpen={onChangeOnlyOpen}
                     onChangeMatched={onChangeMatched}
                     onChangeOnlySelection={onChangeOnlySelection}
                     onSubmit={onSubmit} />
             </SideNav>
             <MainWithSideNav>
-                <MatchMain 
-                    filterState={filterState} 
+                <MatchMain
+                    filterState={filterState}
                     matchStuff={matchStuff}
                     accounts={activeAccounts}
                     selected={filterState.selection}
                     setSelected={onChangeSelection}
-                    onConnectBookings={onConnectBookings}/>
+                    onConnectBookings={onConnectBookings} />
             </MainWithSideNav>
         </SideNavWrapper>
     }

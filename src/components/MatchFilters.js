@@ -48,7 +48,8 @@ export const initialFilters = {
     hasRelated: false,
     selection: [],
     hasSelection: false,
-    onlySelection: false
+    onlySelection: false,
+    connectClicked: false
 }
 
 export const MatchFilters = (props) => {
@@ -106,7 +107,7 @@ export const MatchFilters = (props) => {
                 </li>
                 <li>
                     <div className='switch'>
-                        <label className={(!hasToppers)? 'disabled' : ''}>
+                        <label className={(!hasToppers) ? 'disabled' : ''}>
                             <span className='switch-label right-align'>Alle transacties tonen</span>
                             <input type="checkbox"
                                 checked={filterState.onlyMatched}
@@ -119,7 +120,7 @@ export const MatchFilters = (props) => {
                 </li>
                 <li>
                     <div className='switch'>
-                        <label className={(!filterState.hasSelection)? 'disabled': ''}>
+                        <label className={(!filterState.hasSelection) ? 'disabled' : ''}>
                             <span className='switch-label right-align'>Alles tonen</span>
                             <input type="checkbox"
                                 checked={filterState.onlySelection}
@@ -151,7 +152,7 @@ export const filterReducer = (state, action) => {
             const newFet = { account: { ...current.account }, period: { ...current.period } };
             return {
                 ...state, fetched: newFet, changed: false,
-                selection: [], onlySelection: false, hasSelection: false
+                selection: [], onlySelection: false, hasSelection: false, connectClicked: false
             }
 
         case 'SET_ONLYOPEN':
@@ -183,8 +184,11 @@ export const filterReducer = (state, action) => {
                 ...state,
                 selection: newSelection,
                 hasSelection: newHasSelection,
-                onlySelection: state.onlySelection && newHasSelection
+                onlySelection: state.onlySelection && newHasSelection,
+                connectClicked: false
             }
+        case 'SET_CONNECT':
+            return { ...state, connectClicked: true }
 
         default:
             return state;

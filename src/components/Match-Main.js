@@ -28,12 +28,15 @@ const MatchMain = (props) => {
                 && (!filterState.onlySelection || selected.find(s => (s.payId === p.id)))
             )
         });
-        const btnClass = (selected.length > 0) ? 'btn right' : 'btn right disabled';
-        const btnText = (selected.length === 1) ?
-            `${selected.length} betaling koppelen`
-            : (selected.length > 1) ?
-                `${selected.length} betalingen koppelen`
-                : 'Selectie koppelen';
+        const btnClass = (selected.length > 0) ?
+            (filterState.connectClicked) ? 'btn right blue darken-1' : 'btn right'
+            : 'btn right disabled';
+        const btnText = (filterState.connectClicked) ? 'Koppeling bevestigen'
+            : (selected.length === 1) ?
+                `${selected.length} betaling koppelen`
+                : (selected.length > 1) ?
+                    `${selected.length} betalingen koppelen`
+                    : 'Selectie koppelen';
         const curAccountName = (filterState.current.account.id === '') ?
             '' : `voor de rekening ${filterState.current.account.label} `;
         return <div className='container'>
