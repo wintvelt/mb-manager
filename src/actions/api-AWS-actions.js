@@ -10,7 +10,7 @@ export function getIncomingSums(access_token) {
 		// const url = (process.env.NODE_ENV === 'development') ?
 		// 	'http://localhost:3030/export?method=GET&filename=incoming-summary-list.json'
 		// 	: '';
-		const url = 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export?filename=incoming-summary-list.json';
+		const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/export?filename=incoming-summary-list.json';
 
 		return fetch(url, {
 			mode: "cors", cache: 'no-cache',
@@ -39,7 +39,7 @@ export function exportDocs(body, access_token) {
 		// const url = (process.env.NODE_ENV === 'development') ?
 		// 	'http://localhost:3030/export'
 		// 	: 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export/';
-		const url = 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export';
+		const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/export';
 		dispatch(setExportPending(body.ids.length));
 		dispatch(doSnack('Export wordt gemaakt voor ' + body.ids.length + ' document(en)'));
 		postData(url, body, "POST", access_token)
@@ -64,7 +64,7 @@ export function syncFiles(access_token) {
 		// const url = (process.env.NODE_ENV === 'development') ?
 		// 	'http://localhost:3030/sync'
 		// 	: 'https://';
-		const url = 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/sync';
+		const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/sync';
 
 		dispatch(setSyncPending(true));
 		dispatch(doSnack('Laatste stand van zaken van Moneybird ophalen'));
@@ -90,7 +90,7 @@ export function deleteFile(filename, access_token) {
 		// const url = (process.env.NODE_ENV === 'development') ?
 		// 	'http://localhost:3030/export'
 		// 	: 'https://';
-		const url = 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export';
+		const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/export';
 
 		const body = { filename: filename };
 		dispatch(setOptDeleted([filename]));
