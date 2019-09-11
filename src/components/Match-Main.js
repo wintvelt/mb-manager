@@ -41,7 +41,7 @@ const MatchMain = (props) => {
             '' : `voor de rekening ${filterState.current.account.label} `;
         return <div className='container'>
             <div className='row flex' style={{ alignItems: 'baseline', minHeight: '50px' }}>
-                <h5 style={{ flex: 1 }}>Betalingen om te matchen</h5>
+                <h5 style={{ flex: 1 }}>Betalingen om te matchen ({data.length} van {payments.data.length} getoond)</h5>
                 <button className={btnClass} onClick={onSubmit}>{btnText}</button>
             </div>
             {loadComp(invoices, 'Ophalen bonnetjes', 'Foutje', 'Bonnetjes', invoiceIds.data)}
