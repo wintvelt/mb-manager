@@ -178,7 +178,7 @@ export const loadComp = (apiEl, txtLoading, txtError, txtOK, refData) => {
                     <span className="progress" style={{ width: '200px', margin: '8px' }}>
                         <span className="determinate" style={{ width: progPerc }}></span>
                     </span>
-                    {`${(apiEl.data && apiEl.data.length) || 0} van ${refData.length} (${since(apiEl.time)})`}
+                    {`${(apiEl.data && apiEl.data.length) || 0} van ${refData.length}`}
                 </p>
                 : <p className='flex' style={{minHeight: '24px'}}></p>
             : (apiEl.hasData) ?

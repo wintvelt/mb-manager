@@ -33,7 +33,7 @@ export const matchReducer = (matchStuff, action) => {
             return { ...matchStuff, invoiceIds: newInvoiceIds };
 
         case 'setInvoices':
-            const newInvoices = api.set(matchStuff.invoices, content);
+            const newInvoices = api.set(matchStuff.invoices, content, openAmount);
             return { ...matchStuff, invoices: newInvoices };
 
         case 'setConnections':
@@ -81,6 +81,22 @@ const sortByDate = (arr) => {
     })
 }
 
+// to add open amount for matching
+const openAmount = (arr) => {
+    return arr.map(inv => {
+        const { payments } = inv;
+        if (payments && payments.length > 0) {
+            let openAmt = -parseFloat(inv.total_price_incl_tax_base);
+            for (const payment of payments) {
+                openAmt += parseFloat(payment.price_base);
+            }
+            return { ...inv, amount_open: openAmt.toString() }
+        } else {
+            return inv;
+        }
+    })
+}
+
 const flip = (str) => {
     if (!str) return str;
     return (str.slice(0, 1) === '-') ? str.slice(1) : '-' + str;
@@ -90,13 +106,13 @@ const flip = (str) => {
 export const connectSelection = (stuff, selection, accessToken, dispatch, callback) => {
     const storeSetFunc = (content) => setMatch({ type: 'setConnections', content });
     const paramsArr = selection.map(connection => {
-        const { payId, invId, amount} = connection;
+        const { payId, invId, amount } = connection;
         return {
             method: 'PATCH',
             stuff,
-            body: { 
-                booking_type: 'Document', 
-                booking_id: invId, 
+            body: {
+                booking_type: 'Document',
+                booking_id: invId,
                 price_base: amount,
                 description: 'Transactie gekoppeld uit Moblybird ;)'
             },
@@ -273,6 +289,7 @@ const getRelated = (payment, invoiceData) => {
             (amount_open === invAmt) ? 5
                 : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 2
                     : 0;
+        const openInvScore = (amount_open === inv.amount_open) ? 5 : 0;
         const detailScore = (inv.details && inv.details.length > 1) ?
             (inv.details.find(d => (d.amount === '1 x' && d.price === flip(amount)))) ? 5 : 0 : 0;
         const kwObj = inv.contact && inv.contact.custom_fields &&
@@ -286,8 +303,8 @@ const getRelated = (payment, invoiceData) => {
             (date === inv.date) ? 3
                 : (daysDiff(date, inv.date) < THRESHOLD_DAYS) ? 1
                     : 0;
-        const totalScore = dateScore + amountScore + openScore + detailScore + kwScore;
-        const scores = [amountScore, openScore, detailScore, kwScore, dateScore];
+        const totalScore = dateScore + amountScore + openScore + openInvScore + detailScore + kwScore;
+        const scores = [amountScore, openScore, openInvScore, detailScore, kwScore, dateScore];
         return {
             ...inv,
             total_price_incl_tax_base: invAmt,

@@ -6,6 +6,7 @@ This page is in desparate need of more specifics, I know.
 They will be provided sometime in the future..
 
 Generic wishlist for cleanup and improvement:
+- [ ] On Match-page, turn off topHits filter when deselecting onlyOpen
 - [ ] Add export for marketing purposes
     - [ ] per category
     - [ ] per month

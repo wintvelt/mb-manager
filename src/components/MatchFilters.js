@@ -156,10 +156,12 @@ export const filterReducer = (state, action) => {
             }
 
         case 'SET_ONLYOPEN':
-            return { ...state, onlyOpen: !state.onlyOpen }
+            const newOnlyOpen = !state.onlyOpen;
+            return { ...state, onlyOpen: newOnlyOpen, onlyMatched: newOnlyOpen && state.onlyMatched }
 
         case 'SET_MATCHED':
-            return { ...state, onlyMatched: !state.onlyMatched }
+            const newOnlyMatched = !state.onlyMatched;
+            return { ...state, onlyMatched: newOnlyMatched }
 
         case 'SET_ONLY_SELECTION':
             return { ...state, onlySelection: !state.onlySelection }

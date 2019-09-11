@@ -295,7 +295,7 @@ const ConnectOption = (props) => {
             </li>
             <li></li>
             <li style={{ color: '#757575' }}>
-                <Amount amount={inv.total_price_incl_tax_base || '0.0'} />
+                <Amount amount={inv.total_price_incl_tax_base || '0.0'} amount_open={inv.amount_open}/>
             </li>
         </ul>
     </li>
