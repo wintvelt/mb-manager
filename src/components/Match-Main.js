@@ -37,8 +37,10 @@ const MatchMain = (props) => {
                 : (selected.length > 1) ?
                     `${selected.length} betalingen koppelen`
                     : 'Selectie koppelen';
-        const curAccountName = (filterState.current.account.id === '') ?
+        const curAccountName = (filterState.current.account.value === '') ?
             '' : `voor de rekening ${filterState.current.account.label} `;
+        const noDataTitle = (!matchStuff.hasToppers) ? 'Geen open betalingen met top suggesties gevonden.'
+            : 'Woohoo! Geen openstaande betalingen.';
         return <div className='container'>
             <div className='row flex' style={{ alignItems: 'baseline', minHeight: '50px' }}>
                 <h5 style={{ flex: 1 }}>Betalingen om te matchen ({data.length} van {payments.data.length} getoond)</h5>
@@ -48,8 +50,8 @@ const MatchMain = (props) => {
             {(data.length > 0 || !invoices.hasAllData) ?
                 <Payments data={data} accounts={accounts} selected={selected} onSelect={setSelected} />
                 : <div className='section center'>
-                    <h5>Woohoo! Geen openstaande betalingen.</h5>
-                    <p>{`Tenminste, ${curAccountName} voor de periode ${filterState.current.period.label}`}</p>
+                    <h5>{noDataTitle}</h5>
+                    <p>{`Tenminste, ${curAccountName}voor de periode ${filterState.current.period.label}`}</p>
                 </div>
             }
         </div>
@@ -295,7 +297,7 @@ const ConnectOption = (props) => {
             </li>
             <li></li>
             <li style={{ color: '#757575' }}>
-                <Amount amount={inv.total_price_incl_tax_base || '0.0'} amount_open={inv.amount_open}/>
+                <Amount amount={inv.total_price_incl_tax_base || '0.0'} amount_open={inv.amount_open} />
             </li>
         </ul>
     </li>

@@ -86,10 +86,9 @@ const MatchBankTransactions = () => {
 
     if (accessToken.hasData && accounts.hasAllData) {
         const activeAccounts = accounts.data.filter(a => a.active);
-        const hasToppers = matchStuff.hasToppers;
         return <SideNavWrapper>
             <SideNav>
-                <MatchFilters accounts={activeAccounts} filterState={filterState} hasToppers={hasToppers}
+                <MatchFilters accounts={activeAccounts} filterState={filterState}
                     onChangeFilters={onChangeFilters} onChangeOnlyOpen={onChangeOnlyOpen}
                     onChangeMatched={onChangeMatched}
                     onChangeOnlySelection={onChangeOnlySelection}

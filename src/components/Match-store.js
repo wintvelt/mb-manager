@@ -90,7 +90,8 @@ const openAmount = (arr) => {
             for (const payment of payments) {
                 openAmt += parseFloat(payment.price_base);
             }
-            return { ...inv, amount_open: openAmt.toString() }
+            const roundedOpenAmt = Math.round(openAmt * 100) / 100;
+            return { ...inv, amount_open: roundedOpenAmt.toString() }
         } else {
             return inv;
         }

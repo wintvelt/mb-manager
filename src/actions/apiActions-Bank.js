@@ -43,11 +43,7 @@ const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc,
     })
         .then(res => {
             if (res.ok) {
-                const contentType = res.headers.get('content-type');
-                if (contentType.startsWith('application/json')) {
-                    return res.json();
-                }
-                else return res.text();
+                return res.text();
             } else {
                 return res.text()
                     .then(errorMsg => {
@@ -57,7 +53,7 @@ const fetchAPI = ({ stuff, url, accessToken, dispatch, storeSetFunc,
         })
         .then(string => {
             try {
-                return JSON.parse(string)
+                return JSON.parse(string);
             } catch (error) {
                 return (string === 'no data') ? '' : string;
             }

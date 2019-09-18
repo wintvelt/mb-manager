@@ -53,7 +53,7 @@ export const initialFilters = {
 }
 
 export const MatchFilters = (props) => {
-    const { accounts, filterState, hasToppers, onChangeOnlySelection,
+    const { accounts, filterState, onChangeOnlySelection,
         onChangeFilters, onChangeOnlyOpen, onChangeMatched, onSubmit } = props;
     const accountOptions = [initAccount, ...accounts]
         .map(account => {
@@ -107,12 +107,12 @@ export const MatchFilters = (props) => {
                 </li>
                 <li>
                     <div className='switch'>
-                        <label className={(!hasToppers) ? 'disabled' : ''}>
+                        <label>
                             <span className='switch-label right-align'>Alle transacties tonen</span>
                             <input type="checkbox"
                                 checked={filterState.onlyMatched}
                                 onChange={onChangeMatched}
-                                disabled={!hasToppers} />
+                            />
                             <span className="lever"></span>
                             <span className='switch-label'>Alleen top suggesties</span>
                         </label>
