@@ -94,7 +94,8 @@ function PrivateRoute({ isConnected, component: Component, ...rest }) {
   );
 }
 
-
 const App = connect(mapStateToProps)(ConnectedApp);
 
 export default App;
+
+export { App };
