@@ -1,12 +1,12 @@
 // Component for Active account (sub of Bankmutations)
 import React, { useState } from 'react';
-import { fetchAWSAPI } from '../actions/apiActions-Bank';
+import { fetchAWSAPI } from '../store/apiActions-Bank';
 import { useDispatch, useSelector } from 'react-redux';
 import { FileZone } from '../constants/file-helpers';
 import { BankFiles } from './Bankmutations-Files';
 import { BankConfig } from './Bankmutations-config';
-import { setBank } from '../actions/actions';
-import { doSnack } from '../actions/actions';
+import { setBank } from '../store/actions';
+import { doSnack } from '../store/actions';
 import { BankActiveCsv } from './Bankmutations-ActiveCsv';
 
 export const ActiveAccount = (props) => {

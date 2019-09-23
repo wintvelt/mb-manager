@@ -4,9 +4,9 @@ import React, { useReducer, useState } from 'react';
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from 'react-router-dom';
 
-import { getLedgers, getContacts, getCustomFields } from "../actions/apiActions";
-import { batchContactCustomUpdate } from '../actions/batchActions';
-import { doSnack } from "../actions/actions";
+import { getLedgers, getContacts, getCustomFields } from "../store/apiActions";
+import { batchContactCustomUpdate } from '../store/batchActions';
+import { doSnack } from "../store/actions";
 import ContactFilters from './ContactFilters';
 import { SideNavWrapper, SideNav, MainWithSideNav } from './SideNav';
 import { keywordReducer, makeRows, HeaderRow, Row, filterRow } from './Contacts-Keywords-helpers';

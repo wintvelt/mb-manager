@@ -1,5 +1,5 @@
 // specifically for Bank (with hooks)
-import { doSnackError } from '../actions/actions';
+import { doSnackError } from './actions';
 
 
 export const base_url_AWS = 'https://87xzyymsji.execute-api.eu-central-1.amazonaws.com/Prod';

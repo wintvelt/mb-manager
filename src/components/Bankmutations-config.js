@@ -2,9 +2,9 @@
 import React, { useState, useReducer } from 'react';
 import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
-import { setBank } from '../actions/actions';
+import { setBank } from '../store/actions';
 import { FieldsConfig } from './Bankmutations-config-fields';
-import { fetchAWSAPI } from '../actions/apiActions-Bank';
+import { fetchAWSAPI } from '../store/apiActions-Bank';
 
 
 export const BankConfig = ({ account, config, convertResult, files }) => {

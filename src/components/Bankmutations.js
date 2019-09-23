@@ -1,8 +1,8 @@
 // For converting csv files with bank transactions and uploading to moneybird
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchMBAPI, fetchAWSAPI } from '../actions/apiActions-Bank';
-import { setAccounts, setBank } from '../actions/actions';
+import { fetchMBAPI, fetchAWSAPI } from '../store/apiActions-Bank';
+import { setAccounts, setBank } from '../store/actions';
 import Select from 'react-select';
 import { ActiveAccount } from './Bankmutations-ActiveAccount';
 import { Link } from 'react-router-dom';

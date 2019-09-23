@@ -32,10 +32,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { SideNavWrapper, SideNav, MainWithSideNav } from './SideNav';
 import { MatchFilters, filterReducer, initialFilters } from './MatchFilters';
 import MatchMain from './Match-Main';
-import { getAccounts } from '../actions/apiActions';
+import { getAccounts } from '../store/apiActions';
 import { Link } from 'react-router-dom';
 import { fetchMatchData, connectSelection } from './Match-store';
-import { doSnack } from '../actions/actions';
+import { doSnack } from '../store/actions';
 
 
 const MatchBankTransactions = () => {

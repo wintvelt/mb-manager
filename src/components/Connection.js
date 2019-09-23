@@ -3,8 +3,8 @@
 
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { setAccess, getRequestToken, testAccess } from "../actions/apiActions";
-import { logout } from "../actions/actions";
+import { setAccess, getRequestToken, testAccess } from "../store/apiActions";
+import { logout } from "../store/actions";
 import { paramToObj } from "../constants/helpers";
 import moment from 'moment';
 

@@ -1,9 +1,9 @@
 //Semi secret page, playground for new stuff
 import React from 'react';
 import { connect } from "react-redux";
-import { login, logout, doSnack } from "../actions/actions";
-import { batchLedgerUpdate } from "../actions/batchActions";
-import { getContacts } from '../actions/apiActions';
+import { login, logout, doSnack } from "../store/actions";
+import { batchLedgerUpdate } from "../store/batchActions";
+import { getContacts } from '../store/apiActions';
 import { FileZone } from '../constants/file-helpers';
 
 function mapDispatchToProps(dispatch) {

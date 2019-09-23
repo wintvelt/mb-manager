@@ -6,7 +6,7 @@ import { storeWithInit } from "./store/index";
 import App from './components/App';
 import * as serviceWorker from './serviceWorker';
 
-import { getCookie } from "./actions/cookies";
+import { getCookie } from "./store/cookies";
 import { initialState } from './reducers/reducers';
 import { newApiData } from './constants/helpers';
 
