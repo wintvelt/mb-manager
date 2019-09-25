@@ -1,4 +1,4 @@
-// src/js/reducers/reducers.js
+// reducers.js
 
 import {
   DO_SNACK, DO_SNACK_ERROR,
@@ -247,6 +247,7 @@ function rootReducer(state = initialState, action) {
 
     case ADD_RECEIVED: {
       const newReceived = api.set(state.received, action.payload);
+      console.log({newReceived});
       return Object.assign({}, state, {
         received: newReceived,
         accessVerified: (!action.payload.ERROR)

@@ -7,7 +7,7 @@ import App from './components/App';
 import * as serviceWorker from './serviceWorker';
 
 import { getCookie } from "./store/cookies";
-import { initialState } from './reducers/reducers';
+import { initialState } from './store/reducers';
 import { newApiData } from './constants/helpers';
 
 const initFromCookie = () => {

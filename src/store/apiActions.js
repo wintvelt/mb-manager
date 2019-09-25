@@ -206,6 +206,7 @@ export function getReceived(idList) {
 		}
 		if (!idList) {
 			// fetch payment ids
+			console.log('fetching payment ids')
 			const url = base_url + '/financial_mutations/synchronization.json?filter=period:this_year';
 			return getData(url, accessToken.data)
 				.then(idListRaw => {
@@ -225,6 +226,7 @@ export function getReceived(idList) {
 					dispatch(doSnackError(msg));
 				});
 		}
+		console.log({idList});
 		// get payments from fetched ids
 		const newIdList = idList.slice(0, PERPAGE);
 		const nextIds = idList.slice(PERPAGE);
