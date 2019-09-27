@@ -1,4 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { getPayments, getContacts, getAccounts } from '../../actions/apiActions-new';
+
 import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
@@ -6,6 +10,9 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Box from '@material-ui/core/Box';
+import List from '@material-ui/core/Box';
+
+import { LoadingComp } from '../../helpers/apiData/apiData-components';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -29,9 +36,24 @@ const useStyles = makeStyles(theme => ({
 
 const ExpandMoreIcon = () => <Icon>expand_more</Icon>
 
-export default function ControlledExpansionPanels() {
+export default function Payments() {
     const classes = useStyles();
-    const [expanded, setExpanded] = React.useState([]);
+    const payments = useSelector(store => store.payments);
+    const paymentsList = payments.apiData;
+    const accessToken = useSelector(store => store.accessToken);
+    const access_token = accessToken.data;
+    const dispatch = useDispatch();
+    const [expanded, setExpanded] = useState(['loading']);
+    const [period, setPeriod] = useState(',period:this_quarter');
+
+    useEffect(() => {
+        dispatch(getAccounts(access_token));
+        dispatch(getContacts(access_token));
+    },[dispatch, access_token])
+
+    useEffect(() => {
+        dispatch(getPayments(access_token, period));
+    },[dispatch, access_token, period])
 
     const handleChange = panel => (event, isIn) => {
         const newExpanded = (!isIn) ?
@@ -42,7 +64,7 @@ export default function ControlledExpansionPanels() {
 
     return (
         <div className={classes.root}>
-            <ExpansionPanel expanded={expanded.includes('panel1')} onChange={handleChange('panel1')}>
+            <ExpansionPanel expanded={expanded.includes('loading')} onChange={handleChange('loading')}>
                 <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1bh-content"
@@ -52,14 +74,14 @@ export default function ControlledExpansionPanels() {
                         <Icon className={classes.icon}>cloud_queue</Icon>Geladen
                         </Typography>
                     <Typography className={classes.secondaryHeading}>
-                        382 betalingen, van de afgelopen 3 maanden (vanaf juni).
                     </Typography>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>
-                    <Typography>
-                        Nulla facilisi. Phasellus sollicitudin nulla et quam mattis feugiat. Aliquam eget
-                        maximus est, id dignissim quam.
-                    </Typography>
+                    <List>
+                        <LoadingComp name='rekeningen' apiData={accountsList} />
+                        <LoadingComp name='betalingen' apiData={paymentsList} />
+                        <LoadingComp name='contacten' apiData={contactsList} />
+                    </List>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
             <ExpansionPanel expanded={expanded.includes('panel2')} onChange={handleChange('panel2')}>
