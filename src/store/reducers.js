@@ -10,14 +10,17 @@ import {
   ADD_RECEIVED, SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT,
-  SET_BANK, SET_MATCH
-} from "../constants/action-types";
+  SET_BANK, SET_MATCH, 
+  SET_PAYMENTS_NEW, SET_CONTACTS_NEW, SET_ACCOUNTS_NEW
+} from "./action-types";
 import {
   setLedgerInRow, setCustomFieldInRow, setPaymentInRow
 } from './reducer-helpers';
 import { newApiData, api } from '../constants/helpers';
 import { initBankData, setBank } from './reducer-helpers-bank';
 import { initialMatch, matchReducer } from "../components/Match-store";
+import { initApiDataMulti, apiUpdateMulti, apiUpdateMultiMulti } from '../helpers/apiData/apiData-multi';
+import { apiUpdate, initApiData } from '../helpers/apiData/apiData';
 
 // initial state also exported to root (to set default when initializing)
 export const initialState = {
@@ -29,6 +32,9 @@ export const initialState = {
   accounts: newApiData(),
   customFields: newApiData(),
   incoming: newApiData(),
+  payments: initApiDataMulti,
+  contactsNew: initApiDataMulti,
+  accountsNew: initApiData,
   contacts: newApiData(),
   received: newApiData(),
   incomingSums: null,
@@ -43,7 +49,8 @@ export const initialState = {
 };
 
 function rootReducer(state = initialState, action) {
-  switch (action.type) {
+  const { type, payload } = action;
+  switch (type) {
     // payload = accessToken
     case SET_ACCESS_TOKEN: {
       return Object.assign({}, state, {
@@ -56,6 +63,18 @@ function rootReducer(state = initialState, action) {
         accessToken: newApiData(),
         accessVerified: false
       })
+    }
+    case SET_PAYMENTS_NEW: {
+      const newPayments = apiUpdateMultiMulti(state.payments, payload);
+      return {...state, payments: newPayments }
+    }
+    case SET_CONTACTS_NEW: {
+      const newContacts = apiUpdateMulti(state.contactsNew, payload);
+      return {...state, contactsNew: newContacts }
+    }
+    case SET_ACCOUNTS_NEW: {
+      const newAccounts = apiUpdate(state.accountsNew, payload);
+      return {...state, accountsNew: newAccounts }
     }
     // payload = ()
     case TEST_CONNECTION: {

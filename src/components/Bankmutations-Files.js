@@ -1,8 +1,8 @@
 // component for listing files
 import React, { useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setBank, doSnack } from '../store/actions';
-import { fetchAWSAPI, base_url_AWS, adminCode } from '../store/apiActions-Bank';
+import { setBank, doSnack } from '../actions/actions';
+import { fetchAWSAPI, base_url_AWS, adminCode } from '../actions/apiActions-Bank';
 
 let counter = 0;
 

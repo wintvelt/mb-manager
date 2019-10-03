@@ -4,8 +4,8 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import { Link } from 'react-router-dom';
 
-import { getReceived, getAccounts } from "../store/apiActions";
-import { doSnack } from "../store/actions";
+import { getReceived, getAccounts } from "../actions/apiActions";
+import { doSnack } from "../actions/actions";
 import { SortableTable, tHeadAddSelect, toggleCell } from '../constants/table-helpers-2';
 import { receivedRows, receivedHeaders } from '../constants/data-helpers-received';
 import ReceivedFilters, { filterMonth, filterStatus, filterAmount, filterSearch, filterAccount } from './ReceivedFilters';

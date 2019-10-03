@@ -4,10 +4,10 @@ import { connect } from "react-redux";
 import Select from 'react-select';
 import moment from 'moment';
 
-import { getIncomingSums, exportDocs, deleteFile, syncFiles } from '../store/api-AWS-actions';
+import { getIncomingSums, exportDocs, deleteFile, syncFiles } from '../actions/api-AWS-actions';
 import { exportRows, exportHeaders, getFromSums } from '../constants/data-helpers-export';
 import { SortableTable, tHeadAddSelect } from '../constants/table-helpers';
-import { doSnack } from "../store/actions";
+import { doSnack } from "../actions/actions";
 
 
 

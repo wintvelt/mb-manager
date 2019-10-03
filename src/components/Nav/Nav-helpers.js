@@ -236,7 +236,7 @@ export const NavWrapper = (props) => {
             className={clsx(classes.content, {
                 [classes.contentShift]: open,
             })}>
-            <div className={classes.drawerHeader} />
+            <div className={classes.drawerHeader} id='back-to-top-anchor'/>
             {children}
         </main>
     </div>

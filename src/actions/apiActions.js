@@ -7,7 +7,7 @@ import {
 	addContacts, setCustomFields,
 	addReceived
 } from './actions';
-import { setCookie, deleteCookie } from './cookies';
+import { setCookie, deleteCookie } from '../store/cookies';
 
 const PERPAGE = 50;
 

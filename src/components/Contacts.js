@@ -4,9 +4,9 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import { Link } from 'react-router-dom';
 
-import { getLedgers, getContacts, getCustomFields } from "../store/apiActions";
-import { batchContactUpdate, batchContactCustomUpdate } from '../store/batchActions';
-import { doSnack } from "../store/actions";
+import { getLedgers, getContacts, getCustomFields } from "../actions/apiActions";
+import { batchContactUpdate, batchContactCustomUpdate } from '../actions/batchActions';
+import { doSnack } from "../actions/actions";
 import { SortableTable, tHeadAddSelect, toggleCell } from '../constants/table-helpers';
 import {
 	contactRows, contactHeaders,

@@ -2,7 +2,7 @@
 import {
 	setIncomingSums, setExportPending, setSyncPending, setOptDeleted,
 	doSnack, doSnackError
-} from './actions';
+} from '../actions/actions';
 import { postData, getData } from './apiActions';
 
 export function getIncomingSums(access_token) {

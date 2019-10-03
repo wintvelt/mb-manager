@@ -12,7 +12,7 @@ import Contacts from './Contacts';
 import ContactKeywords from './Contacts-Keywords';
 import Incoming from './Incoming';
 import Payments from './Payments/Payments';
-import Received from './Received';
+// import Received from './Received';
 import MatchBankTransactions from './Match';
 import Export from './Export';
 import Bankmutations from './Bankmutations';

@@ -1,6 +1,6 @@
 import { newApiData, api } from "../constants/helpers";
-import { setMatch } from '../store/actions';
-import { fetchMBAPI } from '../store/apiActions-Bank';
+import { setMatch } from '../actions/actions';
+import { fetchMBAPI } from '../actions/apiActions-Bank';
 
 // Match-store.js
 // includes reducers and helpers

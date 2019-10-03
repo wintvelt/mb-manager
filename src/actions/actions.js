@@ -9,7 +9,7 @@ import { DO_SNACK, DO_SNACK_ERROR,
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT,
   SET_BANK, SET_MATCH
-  } from "../constants/action-types";
+  } from "../store/action-types";
 
 export function setAccessToken(payload) {
   return { type: SET_ACCESS_TOKEN, payload };

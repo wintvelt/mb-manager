@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setBank } from '../store/actions';
+import { setBank } from '../actions/actions';
 
 export const BankActiveCsv = (props) => {
     const { activeCsv } = props;

@@ -2,7 +2,7 @@
 // bevat ook tabel-bouw functies en tabel logica voor incoming
 
 import { tHead, tCell } from '../constants/table-helpers';
-import { adminCode } from '../store/apiActions';
+import { adminCode } from '../actions/apiActions';
 import { idLookup } from './file-imported';
 
 // potentially move to Incoming Component..
