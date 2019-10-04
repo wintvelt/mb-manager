@@ -15,8 +15,8 @@ export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
 })
 
 export const getPayments = (access_token, periodFilter = 'this_quarter') => apiActionSync({
-    url: 'https://moneybird.com/api/v2/243231934476453244/documents/receipts/synchronization.json' +
-        `?filter=period:${periodFilter},state:saved%7Copen%7Cpaid%7Cpending_payment%7Clate`,
+    url: 'https://moneybird.com/api/v2/243231934476453244/financial_mutations/synchronization.json' +
+        `?filter=period:${periodFilter}`,
     headers: { Authorization: 'Bearer ' + access_token },
     storeAction: (payload) => {
         return { type: SET_PAYMENTS_NEW, payload: { key: periodFilter, apiAction: payload } }

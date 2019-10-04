@@ -70,11 +70,17 @@ export const apiUpdateMulti = (state, action) => {
                 .updateIn(['syncList'], initApiData, (apiData) => apiUpdate(apiData, payload));
             const syncIsLoading = newState.getIn(['syncList', 'isLoading']);
             const syncHasAllData = newState.getIn(['syncList', 'hasAllData']);
+            const syncHasError = newState.getIn(['syncList', 'hasError']);
             return (syncIsLoading) ?
                 newState.mergeIn(['apiData'], apiFlagMulti('isLoading'))
-                : (syncHasAllData) ?
-                    newState.setIn(['apiData', 'dataLength'], newState.getIn(['syncList', 'data']).size)
-                    : newState;
+                : (syncHasError) ? newState.mergeIn(['apiData'], {
+                    isLoading: false,
+                    hasError: true,
+                    errorMsg: newState.getIn(['syncList', 'errorMsg'])
+                })
+                    : (syncHasAllData) ?
+                        newState.setIn(['apiData', 'dataLength'], newState.getIn(['syncList', 'data']).size)
+                        : newState;
         }
 
         case SET_DONE:
@@ -104,16 +110,16 @@ export const apiUpdateMultiMulti = (state, action) => {
         .equals(newState.getIn(['rawData', key, 'apiData']));
     // derive the new global state
     const newRawData = newState.get('rawData').toList();
-    const newLoadingMsg = (apiAction && apiAction.payload && apiAction.payload.loadingMsg ) || 
+    const newLoadingMsg = (apiAction && apiAction.payload && apiAction.payload.loadingMsg) ||
         state.getIn(['apiData', 'loadingMsg']);
-    const newErrorMsg = (apiAction && apiAction.payload && apiAction.payload.errorMsg) || 
+    const newErrorMsg = (apiAction && apiAction.payload && apiAction.payload.errorMsg) ||
         state.getIn(['apiData', 'errorMsg']);
 
     return (hasRelevantUpdate) ?
         newState.mergeIn(['apiData'], {
             notAsked: false,
             isLoading: newRawData.find(v => v.getIn(['apiData', 'isLoading']) === true) ? true : false,
-            data: newRawData.map(it => it.getIn(['apiData','data'])).filter(it => List.isList(it)).flatten(1),
+            data: newRawData.map(it => it.getIn(['apiData', 'data'])).filter(it => List.isList(it)).flatten(1),
             hasData: newRawData.find(v => v.getIn(['apiData', 'hasData']) === true) ? true : false,
             hasError: newRawData.find(v => v.getIn(['apiData', 'hasError']) === true) ? true : false,
             hasAllData: newRawData.find(v => v.getIn(['apiData', 'hasAllData']) === true) ? true : false,

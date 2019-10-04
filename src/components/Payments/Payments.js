@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { getPayments, getContacts, getAccounts } from '../../actions/apiActions-new';
+import { derivedPayments } from './Payments-table';
+import EnhancedTable from './Payments-table-helpers';
 
 import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -56,8 +58,12 @@ export default function Payments() {
     const hasContacts = contactsList.hasAllData;
     const accounts = useSelector(store => store.accountsNew);
     const accountsList = accounts.toJS();
+    const paymentsData = useMemo(() => {
+        return derivedPayments(paymentsList.data, contactsList.data, accountsList.data)
+    }, [paymentsList.data, contactsList.data, accountsList.data])
+    // const paymentsData = derivedPayments(paymentsList.data, contactsList.data, accountsList.data);
     const dispatch = useDispatch();
-    const [expanded, setExpanded] = useState(['loading']);
+    const [expanded, setExpanded] = useState([]);
     const [period, setPeriod] = useState(0);
     const curPeriod = periodOptions[period].label.toLowerCase();
     const nextPeriod = (period < periodOptions.length) ?
@@ -123,15 +129,12 @@ export default function Payments() {
                 </ExpansionPanelDetails>
                 <Divider />
                 <ExpansionPanelActions>
-                    <Typography align='right'>
-                        {(nextPeriod) ?
-                            `Betalingen ${nextPeriod} toevoegen`
-                            : `Alle betalingen (${curPeriod}) zijn opgehaald`}
-                    </Typography>
-                    <Button variant='contained' color='primary' className={classes.listButton}
+                    <Button color='primary' className={classes.listButton}
                         disabled={(nextPeriod) ? false : true}
                         onClick={handleMore}>
-                        Meer..
+                        {(nextPeriod) ?
+                            `Betalingen ${nextPeriod} toevoegen..`
+                            : `Alle betalingen (${curPeriod}) zijn opgehaald`}
                         </Button>
                 </ExpansionPanelActions>
             </ExpansionPanel>
@@ -153,7 +156,7 @@ export default function Payments() {
                     <Typography>
                         Donec placerat, lectus sed mattis semper, neque lectus feugiat lectus, varius pulvinar
                         diam eros in elit. Pellentesque convallis laoreet laoreet.
-          </Typography>
+                     </Typography>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
             <ExpansionPanel expanded={expanded.includes('panel3')} onChange={handlePanel('panel3')} disabled>
@@ -177,13 +180,15 @@ export default function Payments() {
                     </Typography>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
+            <EnhancedTable rows={paymentsData} />
             <ExpansionPanel expanded={true}>
+                <ExpansionPanelSummary />
                 <ExpansionPanelDetails>
                     Dit is dan een titel
                 </ExpansionPanelDetails>
-                <DebugPre apiData={paymentsList} name='payments' />
-                <DebugPre apiData={accountsList} name='accounts' />
-                <DebugPre apiData={contactsList} name='contacts' />
+                <pre style={{ display: 'table', overflow: 'hidden', width: '100%', tableLayout: ' fixed' }}>
+                    {JSON.stringify(paymentsData, null, 2)}</pre>
+                <DebugPre apiData={paymentsList} name='paymentsApiData' />
             </ExpansionPanel>
         </div >
     );
