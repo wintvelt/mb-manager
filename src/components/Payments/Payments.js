@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { getPayments, getContacts, getAccounts } from '../../actions/apiActions-new';
 import { derivedPayments } from './Payments-table';
 import EnhancedTable from './Payments-table-helpers';
+import { PaymentFilters } from './Payment-filters';
 
 import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -17,7 +18,14 @@ import Box from '@material-ui/core/Box';
 import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
 
+import { filterConfig } from './Payment-filters';
+
 import { LoadingComp, LoadingIcon } from '../../helpers/apiData/apiData-components';
+import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
+
+const updateFilters = makeReducer(filterConfig);
+const initFilters = initialFilters(filterConfig);
+const getFilters = makeFilters(filterConfig);
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -63,7 +71,7 @@ export default function Payments() {
     }, [paymentsList.data, contactsList.data, accountsList.data])
     // const paymentsData = derivedPayments(paymentsList.data, contactsList.data, accountsList.data);
     const dispatch = useDispatch();
-    const [expanded, setExpanded] = useState([]);
+    const [expanded, setExpanded] = useState(['filters']);
     const [period, setPeriod] = useState(0);
     const curPeriod = periodOptions[period].label.toLowerCase();
     const nextPeriod = (period < periodOptions.length) ?
@@ -79,6 +87,25 @@ export default function Payments() {
         : loadingApiData.hasError ? 'Fout bij het laden.'
             : loadingApiData.isLoading ? `...betalingen ${curPeriod} ophalen.`
                 : '';
+
+    const [filterState, setFilters] = useReducer(updateFilters, initFilters);
+    const [filters, rows] = getFilters(paymentsData, [], filterState);
+    const filterObj = filters.map(f => {
+        return {
+            ...f,
+            onChange: selected => {
+                setFilters({ id: f.id, payload: selected })
+            }
+        }
+    });
+    const filtersApplied = filterState.filter(f => {
+        const fConfig = filterConfig.find(fc => fc.id === f.id);
+        return fConfig.type === filterType.BOOLEAN ? f.value
+            : fConfig.type === filterType.SINGLE ? (f.value) ? true : false
+                : f.value && f.value.length > 0
+
+    });
+    const filterCount = filtersApplied.length > 0 ? filtersApplied.length : 'Geen';
 
     useEffect(() => {
         if (!hasContacts) {
@@ -135,31 +162,57 @@ export default function Payments() {
                         {(nextPeriod) ?
                             `Betalingen ${nextPeriod} toevoegen..`
                             : `Alle betalingen (${curPeriod}) zijn opgehaald`}
-                        </Button>
+                    </Button>
                 </ExpansionPanelActions>
             </ExpansionPanel>
-            <ExpansionPanel expanded={expanded.includes('panel2')} onChange={handlePanel('panel2')}>
+            <ExpansionPanel expanded={expanded.includes('filters')} onChange={handlePanel('filters')}>
                 <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel2bh-content"
-                    id="panel2bh-header"
+                    aria-controls="filters-panel-header"
+                    id="filters-panel-header"
                 >
                     <Typography className={classes.heading}>
                         <Icon className={classes.icon}>filter_list</Icon>
                         Filters
                         </Typography>
                     <Typography className={classes.secondaryHeading}>
-                        2 filters toegepast.
+                        {`${filterCount} filter${filterCount === 1 ? '' : 's'} toegepast`}
                     </Typography>
                 </ExpansionPanelSummary>
-                <ExpansionPanelDetails>
-                    <Typography>
-                        Donec placerat, lectus sed mattis semper, neque lectus feugiat lectus, varius pulvinar
-                        diam eros in elit. Pellentesque convallis laoreet laoreet.
-                     </Typography>
-                </ExpansionPanelDetails>
+                <PaymentFilters filterObj={filterObj}/>
+                <PaymentFilters filterObj={
+                    [
+                        {
+                            id: 'state', type: filterType.SINGLE, options: ['', 'unprocessed', 'processed'],
+                            label: 'Status',
+                            placeholder: 'Alles',
+                            selected: filterState.find(f => f.id === 'state').value, 
+                            onChange: selected => {
+                                setFilters({ id: 'state', payload: selected });
+                            }
+                        },
+                        {
+                            id: 'selected', type: filterType.BOOLEAN,
+                            label: 'Alleen selectie tonen',
+                            selected: filterState.find(f => f.id === 'selected').value, 
+                            onChange: selected => {
+                                setFilters({ id: 'selected', payload: selected });
+                            }
+                        },
+                        {
+                            id: 'owner', type: filterType.MULTI,
+                            options: ['Arjen', 'Alex', 'Gerrit'],
+                            label: 'Owner',
+                            placeholder: 'Alle owners',
+                            selected: filterState.find(f => f.id === 'owner').value, 
+                            onChange: selected => {
+                                setFilters({ id: 'owner', payload: selected });
+                            }
+                        },
+                    ]
+                } />
             </ExpansionPanel>
-            <ExpansionPanel expanded={expanded.includes('panel3')} onChange={handlePanel('panel3')} disabled>
+            <ExpansionPanel expanded={expanded.includes('actions')} onChange={handlePanel('actions')} disabled>
                 <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel3bh-content"
@@ -180,7 +233,7 @@ export default function Payments() {
                     </Typography>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-            <EnhancedTable rows={paymentsData} />
+            <EnhancedTable rows={rows} />
             <ExpansionPanel expanded={true}>
                 <ExpansionPanelSummary />
                 <ExpansionPanelDetails>

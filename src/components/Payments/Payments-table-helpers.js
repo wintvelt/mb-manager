@@ -66,6 +66,7 @@ function EnhancedTableHead(props) {
             checked={numSelected === rowCount}
             onClick={onSelectAllClick}
             inputProps={{ 'aria-label': 'alle betalingen selecteren' }}
+            color='primary'
           />
         </TableCell>
         {headCells.map(headCell => (
@@ -304,6 +305,7 @@ export default function EnhancedTable(props) {
                     >
                       <TableCell padding="checkbox">
                         <Checkbox
+                          color='primary'
                           onClick={event => handleClick(event, row.id)}
                           checked={isItemSelected}
                           inputProps={{ 'aria-labelledby': labelId }}

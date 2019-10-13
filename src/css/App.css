@@ -578,3 +578,27 @@ li.connect:hover {
 	padding: 2px 4px;
 	border-radius: 4px;
 }
+/* fix styling while mixing mui with materializecss */
+[type="checkbox"]+span.MuiSwitch-thumb:not(.lever) {
+    content: inherit;
+	position: relative;
+	padding-left: 0;
+	height: 20px;
+}
+[type="checkbox"]+span.MuiSwitch-thumb:not(.lever):before, 
+[type="checkbox"]:not(.filled-in)+span.MuiSwitch-thumb:not(.lever):after {
+	content: initial;
+}
+.MuiTextField-root input[type=text]:not(.browser-default) {
+	height: 24px;
+	margin: 4px 0;
+}
+.MuiInputBase-root input[type=text]:not(.browser-default),
+.MuiInputBase-root input[type=text]:not(.browser-default):focus:not([readonly]) {
+	border-bottom: none;
+	box-shadow: none;
+	width: auto;
+}
+.MuiChip-root + input[type=text] {
+    margin: 0 2px;
+}

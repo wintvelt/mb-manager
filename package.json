@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^4.4.3",
     "dotenv": "^8.0.0",
+    "downshift": "^3.3.4",
     "immutable": "^4.0.0-rc.12",
     "materialize-css": "^1.0.0",
     "moment": "^2.24.0",

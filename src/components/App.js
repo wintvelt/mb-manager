@@ -41,12 +41,12 @@ const theme = createMuiTheme({
 		},
 		secondary: {
 			main: blueGrey[200]
-		}
+		},
 	},
 	// overrides: {
-	//     'MuiContainer': {
+	//     'MuiSwitch': {
 	//         root: {
-	//             background: '#18202c',
+	//             background: teal[500],
 	//         }
 	//     }
 	// },
