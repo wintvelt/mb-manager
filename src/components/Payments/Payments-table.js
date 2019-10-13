@@ -64,9 +64,10 @@ export const addInfo = (payments, keywords, accounts) => {
         const keyItem = message && keywords.find(k => message.includes(k.keyword));
         const account = accounts.find(a => a.id === payment.financial_account_id);
         const account_name = account && account.name;
+        const afBij = (payment.amount && payment.amount < 0)? 'Afgeschreven' : 'Bijgeschreven';
         return (keyItem) ?
-            { ...payment, ...keyItem, account_name }
-            : { ...payment, account_name }
+            { ...payment, ...keyItem, account_name, afBij }
+            : { ...payment, account_name, afBij }
     })
 }
 

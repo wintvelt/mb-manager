@@ -87,9 +87,9 @@ export default function Payments() {
         : loadingApiData.hasError ? 'Fout bij het laden.'
             : loadingApiData.isLoading ? `...betalingen ${curPeriod} ophalen.`
                 : '';
-
+    const [selected, setSelected] = useState([]);
     const [filterState, setFilters] = useReducer(updateFilters, initFilters);
-    const [filters, rows] = getFilters(paymentsData, [], filterState);
+    const [filters, rows] = getFilters(paymentsData, selected, filterState);
     const filterObj = filters.map(f => {
         return {
             ...f,
@@ -179,70 +179,9 @@ export default function Payments() {
                         {`${filterCount} filter${filterCount === 1 ? '' : 's'} toegepast`}
                     </Typography>
                 </ExpansionPanelSummary>
-                <PaymentFilters filterObj={filterObj}/>
-                <PaymentFilters filterObj={
-                    [
-                        {
-                            id: 'state', type: filterType.SINGLE, options: ['', 'unprocessed', 'processed'],
-                            label: 'Status',
-                            placeholder: 'Alles',
-                            selected: filterState.find(f => f.id === 'state').value, 
-                            onChange: selected => {
-                                setFilters({ id: 'state', payload: selected });
-                            }
-                        },
-                        {
-                            id: 'selected', type: filterType.BOOLEAN,
-                            label: 'Alleen selectie tonen',
-                            selected: filterState.find(f => f.id === 'selected').value, 
-                            onChange: selected => {
-                                setFilters({ id: 'selected', payload: selected });
-                            }
-                        },
-                        {
-                            id: 'owner', type: filterType.MULTI,
-                            options: ['Arjen', 'Alex', 'Gerrit'],
-                            label: 'Owner',
-                            placeholder: 'Alle owners',
-                            selected: filterState.find(f => f.id === 'owner').value, 
-                            onChange: selected => {
-                                setFilters({ id: 'owner', payload: selected });
-                            }
-                        },
-                    ]
-                } />
+                <PaymentFilters filterObj={filterObj} />
             </ExpansionPanel>
-            <ExpansionPanel expanded={expanded.includes('actions')} onChange={handlePanel('actions')} disabled>
-                <ExpansionPanelSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel3bh-content"
-                    id="panel3bh-header"
-                >
-                    <Typography className={classes.heading}>
-                        <Icon className={classes.icon}>build</Icon>
-                        Actie
-                    </Typography>
-                    <Typography className={classes.secondaryHeading}>
-                        Geen selectie gemaakt.
-                    </Typography>
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails>
-                    <Typography>
-                        Nunc vitae orci ultricies, auctor nunc in, volutpat nisl. Integer sit amet egestas eros,
-                        vitae egestas augue. Duis vel est augue.
-                    </Typography>
-                </ExpansionPanelDetails>
-            </ExpansionPanel>
-            <EnhancedTable rows={rows} />
-            <ExpansionPanel expanded={true}>
-                <ExpansionPanelSummary />
-                <ExpansionPanelDetails>
-                    Dit is dan een titel
-                </ExpansionPanelDetails>
-                <pre style={{ display: 'table', overflow: 'hidden', width: '100%', tableLayout: ' fixed' }}>
-                    {JSON.stringify(paymentsData, null, 2)}</pre>
-                <DebugPre apiData={paymentsList} name='paymentsApiData' />
-            </ExpansionPanel>
+            <EnhancedTable rows={rows} selected={selected} onSelect={setSelected} />
         </div >
     );
 }
@@ -272,9 +211,11 @@ const periodOptions = [
     { label: `Vanaf ${xVanaf(1)}`, value: `${xAgoPeriod(1)}..${xAgoPeriod(1)}` },
     { label: `Vanaf ${xVanaf(3)} (3 maanden)`, value: `${xAgoPeriod(3)}..${xAgoPeriod(2)}` },
     { label: `Vanaf ${xVanaf(6)} (6 maanden)`, value: `${xAgoPeriod(6)}..${xAgoPeriod(4)}` },
-    curYear.toString() === xAgoPeriod(6).slice(0, 4) && { label: `Vanaf begin dit jaar`, value: `${curYear}01..${xAgoPeriod(7)}` },
+    curYear.toString() === xAgoPeriod(6).slice(0, 4) &&
+    { label: `Vanaf begin dit jaar`, value: `${curYear}01..${xAgoPeriod(7)}` },
     {
         label: 'Vanaf vorig jaar',
-        value: `${curYear - 1}01..${curYear.toString() === xAgoPeriod(6).slice(0, 4) ? xAgoPeriod(7) : '' + curYear - 1 + '12'}`
+        value: `${curYear - 1}01..${curYear.toString() === xAgoPeriod(6).slice(0, 4) ?
+            xAgoPeriod(7) : '' + curYear - 1 + '12'}`
     }
 ].filter(it => it);

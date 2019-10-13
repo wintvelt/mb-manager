@@ -33,9 +33,26 @@ const useStyles = makeStyles(theme => ({
 export const filterConfig = [
     {
         id: 'state',
-        label: 'Status',
+        label: 'Alleen onverwerkte regels',
+        placeholder: 'Alle statussen',
+        type: filterType.BOOLEAN,
+        itemFilter: (selected, filterState, item) => !filterState || item.state === 'unprocessed',
+        initial: true
+    },
+    {
+        id: 'afBij',
+        label: 'Bij- of afgeschreven',
+        placeholder: 'Alle transacties',
         type: filterType.SINGLE,
-        itemFilter: (selected, filterState, item) => !filterState || filterState === item.state
+        itemFilter: (selected, filterState, item) => !filterState || filterState === item.afBij,
+        initial: 'Afgeschreven'
+    },
+    {
+        id: 'account_name',
+        label: 'Rekening',
+        placeholder: 'Alle rekeningen',
+        type: filterType.SINGLE,
+        itemFilter: (selected, filterState, item) => !filterState || filterState === item.account_name
     },
     {
         id: 'selected',

@@ -63,7 +63,7 @@ function EnhancedTableHead(props) {
         <TableCell padding="checkbox">
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={numSelected === rowCount}
+            checked={numSelected === rowCount && rowCount > 0}
             onClick={onSelectAllClick}
             inputProps={{ 'aria-label': 'alle betalingen selecteren' }}
             color='primary'
@@ -212,11 +212,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function EnhancedTable(props) {
-  const { rows } = props;
+  const { rows, selected, onSelect } = props;
   const classes = useStyles();
   const [order, setOrder] = React.useState('desc');
   const [orderBy, setOrderBy] = React.useState('date');
-  const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
 
@@ -229,10 +228,10 @@ export default function EnhancedTable(props) {
   const handleSelectAllClick = event => {
     if (selected.length < rows.length) {
       const newSelecteds = rows.map(n => n.id);
-      setSelected(newSelecteds);
+      onSelect(newSelecteds);
       return;
     }
-    setSelected([]);
+    onSelect([]);
   };
 
   const handleClick = (event, id) => {
@@ -252,7 +251,7 @@ export default function EnhancedTable(props) {
       );
     }
 
-    setSelected(newSelected);
+    onSelect(newSelected);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -357,12 +356,22 @@ export default function EnhancedTable(props) {
   );
 }
 
+const withThousand = (amtStr) => {
+  return (amtStr.slice(0, 1) === '-') ?
+      (amtStr.length > 4) ?
+          withThousand(amtStr.slice(0, -3)) + '.' + amtStr.slice(-3)
+          : amtStr
+      : (amtStr.length > 3) ?
+          withThousand(amtStr.slice(0, -3)) + '.' + amtStr.slice(-3)
+          : amtStr
+}
+
 const prettyAmount = (amount) => {
   const mainAmt = Math.floor(amount);
   const cents = Math.round(amount * 100 - mainAmt * 100);
   const centStr = (cents < 10) ? '0' + cents : cents.toString();
   return <>
-    <span>{mainAmt}.</span>
+    <span>{withThousand(mainAmt.toString())},</span>
     <span style={{ fontSize: '.6rem', verticalAlign: 'top' }}>{centStr}</span>
   </>
 }

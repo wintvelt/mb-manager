@@ -9,13 +9,13 @@ export const filterType = {
 export const initialFilters = filterConfig => filterConfig.map(f => {
     switch (f.type) {
         case filterType.SINGLE:
-            return { id: f.id, value: '' };
+            return { id: f.id, value: f.initial || '' };
 
         case filterType.MULTI:
-            return { id: f.id, value: [] };
+            return { id: f.id, value: f.initial || [] };
 
         case filterType.BOOLEAN:
-            return { id: f.id, value: false };
+            return { id: f.id, value: f.initial? true : false };
 
         default:
             return null;
