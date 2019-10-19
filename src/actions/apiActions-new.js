@@ -14,15 +14,17 @@ export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
     }
 })
 
-export const getPayments = (access_token, periodFilter = 'this_quarter') => apiActionSync({
+export const getPayments = (access_token, periodFilter = 'this_quarter', extraFilters = '') => {
+    console.log({extraFilters});
+    return apiActionSync({
     url: 'https://moneybird.com/api/v2/243231934476453244/financial_mutations/synchronization.json' +
-        `?filter=period:${periodFilter}`,
+        `?filter=period:${periodFilter}${extraFilters}`,
     headers: { Authorization: 'Bearer ' + access_token },
     storeAction: (payload) => {
         return { type: SET_PAYMENTS_NEW, payload: { key: periodFilter, apiAction: payload } }
     },
     loadingMsg: 'betalingen aan het ophalen.'
-})
+})}
 
 export const getAccounts = (access_token) => apiAction({
     url: 'https://moneybird.com/api/v2/243231934476453244/financial_accounts.json',

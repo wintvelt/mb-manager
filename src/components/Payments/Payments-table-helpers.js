@@ -18,10 +18,10 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Icon from '@material-ui/core/Icon';
 
 function desc(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
+  if (!a[orderBy] || b[orderBy] < a[orderBy]) {
     return -1;
   }
-  if (b[orderBy] > a[orderBy]) {
+  if (!b[orderBy] || b[orderBy] > a[orderBy]) {
     return 1;
   }
   return 0;
@@ -134,7 +134,7 @@ const useToolbarStyles = makeStyles(theme => ({
 
 const EnhancedTableToolbar = props => {
   const classes = useToolbarStyles();
-  const { numSelected } = props;
+  const { numSelected, onDownload } = props;
 
   return (
     <Toolbar
@@ -155,8 +155,8 @@ const EnhancedTableToolbar = props => {
       </div>
       <div className={classes.spacer} />
       <div className={classes.actions}>
-        {numSelected > 0 && <Tooltip title="Download selectie">
-          <IconButton aria-label="Download selectie">
+        {numSelected > 0 && <Tooltip title="Download selectie als xlsx">
+          <IconButton aria-label="Download selectie" onClick={onDownload}>
             <Icon>cloud_download</Icon>
           </IconButton>
         </Tooltip>
@@ -212,7 +212,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function EnhancedTable(props) {
-  const { rows, selected, onSelect } = props;
+  const { rows, selected, onSelect, onDownload } = props;
   const classes = useStyles();
   const [order, setOrder] = React.useState('desc');
   const [orderBy, setOrderBy] = React.useState('date');
@@ -270,7 +270,7 @@ export default function EnhancedTable(props) {
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar numSelected={selected.length} onDownload={onDownload} />
         <div className={classes.tableWrapper}>
           <Table
             className={classes.table}
@@ -318,11 +318,14 @@ export default function EnhancedTable(props) {
                       <TableCell align="right">{prettyAmount(row.amount)}</TableCell>
                       <TableCell align="right">{row.owner}</TableCell>
                       <TableCell align="center">
-                        <span className={row.state === 'processed' ? classes.badgeOK : classes.badgeNOK}>
+                        <span className={row.state === 'processed' ? classes.badgeOK : classes.badgeNOK}
+                          style={{ fontSize: '0.7rem' }}>
                           {row.state === 'processed' ? 'ok' : 'open'}
                         </span>
                       </TableCell>
-                      <TableCell align="left" style={{ fontSize: '0.75rem' }}>{row.message}</TableCell>
+                      <TableCell align="left" style={{ fontSize: '0.75rem' }}>
+                        {row.message.replace(/\//g, ' ')}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -358,12 +361,12 @@ export default function EnhancedTable(props) {
 
 const withThousand = (amtStr) => {
   return (amtStr.slice(0, 1) === '-') ?
-      (amtStr.length > 4) ?
-          withThousand(amtStr.slice(0, -3)) + '.' + amtStr.slice(-3)
-          : amtStr
-      : (amtStr.length > 3) ?
-          withThousand(amtStr.slice(0, -3)) + '.' + amtStr.slice(-3)
-          : amtStr
+    (amtStr.length > 4) ?
+      withThousand(amtStr.slice(0, -3)) + '.' + amtStr.slice(-3)
+      : amtStr
+    : (amtStr.length > 3) ?
+      withThousand(amtStr.slice(0, -3)) + '.' + amtStr.slice(-3)
+      : amtStr
 }
 
 const prettyAmount = (amount) => {

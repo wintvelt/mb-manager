@@ -37,7 +37,7 @@ export const filterConfig = [
         placeholder: 'Alle statussen',
         type: filterType.BOOLEAN,
         itemFilter: (selected, filterState, item) => !filterState || item.state === 'unprocessed',
-        initial: true
+        initial: false
     },
     {
         id: 'afBij',
@@ -45,7 +45,7 @@ export const filterConfig = [
         placeholder: 'Alle transacties',
         type: filterType.SINGLE,
         itemFilter: (selected, filterState, item) => !filterState || filterState === item.afBij,
-        initial: 'Afgeschreven'
+        // initial: 'Afgeschreven'
     },
     {
         id: 'account_name',

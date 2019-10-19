@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useMemo, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { saveAs } from 'file-saver';
 
 import { getPayments, getContacts, getAccounts } from '../../actions/apiActions-new';
 import { derivedPayments } from './Payments-table';
 import EnhancedTable from './Payments-table-helpers';
-import { PaymentFilters } from './Payment-filters';
+import { PaymentFilters, filterConfig } from './Payment-filters';
+import { makeXls } from './Payment-xls-download';
+import { LoadingComp, LoadingIcon } from '../../helpers/apiData/apiData-components';
+import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
 
 import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -17,11 +21,6 @@ import Icon from '@material-ui/core/Icon';
 import Box from '@material-ui/core/Box';
 import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
-
-import { filterConfig } from './Payment-filters';
-
-import { LoadingComp, LoadingIcon } from '../../helpers/apiData/apiData-components';
-import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
 
 const updateFilters = makeReducer(filterConfig);
 const initFilters = initialFilters(filterConfig);
@@ -69,10 +68,11 @@ export default function Payments() {
     const paymentsData = useMemo(() => {
         return derivedPayments(paymentsList.data, contactsList.data, accountsList.data)
     }, [paymentsList.data, contactsList.data, accountsList.data])
-    // const paymentsData = derivedPayments(paymentsList.data, contactsList.data, accountsList.data);
     const dispatch = useDispatch();
-    const [expanded, setExpanded] = useState(['filters']);
+    const [expanded, setExpanded] = useState([]);
     const [period, setPeriod] = useState(0);
+    const [unprocessedOnly, setUnprocessedOnly] = useState(true);
+    const [creditOnly, setCreditOnly] = useState(true);
     const curPeriod = periodOptions[period].label.toLowerCase();
     const nextPeriod = (period < periodOptions.length) ?
         periodOptions[period + 1].label.toLowerCase()
@@ -82,11 +82,16 @@ export default function Payments() {
         hasError: paymentsList.hasError || contactsList.hasError || accounts.hasError,
         hasAllData: paymentsList.hasAllData && contactsList.hasAllData && accountsList.hasAllData
     }
-    const loadingApiText = (loadingApiData.hasAllData) ?
+    const loadingApiText1 = (loadingApiData.hasAllData) ?
         `${paymentsList.data.length} betalingen ${curPeriod} opgehaald.`
         : loadingApiData.hasError ? 'Fout bij het laden.'
             : loadingApiData.isLoading ? `...betalingen ${curPeriod} ophalen.`
                 : '';
+    const loadingApiText2 = ' (' + [unprocessedOnly, creditOnly].map((flag, i) => {
+        return (i === 0) ? flag ? 'onverwerkt' : 'ook verwerkte'
+            : flag ? 'alleen afschrijvingen' : 'ook bijschrijvingen'
+    }).join(', ') + ')';
+    const loadingApiText = loadingApiText1 + loadingApiText2;
     const [selected, setSelected] = useState([]);
     const [filterState, setFilters] = useReducer(updateFilters, initFilters);
     const [filters, rows] = getFilters(paymentsData, selected, filterState);
@@ -115,8 +120,10 @@ export default function Payments() {
     }, [dispatch, access_token, hasContacts])
 
     useEffect(() => {
-        dispatch(getPayments(access_token, periodOptions[period].value));
-    }, [dispatch, access_token, period])
+        const extraFilter1 = unprocessedOnly ? ',state:unprocessed' : '';
+        const extraFilter2 = creditOnly ? ',mutation_type:credit' : '';
+        dispatch(getPayments(access_token, periodOptions[period].value, extraFilter1 + extraFilter2));
+    }, [dispatch, access_token, period, unprocessedOnly, creditOnly])
 
     const handlePanel = panel => (event, isIn) => {
         const newExpanded = (!isIn) ?
@@ -127,6 +134,25 @@ export default function Payments() {
 
     const handleMore = () => {
         setPeriod(period + 1);
+    }
+
+    const handleDownload = () => {
+        const selectedRows = paymentsData.filter(item => selected.includes(item.id));
+        const workbook = makeXls([
+            { header: 'Id', key: 'id', width: 20 },
+            { header: 'Datum', key: 'date', width: 10 },
+            { header: 'Owner', key: 'owner', width: 10 },
+            { header: 'Contact', key: 'name', width: 20 },
+            { header: 'Rekening', key: 'account_name', width: 10 },
+            { header: 'Bedrag', key: 'amount', width: 10, style: { numFmt: '"€"#,##0.00;[Red]-"€"#,##0.00' } },
+            { header: 'Omschrijving', key: 'message', width: 60, style: { alignment: { wrapText: true } } }
+        ], selectedRows);
+        const filename = 'download.xlsx';
+
+        workbook.xlsx.writeBuffer().then(function (data) {
+            let blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+            saveAs(blob, filename);
+        });
     }
 
     return (
@@ -160,8 +186,22 @@ export default function Payments() {
                         disabled={(nextPeriod) ? false : true}
                         onClick={handleMore}>
                         {(nextPeriod) ?
-                            `Betalingen ${nextPeriod} toevoegen..`
+                            `Betalingen ${nextPeriod} ophalen..`
                             : `Alle betalingen (${curPeriod}) zijn opgehaald`}
+                    </Button>
+                    <Button color='primary' className={classes.listButton}
+                        disabled={!unprocessedOnly}
+                        onClick={() => setUnprocessedOnly(false)}>
+                        {(unprocessedOnly) ?
+                            `Ook verwerkte betalingen ophalen`
+                            : `Verwerkte betalingen ook opgehaald`}
+                    </Button>
+                    <Button color='primary' className={classes.listButton}
+                        disabled={!creditOnly}
+                        onClick={() => setCreditOnly(false)}>
+                        {(creditOnly) ?
+                            `Ook bijschrijvingen ophalen`
+                            : `Ook bijschrijvingen opgehaald` }
                     </Button>
                 </ExpansionPanelActions>
             </ExpansionPanel>
@@ -181,19 +221,9 @@ export default function Payments() {
                 </ExpansionPanelSummary>
                 <PaymentFilters filterObj={filterObj} />
             </ExpansionPanel>
-            <EnhancedTable rows={rows} selected={selected} onSelect={setSelected} />
+            <EnhancedTable rows={rows} selected={selected} onSelect={setSelected} onDownload={handleDownload} />
         </div >
     );
-}
-
-// temp debugger
-const DebugPre = (props) => {
-    const { apiData, name } = props;
-    const apiClean = { ...apiData, data: apiData.data && apiData.data.length }
-    return <div style={{ display: 'flex' }}>
-        <h6>{name}</h6>
-        <pre>{JSON.stringify(apiClean, null, 2)}</pre>
-    </div>
 }
 
 // helpers
@@ -201,13 +231,13 @@ const now = new Date();
 const curYear = now.getFullYear();
 const m = now.getMonth() + 1;
 const month = (m) => (m < 10) ? '0' + m : m.toString()
-const curPeriod = curYear + month(m);
+// const curPeriod = curYear + month(m);
 const xAgoPeriod = (x) => (m < x + 1) ? (curYear - 1) + month(12 + m - x) : curYear + month(m - x);
 const xVanaf = (x) => ['', 'januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus',
     'september', 'oktober', 'november', 'december'][(m < x + 1) ? 12 + m - x : m - x]
 
 const periodOptions = [
-    { label: `Van deze maand`, value: `${curPeriod}..${curPeriod}` },
+    // { label: `Van deze maand`, value: `${curPeriod}..${curPeriod}` },
     { label: `Vanaf ${xVanaf(1)}`, value: `${xAgoPeriod(1)}..${xAgoPeriod(1)}` },
     { label: `Vanaf ${xVanaf(3)} (3 maanden)`, value: `${xAgoPeriod(3)}..${xAgoPeriod(2)}` },
     { label: `Vanaf ${xVanaf(6)} (6 maanden)`, value: `${xAgoPeriod(6)}..${xAgoPeriod(4)}` },
