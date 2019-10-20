@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { NavWrapper } from './Nav-helpers';
+import { hasData } from '../../store/derived-storestate-helpers';
 
 const menu = [
     { icon: 'import_contacts', link: '/contacten/lijst', text: 'Contacten' },
@@ -16,9 +17,9 @@ const menu = [
 const Nav = (props) => {
     const { children, activePath } = props;
     const accessToken = useSelector(store => store.accessToken);
-    const accessVerified = useSelector(store => store.accessVerified);
+    const accessVerified = useSelector(store => hasData(store));
     const iconLogin = (accessToken.hasData) ?
-        (accessVerified) ? "/avatar connected 2.png" : "/avatar connected.png" : "/avatar no connection.png";
+        (accessVerified) ? "done_all" : "done" : "do_not_disturb";
 
     return <NavWrapper menu={menu} activePath={activePath} iconLogin={iconLogin}>
         {children}

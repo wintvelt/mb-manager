@@ -15,6 +15,7 @@ import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -127,9 +128,9 @@ const ListItemLink = (props) => {
         [link],
     );
 
-    const textComp = (badge)?
-     <span className={classes.textNew}>{text}<Icon className={classes.iconNew}>fiber_new</Icon></span>
-     : text;
+    const textComp = (badge) ?
+        <span className={classes.textNew}>{text}<Icon className={classes.iconNew}>fiber_new</Icon></span>
+        : text;
 
     return <ListItem button component={RenderLink}>
         <ListItemIcon>
@@ -141,9 +142,8 @@ const ListItemLink = (props) => {
     </ListItem>
 }
 
-const AvatarLink = (props) => {
+const ConnectionLink = (props) => {
     const { iconLogin, link } = props;
-    const classes = useStyles();
 
     // weird mojo needed to use react-router with MUI
     const RenderLink = React.useMemo(
@@ -154,12 +154,14 @@ const AvatarLink = (props) => {
         [link],
     );
 
-    return <IconButton component={RenderLink}
+    return <Button component={RenderLink}
         aria-label="connectie-status"
         aria-controls="menu-appbar"
-        color="inherit">
-        <Avatar alt="Connecties" src={encodeURI(iconLogin)} className={classes.avatar} />
-    </IconButton>
+        color="inherit"
+        >
+        <Icon style={{marginRight: '8px'}}>{iconLogin}</Icon>
+        <span style={{height: '1.3rem'}}>Connectie</span>
+    </Button>
 }
 
 export const NavWrapper = (props) => {
@@ -198,7 +200,7 @@ export const NavWrapper = (props) => {
                 <Typography variant="h6" noWrap className={classes.navTitle}>
                     {navTitle}
                 </Typography>
-                <AvatarLink iconLogin={iconLogin} link='/connection' />
+                <ConnectionLink iconLogin={iconLogin} link='/connection' />
             </Toolbar>
         </AppBar>
         <Drawer
@@ -236,7 +238,7 @@ export const NavWrapper = (props) => {
             className={clsx(classes.content, {
                 [classes.contentShift]: open,
             })}>
-            <div className={classes.drawerHeader} id='back-to-top-anchor'/>
+            <div className={classes.drawerHeader} id='back-to-top-anchor' />
             {children}
         </main>
     </div>

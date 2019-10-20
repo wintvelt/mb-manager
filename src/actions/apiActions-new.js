@@ -15,7 +15,6 @@ export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
 })
 
 export const getPayments = (access_token, periodFilter = 'this_quarter', extraFilters = '') => {
-    console.log({extraFilters});
     return apiActionSync({
     url: 'https://moneybird.com/api/v2/243231934476453244/financial_mutations/synchronization.json' +
         `?filter=period:${periodFilter}${extraFilters}`,
