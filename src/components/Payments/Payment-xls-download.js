@@ -14,3 +14,19 @@ export const makeXls = (columns, rows) => {
     sheet.addRows(rows);
     return workbook;
 }
+
+const integerToStr = (num, size) => {
+    const str = num.toString();
+    const strLength = str.length;
+    return (size > strLength) ?
+        '0'.repeat(size - strLength) + str
+        : str
+}
+
+export const timestamp = () => {
+    const now = new Date();
+    const curYear = now.getFullYear();
+    const m = now.getMonth() + 1;
+    const d = now.getDate();
+    return curYear + integerToStr(m) + integerToStr(d);
+}
