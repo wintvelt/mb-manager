@@ -16,6 +16,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import Icon from '@material-ui/core/Icon';
+import { adminCode } from '../../actions/apiActions';
 
 function desc(a, b, orderBy) {
   if (!a[orderBy] || b[orderBy] < a[orderBy]) {
@@ -314,7 +315,12 @@ export default function EnhancedTable(props) {
                         {row.date}
                       </TableCell>
                       <TableCell align="right">{row.account_name}</TableCell>
-                      <TableCell align="left">{row.name}</TableCell>
+                      <TableCell align="left">
+                        <a href={`https://moneybird.com/${adminCode}/documents/filter/state:open%7Clate,contact_id:${row.contactId}`}
+                          target='_blank' rel='noreferrer'>
+                          {row.name}
+                        </a>
+                      </TableCell>
                       <TableCell align="right">{prettyAmount(row.amount)}</TableCell>
                       <TableCell align="right">{row.owner}</TableCell>
                       <TableCell align="center">
@@ -324,7 +330,10 @@ export default function EnhancedTable(props) {
                         </span>
                       </TableCell>
                       <TableCell align="left" style={{ fontSize: '0.75rem' }}>
-                        {row.message.replace(/\//g, ' ')}
+                        <a href={`https://moneybird.com/243231934476453244/financial_mutations/${row.id}`}
+                          target='_blank' rel='noreferrer'>
+                          {row.message.replace(/\//g, ' ')}
+                        </a>
                       </TableCell>
                     </TableRow>
                   );

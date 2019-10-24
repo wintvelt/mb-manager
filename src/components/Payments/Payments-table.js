@@ -51,9 +51,12 @@ export const extractKeywords = (contacts) => {
 */
 export const addInfo = (payments, keywords, accounts) => {
     return payments.map(oldPayment => {
+        const newMessage = oldPayment.contra_account_name? 
+            oldPayment.contra_account_name + ': ' + oldPayment.message
+            : oldPayment.message;
         const payment = {
             id: oldPayment.id,
-            message: oldPayment.message,
+            message: newMessage,
             financial_account_id: oldPayment.financial_account_id,
             currency: oldPayment.currency,
             amount: oldPayment.amount && parseFloat(oldPayment.amount),
