@@ -69,6 +69,16 @@ export const filterConfig = [
         itemFilter: (selected, filterState, item) => {
             return filterState.length === 0 || (filterState.find(s => s === item.owner) ? true : false)
         }
+    },
+    {
+        id: 'noEmptyOwner',
+        label: 'Alleen met owner tonen',
+        placeholder: 'Alles tonen',
+        type: filterType.BOOLEAN,
+        itemFilter: (selected, filterState, item) => {
+            return !filterState || item.owner? true : false
+        },
+        initial: true
     }
 ]
 

@@ -78,7 +78,7 @@ export default (props) => {
     const [creditOnly, setCreditOnly] = useState(true);
 
     const curPeriod = periodOptions[period].label.toLowerCase();
-    const nextPeriod = (period < periodOptions.length) ?
+    const nextPeriod = (period < periodOptions.length - 1) ?
         periodOptions[period + 1].label.toLowerCase()
         : null;
     const loadingApiData = {
