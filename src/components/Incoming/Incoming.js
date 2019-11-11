@@ -16,6 +16,7 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import IncomingTable from './IncomingTable';
+import Dialog from '../Page/Dialog';
 
 const updateFilters = makeReducer(filterConfig);
 const initFilters = initialFilters(filterConfig);
@@ -61,6 +62,8 @@ export default function Incoming() {
     const dispatch = useDispatch();
     const [expanded, setExpanded] = useState([]);
     const [selected, setSelected] = useState([]);
+    const numSelected = selected.length;
+    const [actionState, setActionState] = useState({ open: false, selected: {} });
     const [filterState, setFilters] = useReducer(updateFilters, initFilters);
     const [filters, rows] = getFilters(incomingData, selected, filterState);
     const filterObj = filters.map(f => {
@@ -93,6 +96,18 @@ export default function Incoming() {
         setExpanded(newExpanded);
     };
 
+    const onActionOpen = (newActionOpenState) => {
+        setActionState({
+            open: newActionOpenState,
+            selected: {}
+        });
+    }
+    const actionOptions = ledgersList.data && ledgersList.data.map(ledger => {
+        return { 
+            label: ledger.name+(ledger.account_id?` (${ledger.account_id})`:''), 
+            value: ledger.id }
+    }).sort((a, b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0)
+
     const handleDownload = () => {
         const selectedRows = incomingData.filter(item => selected.includes(item.id));
         paymentDownload(selectedRows);
@@ -120,7 +135,21 @@ export default function Incoming() {
             <FilterPanel filterObj={filterObj} />
         </ExpansionPanel>
         <IncomingTable rows={rows}
-            selected={selected} onSelect={setSelected} onDownload={handleDownload}
+            selected={selected} onSelect={setSelected}
+            onDownload={handleDownload}
+            onMulti={() => onActionOpen(true)}
             tableTitle='Bonnetjes en facturen' />
+        <Dialog
+            open={actionState.open}
+            dialogTitle={`${numSelected} ${numSelected === 1 ? 'bonnetje of factuur' : 'bonnetjes en facturen'} bewerken`}
+            dialogText={'Kies een nieuwe categorie voor je selectie.'}
+            label='Categorie'
+            placeholder='kies een categorie'
+            onHandleClose={() => onActionOpen(false)}
+            onChange={item => setActionState({ open: true, selected: item })}
+            onSubmit={() => alert('submitted ' + JSON.stringify(actionState.selected))}
+            options={actionOptions}
+            selected={actionState.selected}
+        />
     </div >
 }

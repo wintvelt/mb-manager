@@ -27,6 +27,7 @@ import ScrollTop from './Nav/ScrollTop';
 import { createMuiTheme } from '@material-ui/core/styles';
 import blueGrey from '@material-ui/core/colors/blueGrey';
 import teal from '@material-ui/core/colors/teal';
+import blue from '@material-ui/core/colors/blue';
 
 function mapStateToProps(state) {
 	return {
@@ -44,13 +45,23 @@ const theme = createMuiTheme({
 			main: blueGrey[200]
 		},
 	},
-	// overrides: {
-	//     'MuiSwitch': {
-	//         root: {
-	//             background: teal[500],
-	//         }
-	//     }
-	// },
+	overrides: {
+	    'MuiLink': {
+	        root: {
+	            color: blue.A400,
+	        }
+		},
+	    'MuiDialog': {
+	        paper: {
+	            overflowY: 'visible',
+	        }
+		},
+	    'MuiDialogContent': {
+	        root: {
+	            overflowY: 'visible',
+	        }
+		},
+	},
 });
 
 const newRoutes = [

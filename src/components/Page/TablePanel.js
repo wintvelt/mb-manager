@@ -16,6 +16,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import Icon from '@material-ui/core/Icon';
+import Link from '@material-ui/core/Link';
 
 function desc(a, b, orderBy) {
   if (!a[orderBy] || b[orderBy] < a[orderBy]) {
@@ -201,13 +202,13 @@ const RowCell = (props) => {
   const content = prettify ? prettify(row[key]) : row[key];
   return <TableCell padding={padding || 'default'} align={align || 'inherit'} >
     {hrefBase ?
-      <a href={hrefBase + row[hrefKey]}
+      <Link href={hrefBase + row[hrefKey]}
         target='_blank' rel='noopener noreferrer'>
         <span>
           <span>{content}</span>
           <Icon fontSize='small' style={{ marginBottom: '-5px', marginLeft: '4px' }}>launch</Icon>
         </span>
-      </a>
+      </Link>
       : content
     }
   </TableCell>
