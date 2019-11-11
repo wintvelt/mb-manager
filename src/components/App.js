@@ -10,7 +10,8 @@ import Snackbar from './Snackbar';
 import Connection from './Connection';
 import Contacts from './Contacts';
 import ContactKeywords from './Contacts-Keywords';
-import Incoming from './Incoming';
+import Incoming from './Incoming/Incoming';
+// import Incoming from './Incoming';
 import Payments from './Payments/Payments';
 // import Received from './Received';
 import MatchBankTransactions from './Match';
@@ -52,12 +53,19 @@ const theme = createMuiTheme({
 	// },
 });
 
+const newRoutes = [
+	'/betalingen/lijst',
+	'/inkomend'
+]
+
 const NavRoute = (props) => {
 	return <Route render={(routeprops) => {
-		return (routeprops.location.pathname === '/betalingen/lijst') ?
+		return newRoutes.includes(routeprops.location.pathname) ?
 			<NewNav activePath={routeprops.location.pathname}>
 				<Switch>
 					<PrivateRoute exact path="/betalingen/lijst" component={Payments}
+						isConnected={props.isConnected} />
+					<PrivateRoute exact path="/inkomend" component={Incoming}
 						isConnected={props.isConnected} />
 				</Switch>
 			</NewNav>
@@ -82,7 +90,7 @@ const ConnectedApp = (props) => {
 						isConnected={props.isConnected} />
 					<PrivateRoute exact path="/contacten/keywords" component={ContactKeywords}
 						isConnected={props.isConnected} />
-					<PrivateRoute path="/inkomend" component={Incoming}
+					<PrivateRoute path="/inkomend" component={Dummy}
 						isConnected={props.isConnected} />
 					<PrivateRoute exact path="/betalingen/lijst" component={Dummy}
 						isConnected={props.isConnected} />

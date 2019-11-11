@@ -11,7 +11,8 @@ import {
   SET_BATCH_MSG, CLEAR_BATCH_MSG,
   LOGIN, LOGOUT, TEST, SET_TEST_RESULT,
   SET_BANK, SET_MATCH, 
-  SET_PAYMENTS_NEW, SET_CONTACTS_NEW, SET_ACCOUNTS_NEW
+  SET_PAYMENTS_NEW, SET_CONTACTS_NEW, SET_ACCOUNTS_NEW,
+  SET_RECEIPTS
 } from "./action-types";
 import {
   setLedgerInRow, setCustomFieldInRow, setPaymentInRow
@@ -35,6 +36,8 @@ export const initialState = {
   payments: initApiDataMulti,
   contactsNew: initApiDataMulti,
   accountsNew: initApiData,
+  receipts: initApiDataMulti,
+  ledgersNew: initApiData,
   contacts: newApiData(),
   received: newApiData(),
   incomingSums: null,
@@ -75,6 +78,14 @@ function rootReducer(state = initialState, action) {
     case SET_ACCOUNTS_NEW: {
       const newAccounts = apiUpdate(state.accountsNew, payload);
       return {...state, accountsNew: newAccounts }
+    }
+    case SET_RECEIPTS: {
+      const newReceipts = apiUpdateMultiMulti(state.receipts, payload);
+      return {...state, receipts: newReceipts }
+    }
+    case SET_LEDGERS_NEW: {
+      const newLedgers = apiUpdate(state.ledgersNew, payload);
+      return {...state, ledgersNew: newLedgers }
     }
     // payload = ()
     case TEST_CONNECTION: {

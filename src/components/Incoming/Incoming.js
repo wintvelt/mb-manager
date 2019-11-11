@@ -1,11 +1,11 @@
-// Payments.js
+// Incoming.js
 import React, { useState, useEffect, useMemo, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { getContacts, getAccounts } from '../../actions/apiActions-new';
-import { derivedPayments } from './Payments-table';
-import PaymentsData from './PaymentsData';
-import { filterConfig } from './Payment-filters';
+import { derivedPayments } from './Incoming-datatable';
+import IncomingData from './IncomingData';
+import { filterConfig } from './Incoming-filters';
 import { FilterPanel } from '../Page/FilterPanel';
 import { paymentDownload } from './Payment-xls-download';
 import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
@@ -15,7 +15,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
-import PaymentsTable from './PaymentsTable';
+import IncomingTable from './IncomingTable';
 
 const updateFilters = makeReducer(filterConfig);
 const initFilters = initialFilters(filterConfig);
@@ -44,17 +44,15 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function Payments() {
+export default function Incoming() {
     const classes = useStyles();
     const accessToken = useSelector(store => store.accessToken);
     const access_token = accessToken.data;
-    const payments = useSelector(store => store.payments.get('apiData'));
-    const paymentsList = payments.toJS();
-    const contacts = useSelector(store => store.contactsNew.get('apiData'));
+    const receipts = useSelector(store => store.receipts.get('apiData'));
+    const receiptsList = receipts.toJS();
+    const ledgers = useSelector(store => store.ledgersNew.get('apiData'));
     const contactsList = contacts.toJS();
     const hasContacts = contactsList.hasAllData;
-    const accounts = useSelector(store => store.accountsNew);
-    const accountsList = accounts.toJS();
     const paymentsData = useMemo(() => {
         return derivedPayments(paymentsList.data, contactsList.data, accountsList.data)
     }, [paymentsList.data, contactsList.data, accountsList.data])
@@ -100,9 +98,9 @@ export default function Payments() {
     }
 
     return <div className={classes.root}>
-        <PaymentsData expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
+        <IncomingData expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
             access_token={access_token}
-            payments={payments} contacts={contacts} accounts={accounts} />
+            receipts={receipts} ledgers={ledgers}/>
         <ExpansionPanel expanded={expanded.includes('filters')} onChange={handlePanel('filters')}>
             <ExpansionPanelSummary
                 expandIcon={<Icon>expand_more</Icon>}
@@ -119,8 +117,8 @@ export default function Payments() {
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />
         </ExpansionPanel>
-        <PaymentsTable rows={rows}
+        <IncomingTable rows={rows}
             selected={selected} onSelect={setSelected} onDownload={handleDownload}
-            tableTitle='Banktransacties' />
+            tableTitle='Bonnetjes en facturen' />
     </div >
 }

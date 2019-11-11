@@ -16,7 +16,6 @@ import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import Icon from '@material-ui/core/Icon';
-import { adminCode } from '../../actions/apiActions';
 
 function desc(a, b, orderBy) {
   if (!a[orderBy] || b[orderBy] < a[orderBy]) {
@@ -42,18 +41,8 @@ function getSorting(order, orderBy) {
   return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
 }
 
-const headCells = [
-  { id: 'date', numeric: true, disablePadding: true, wider: '2rem', label: 'Datum' },
-  { id: 'account_name', numeric: true, disablePadding: false, label: 'Rekening' },
-  { id: 'name', numeric: false, disablePadding: false, label: 'Contact' },
-  { id: 'amount', numeric: true, disablePadding: false, label: 'Bedrag' },
-  { id: 'owner', numeric: true, disablePadding: false, label: 'Owner' },
-  { id: 'state', numeric: false, center: true, disablePadding: false, label: 'Status' },
-  { id: 'message', numeric: false, disablePadding: false, label: 'Omschrijving' },
-];
-
 function EnhancedTableHead(props) {
-  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, headCells } = props;
   const createSortHandler = property => event => {
     onRequestSort(event, property);
   };
@@ -127,6 +116,7 @@ const useToolbarStyles = makeStyles(theme => ({
   },
   actions: {
     color: theme.palette.text.secondary,
+    display: 'flex'
   },
   title: {
     flex: '0 0 auto',
@@ -135,7 +125,7 @@ const useToolbarStyles = makeStyles(theme => ({
 
 const EnhancedTableToolbar = props => {
   const classes = useToolbarStyles();
-  const { numSelected, onDownload } = props;
+  const { numSelected, onDownload, onMulti, tableTitle } = props;
 
   return (
     <Toolbar
@@ -146,17 +136,23 @@ const EnhancedTableToolbar = props => {
       <div className={classes.title}>
         {numSelected > 0 ? (
           <Typography color="inherit" variant="subtitle1">
-            {numSelected} transactie{numSelected !== 1 && 's'} geselecteerd
+            {numSelected} regel{numSelected !== 1 && 's'} geselecteerd
           </Typography>
         ) : (
             <Typography variant="h6" id="tableTitle">
-              Banktransacties
-          </Typography>
+              {tableTitle}
+            </Typography>
           )}
       </div>
       <div className={classes.spacer} />
       <div className={classes.actions}>
-        {numSelected > 0 && <Tooltip title="Download selectie als xlsx">
+        {numSelected > 0 && onMulti && <Tooltip title="Bewerk geselecteerde regels">
+          <IconButton aria-label="Bewerk regels" onClick={onMulti}>
+            <Icon>edit</Icon>
+          </IconButton>
+        </Tooltip>
+        }
+        {numSelected > 0 && onDownload && <Tooltip title="Download selectie als xlsx">
           <IconButton aria-label="Download selectie" onClick={onDownload}>
             <Icon>cloud_download</Icon>
           </IconButton>
@@ -196,24 +192,26 @@ const useStyles = makeStyles(theme => ({
     position: 'absolute',
     top: 20,
     width: 1,
-  },
-  badgeOK: {
-    borderRadius: '4px',
-    padding: '4px',
-    backgroundColor: lighten(theme.palette.primary.light, 0.3),
-    color: 'white'
-  },
-  badgeNOK: {
-    borderRadius: '4px',
-    padding: '4px',
-    backgroundColor: theme.palette.error.main,
-    color: 'white'
-  },
-
+  }
 }));
 
-export default function EnhancedTable(props) {
-  const { rows, selected, onSelect, onDownload } = props;
+const RowCell = (props) => {
+  const { row, cellConfig } = props;
+  const { key, padding, align, prettify, hrefBase, hrefKey } = cellConfig;
+  const content = prettify ? prettify(row[key]) : row[key];
+  return <TableCell padding={padding || 'default'} align={align || 'inherit'} >
+    {hrefBase ?
+      <a href={hrefBase + row[hrefKey]}
+        target='_blank' rel='noopener noreferrer'>
+        {content}
+      </a>
+      : content
+    }
+  </TableCell>
+}
+
+export function EnhancedTable(props) {
+  const { rows, selected, onSelect, onDownload, onMulti, tableTitle, headCells, rowCells } = props;
   const classes = useStyles();
   const [order, setOrder] = React.useState('desc');
   const [orderBy, setOrderBy] = React.useState('date');
@@ -271,7 +269,8 @@ export default function EnhancedTable(props) {
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <EnhancedTableToolbar numSelected={selected.length} onDownload={onDownload} />
+        <EnhancedTableToolbar numSelected={selected.length} onDownload={onDownload} onMulti={onMulti}
+          tableTitle={tableTitle} />
         <div className={classes.tableWrapper}>
           <Table
             className={classes.table}
@@ -286,6 +285,7 @@ export default function EnhancedTable(props) {
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
+              headCells={headCells}
             />
             <TableBody>
               {stableSort(rows, getSorting(order, orderBy))
@@ -311,30 +311,9 @@ export default function EnhancedTable(props) {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell component="th" id={labelId} scope="row" padding="none" align='right'>
-                        {row.date}
-                      </TableCell>
-                      <TableCell align="right">{row.account_name}</TableCell>
-                      <TableCell align="left">
-                        <a href={`https://moneybird.com/${adminCode}/documents/filter/state:open%7Clate,contact_id:${row.contactId}`}
-                          target='_blank' rel='noreferrer'>
-                          {row.name}
-                        </a>
-                      </TableCell>
-                      <TableCell align="right">{prettyAmount(row.amount)}</TableCell>
-                      <TableCell align="right">{row.owner}</TableCell>
-                      <TableCell align="center">
-                        <span className={row.state === 'processed' ? classes.badgeOK : classes.badgeNOK}
-                          style={{ fontSize: '0.7rem' }}>
-                          {row.state === 'processed' ? 'ok' : 'open'}
-                        </span>
-                      </TableCell>
-                      <TableCell align="left" style={{ fontSize: '0.75rem' }}>
-                        <a href={`https://moneybird.com/243231934476453244/financial_mutations/${row.id}`}
-                          target='_blank' rel='noreferrer'>
-                          {row.message.replace(/\//g, ' ')}
-                        </a>
-                      </TableCell>
+                      {rowCells.map((cellConfig, i) => {
+                        return <RowCell key={i} row={row} cellConfig={cellConfig} />
+                      })}
                     </TableRow>
                   );
                 })}
@@ -366,24 +345,4 @@ export default function EnhancedTable(props) {
       </Paper>
     </div>
   );
-}
-
-const withThousand = (amtStr) => {
-  return (amtStr.slice(0, 1) === '-') ?
-    (amtStr.length > 4) ?
-      withThousand(amtStr.slice(0, -3)) + '.' + amtStr.slice(-3)
-      : amtStr
-    : (amtStr.length > 3) ?
-      withThousand(amtStr.slice(0, -3)) + '.' + amtStr.slice(-3)
-      : amtStr
-}
-
-const prettyAmount = (amount) => {
-  const mainAmt = Math.floor(amount);
-  const cents = Math.round(amount * 100 - mainAmt * 100);
-  const centStr = (cents < 10) ? '0' + cents : cents.toString();
-  return <>
-    <span>{withThousand(mainAmt.toString())},</span>
-    <span style={{ fontSize: '.6rem', verticalAlign: 'top' }}>{centStr}</span>
-  </>
 }

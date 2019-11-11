@@ -18,6 +18,8 @@ export const SET_CUSTOM_FIELDS = "SET_CUSTOM_FIELDS";
 export const SET_CONTACTS_NEW = 'SET_CONTACTS_NEW';
 export const SET_PAYMENTS_NEW = 'SET_PAYMENTS_NEW';
 export const SET_ACCOUNTS_NEW = 'SET_ACCOUNTS_NEW';
+export const SET_RECEIPTS = 'SET_RECEIPTS';
+export const SET_LEDGERS_NEW = 'SET_LEDGERS_NEW';
 
 export const ADD_INCOMING = "ADD_INCOMING";
 export const SET_INCOMING_LEDGER = "SET_INCOMING_LEDGER";
@@ -43,6 +45,6 @@ export const LOGIN = "LOGIN";
 export const LOGOUT = "LOGOUT";
 
 export const TEST = "TEST";
-export const SET_TEST_RESULT ="SET_TEST_RESULT";
-export const SET_COUNT ="SET_COUNT";
+export const SET_TEST_RESULT = "SET_TEST_RESULT";
+export const SET_COUNT = "SET_COUNT";
 

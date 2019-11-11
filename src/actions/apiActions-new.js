@@ -33,3 +33,24 @@ export const getAccounts = (access_token) => apiAction({
         return { type: SET_ACCOUNTS_NEW, payload }
     }
 })
+
+export const getReceipts = (access_token, periodFilter = 'this_quarter', extraFilters = '') => {
+    return apiActionSync({
+    url: 'https://moneybird.com/api/v2/243231934476453244/documents/receipts/synchronization.json' +
+        `?filter=period:${periodFilter}${extraFilters}`,
+    headers: { Authorization: 'Bearer ' + access_token },
+    storeAction: (payload) => {
+        return { type: SET_RECEIPTS_NEW, payload: { key: periodFilter, apiAction: payload } }
+    },
+    loadingMsg: 'bonnetjes aan het ophalen.'
+})}
+
+export const getLedgers = (access_token) => apiAction({
+    url: 'https://moneybird.com/api/v2/243231934476453244/ledger_accounts.json',
+    headers: { Authorization: 'Bearer ' + access_token },
+    loadingMsg: 'categorieën aan het ophalen.',
+    storeAction: (payload) => {
+        return { type: SET_LEDGER_NEW, payload }
+    }
+})
+
