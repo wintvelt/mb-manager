@@ -203,7 +203,10 @@ const RowCell = (props) => {
     {hrefBase ?
       <a href={hrefBase + row[hrefKey]}
         target='_blank' rel='noopener noreferrer'>
-        {content}
+        <span>
+          <span>{content}</span>
+          <Icon fontSize='small' style={{ marginBottom: '-5px', marginLeft: '4px' }}>launch</Icon>
+        </span>
       </a>
       : content
     }

@@ -37,7 +37,7 @@ export const makeFilters = (filterConfig) => (rows, selected, filterState) => {
     const filters = filterConfig.map(fConfig => {
         const optionsList = (fConfig.type !== filterType.BOOLEAN) &&
             [...new Set([...filterRows(filterConfig)(rows, selected, filterState.filter(f => f.id !== fConfig.id))
-                .map(it => it[fConfig.id])])].filter(option => option);
+                .map(it => it[fConfig.id])])].filter(option => option).sort();
         const options = (fConfig.type === filterType.SINGLE) ?
             ['', ...optionsList]
             : (fConfig.type === filterType.MULTI) && optionsList;

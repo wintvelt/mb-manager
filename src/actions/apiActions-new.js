@@ -1,7 +1,8 @@
 // apiActions with New apiData lib
 import { apiActionPaged, apiActionSync } from '../helpers/apiData/apiData-multi';
 import { apiAction } from '../helpers/apiData/apiData';
-import { SET_CONTACTS_NEW, SET_PAYMENTS_NEW, SET_ACCOUNTS_NEW } from '../store/action-types';
+import { SET_CONTACTS_NEW, SET_PAYMENTS_NEW, SET_ACCOUNTS_NEW, 
+    SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW } from '../store/action-types';
 
 export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
     url: 'https://moneybird.com/api/v2/243231934476453244/contacts?per_page=50&page=',
@@ -40,7 +41,18 @@ export const getReceipts = (access_token, periodFilter = 'this_quarter', extraFi
         `?filter=period:${periodFilter}${extraFilters}`,
     headers: { Authorization: 'Bearer ' + access_token },
     storeAction: (payload) => {
-        return { type: SET_RECEIPTS_NEW, payload: { key: periodFilter, apiAction: payload } }
+        return { type: SET_RECEIPTS, payload: { key: periodFilter, apiAction: payload } }
+    },
+    loadingMsg: 'bonnetjes aan het ophalen.'
+})}
+
+export const getPurchaseInvoices = (access_token, periodFilter = 'this_quarter', extraFilters = '') => {
+    return apiActionSync({
+    url: 'https://moneybird.com/api/v2/243231934476453244/documents/purchase_invoices/synchronization.json' +
+        `?filter=period:${periodFilter}${extraFilters}`,
+    headers: { Authorization: 'Bearer ' + access_token },
+    storeAction: (payload) => {
+        return { type: SET_PURCHASE_INVOICES, payload: { key: periodFilter, apiAction: payload } }
     },
     loadingMsg: 'bonnetjes aan het ophalen.'
 })}
@@ -50,7 +62,7 @@ export const getLedgers = (access_token) => apiAction({
     headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'categorieën aan het ophalen.',
     storeAction: (payload) => {
-        return { type: SET_LEDGER_NEW, payload }
+        return { type: SET_LEDGERS_NEW, payload }
     }
 })
 

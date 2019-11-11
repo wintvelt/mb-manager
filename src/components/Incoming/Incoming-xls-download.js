@@ -9,7 +9,7 @@ const makeXls = (columns, rows) => {
     workbook.created = new Date();
     workbook.modified = new Date();
     workbook.lastPrinted = new Date();
-    let sheet = workbook.addWorksheet('Banktransacties');
+    let sheet = workbook.addWorksheet('Inkomende facturen');
 
     sheet.columns = columns;
     sheet.addRows(rows);
@@ -36,13 +36,14 @@ export const paymentDownload = (selectedRows) => {
     const workbook = makeXls([
         { header: 'Id', key: 'id', width: 20 },
         { header: 'Datum', key: 'date', width: 10 },
-        { header: 'Owner', key: 'owner', width: 10 },
-        { header: 'Contact', key: 'name', width: 20 },
-        { header: 'Rekening', key: 'account_name', width: 10 },
+        { header: 'Leverancier', key: 'contact_name', width: 20 },
+        { header: 'Factuur-referentie', key: 'reference', width: 40, style: { alignment: { wrapText: true } } },
         { header: 'Bedrag', key: 'amount', width: 10, style: { numFmt: '"€"#,##0.00;[Red]-"€"#,##0.00' } },
-        { header: 'Omschrijving', key: 'message', width: 60, style: { alignment: { wrapText: true } } }
+        { header: 'Owner', key: 'owner', width: 10 },
+        { header: 'Status', key: 'state', width: 15 },
+        { header: 'Categorie', key: 'ledger_name', width: 40 }
     ], selectedRows);
-    const filename = `moblybird betalingen ${timestamp()}.xlsx`;
+    const filename = `moblybird bonnetjes ${timestamp()}.xlsx`;
 
     workbook.xlsx.writeBuffer().then(function (data) {
         let blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });

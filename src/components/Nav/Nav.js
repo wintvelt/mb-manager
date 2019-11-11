@@ -6,10 +6,10 @@ import { hasData } from '../../store/derived-storestate-helpers';
 const menu = [
     { icon: 'import_contacts', link: '/contacten/lijst', text: 'Contacten' },
     { icon: 'spellcheck', link: '/contacten/keywords', text: 'Contacten keywords' },
-    { icon: 'receipt', link: '/inkomend', text: 'Bonnetjes en facturen' },
-    { icon: 'account_balance', link: '/betalingen/lijst', text: 'Banktransacties' },
+    { icon: 'receipt', link: '/inkomend', text: 'Bonnetjes en facturen', badge: true },
+    { icon: 'account_balance', link: '/betalingen/lijst', text: 'Banktransacties', badge: true },
     { icon: 'attachment', link: '/betalingen/match', text: 'Betalingen matchen' },
-    { icon: 'cloud_upload', link: '/bankmutations', text: 'Upload bankfile', badge: true },
+    { icon: 'cloud_upload', link: '/bankmutations', text: 'Upload bankfile' },
     { icon: 'sync', link: '/export', text: 'Export Finvision' },
     { icon: 'account_circle', link: '/connection', text: 'Connectie' }
 ];

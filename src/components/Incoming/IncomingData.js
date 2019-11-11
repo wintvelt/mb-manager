@@ -1,7 +1,7 @@
 // PaymentsData.js
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { getReceipts } from '../../actions/apiActions-new';
+import { getReceipts, getPurchaseInvoices } from '../../actions/apiActions-new';
 import { LoadingComp, LoadingIcon } from '../../helpers/apiData/apiData-components';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -67,9 +67,10 @@ const useStyles = makeStyles(theme => ({
 
 // receives data through props
 export default (props) => {
-    const { access_token, receipts, ledgers, expanded, onChange } = props;
+    const { access_token, receipts, purchaseInvoices, ledgers, expanded, onChange } = props;
 
     const receiptsList = receipts.toJS();
+    const purchaseInvoicesList = purchaseInvoices.toJS();
     const ledgersList = ledgers.toJS();
 
     const [period, setPeriod] = useState(0);
@@ -85,7 +86,7 @@ export default (props) => {
         hasAllData: receiptsList.hasAllData && ledgersList.hasAllData
     }
     const loadingApiText1 = (loadingApiData.hasAllData) ?
-        `${paymentsList.data.length} bonnetjes en facturen ${curPeriod} opgehaald.`
+        `${receiptsList.data.length + purchaseInvoicesList.data.length} bonnetjes en facturen ${curPeriod} opgehaald.`
         : loadingApiData.hasError ? 'Fout bij het laden.'
             : loadingApiData.isLoading ? `...bonnetjes en facturen ${curPeriod} ophalen.`
                 : '';
@@ -94,8 +95,9 @@ export default (props) => {
 
     const dispatch = useDispatch();
     useEffect(() => {
-        const extraFilter1 = URLencode(',state:saved|open|late' + (unpaidOnly ? '|paid|payment_pending' : ''));
+        const extraFilter1 = encodeURI(',state:saved|open|late' + (unpaidOnly ? '|paid|pending_payment' : ''));
         dispatch(getReceipts(access_token, periodOptions[period].value, extraFilter1));
+        dispatch(getPurchaseInvoices(access_token, periodOptions[period].value, extraFilter1));
     }, [dispatch, access_token, period, unpaidOnly]);
 
     const handleMore = () => {
@@ -122,8 +124,10 @@ export default (props) => {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
             <List>
-                <LoadingComp name={`bonnetjes en facturen ${periodOptions[period].label.toLowerCase()}`}
-                    apiData={paymentsList} />
+                <LoadingComp name={`bonnetjes ${periodOptions[period].label.toLowerCase()}`}
+                    apiData={receiptsList} />
+                <LoadingComp name={`facturen ${periodOptions[period].label.toLowerCase()}`}
+                    apiData={purchaseInvoicesList} />
                 <LoadingComp name='categorieën' apiData={ledgersList} />
             </List>
         </ExpansionPanelDetails>

@@ -2,12 +2,12 @@
 import React, { useState, useEffect, useMemo, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { getContacts, getAccounts } from '../../actions/apiActions-new';
-import { derivedPayments } from './Incoming-datatable';
+import { getLedgers } from '../../actions/apiActions-new';
+import { derivedIncoming } from './Incoming-datatable';
 import IncomingData from './IncomingData';
 import { filterConfig } from './Incoming-filters';
 import { FilterPanel } from '../Page/FilterPanel';
-import { paymentDownload } from './Payment-xls-download';
+import { paymentDownload } from './Incoming-xls-download';
 import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -50,17 +50,19 @@ export default function Incoming() {
     const access_token = accessToken.data;
     const receipts = useSelector(store => store.receipts.get('apiData'));
     const receiptsList = receipts.toJS();
-    const ledgers = useSelector(store => store.ledgersNew.get('apiData'));
-    const contactsList = contacts.toJS();
-    const hasContacts = contactsList.hasAllData;
-    const paymentsData = useMemo(() => {
-        return derivedPayments(paymentsList.data, contactsList.data, accountsList.data)
-    }, [paymentsList.data, contactsList.data, accountsList.data])
+    const purchaseInvoices = useSelector(store => store.purchaseInvoices.get('apiData'));
+    const purchaseInvoicesList = purchaseInvoices.toJS();
+    const ledgers = useSelector(store => store.ledgersNew);
+    const ledgersList = ledgers.toJS();
+    const hasLedgers = ledgersList.hasAllData;
+    const incomingData = useMemo(() => {
+        return derivedIncoming(receiptsList.data, purchaseInvoicesList.data, ledgersList.data)
+    }, [receiptsList.data, purchaseInvoicesList, ledgersList.data])
     const dispatch = useDispatch();
     const [expanded, setExpanded] = useState([]);
     const [selected, setSelected] = useState([]);
     const [filterState, setFilters] = useReducer(updateFilters, initFilters);
-    const [filters, rows] = getFilters(paymentsData, selected, filterState);
+    const [filters, rows] = getFilters(incomingData, selected, filterState);
     const filterObj = filters.map(f => {
         return {
             ...f,
@@ -79,11 +81,10 @@ export default function Incoming() {
     const filterCount = appliedFilters.length > 0 ? appliedFilters.length : 'Geen';
 
     useEffect(() => {
-        if (!hasContacts) {
-            dispatch(getAccounts(access_token));
-            dispatch(getContacts(access_token));
+        if (!hasLedgers) {
+            dispatch(getLedgers(access_token));
         }
-    }, [dispatch, access_token, hasContacts])
+    }, [dispatch, access_token, hasLedgers])
 
     const handlePanel = panel => (event, isIn) => {
         const newExpanded = (!isIn) ?
@@ -93,14 +94,15 @@ export default function Incoming() {
     };
 
     const handleDownload = () => {
-        const selectedRows = paymentsData.filter(item => selected.includes(item.id));
+        const selectedRows = incomingData.filter(item => selected.includes(item.id));
         paymentDownload(selectedRows);
     }
 
     return <div className={classes.root}>
         <IncomingData expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
             access_token={access_token}
-            receipts={receipts} ledgers={ledgers}/>
+            receipts={receipts} purchaseInvoices={purchaseInvoices}
+            ledgers={ledgers} />
         <ExpansionPanel expanded={expanded.includes('filters')} onChange={handlePanel('filters')}>
             <ExpansionPanelSummary
                 expandIcon={<Icon>expand_more</Icon>}

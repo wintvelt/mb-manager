@@ -1,21 +1,24 @@
 // Payment-filters.js
 import { filterType } from '../../helpers/filters/filters';
 
-/*
-state
-ledger
-owner
-selected
-*/
 
 export const filterConfig = [
     {
-        id: 'state',
-        label: 'Status',
-        placeholder: 'Alle statussen',
+        id: 'owner',
+        label: 'Owner',
+        placeholder: 'Alle owners',
         type: filterType.MULTI,
         itemFilter: (selected, filterState, item) => {
-            return filterState.length === 0 || (filterState.find(s => s === item.state) ? true : false)
+            return filterState.length === 0 || (filterState.find(s => s === item.owner) ? true : false)
+        }
+    },
+    {
+        id: 'contact_name',
+        label: 'Leverancier',
+        placeholder: 'Alle leveranciers',
+        type: filterType.MULTI,
+        itemFilter: (selected, filterState, item) => {
+            return filterState.length === 0 || (filterState.find(s => s === item.contact_name) ? true : false)
         }
     },
     {
@@ -26,12 +29,12 @@ export const filterConfig = [
         itemFilter: (selected, filterState, item) => !filterState || filterState === item.ledger_name
     },
     {
-        id: 'owner',
-        label: 'Owner',
-        placeholder: 'Alle owners',
+        id: 'state',
+        label: 'Status',
+        placeholder: 'Alle statussen',
         type: filterType.MULTI,
         itemFilter: (selected, filterState, item) => {
-            return filterState.length === 0 || (filterState.find(s => s === item.owner) ? true : false)
+            return filterState.length === 0 || (filterState.find(s => s === item.state) ? true : false)
         }
     },
     {
