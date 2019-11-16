@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { getLedgers } from '../../actions/apiActions-new';
+import { batchLedgerPost } from '../../actions/apiActions-post';
 import { derivedIncoming } from './Incoming-datatable';
 import IncomingData from './IncomingData';
 import { filterConfig } from './Incoming-filters';
@@ -106,7 +107,18 @@ export default function Incoming() {
         return { 
             label: ledger.name+(ledger.account_id?` (${ledger.account_id})`:''), 
             value: ledger.id }
-    }).sort((a, b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0)
+    }).sort((a, b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0);
+
+    const onActionSubmit = (access_token) => {
+        setActionState({
+            ...actionState,
+            open: false
+        });
+        const selectedIncomingwithUpdate = incomingData
+            .filter(incoming => selected.includes(incoming.id))
+            .map(incoming => {return { incoming, newLedgerId: actionState.selected.value}});
+        dispatch(batchLedgerPost(selectedIncomingwithUpdate, access_token));
+    }
 
     const handleDownload = () => {
         const selectedRows = incomingData.filter(item => selected.includes(item.id));
@@ -147,7 +159,7 @@ export default function Incoming() {
             placeholder='kies een categorie'
             onHandleClose={() => onActionOpen(false)}
             onChange={item => setActionState({ open: true, selected: item })}
-            onSubmit={() => alert('submitted ' + JSON.stringify(actionState.selected))}
+            onSubmit={() => onActionSubmit(access_token)}
             options={actionOptions}
             selected={actionState.selected}
         />

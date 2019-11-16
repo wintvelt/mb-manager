@@ -95,7 +95,7 @@ export default (props) => {
 
     const dispatch = useDispatch();
     useEffect(() => {
-        const extraFilter1 = encodeURI(',state:saved|open|late' + (unpaidOnly ? '|paid|pending_payment' : ''));
+        const extraFilter1 = encodeURI(',state:saved|open|late' + (unpaidOnly ? '' : '|paid|pending_payment'));
         dispatch(getReceipts(access_token, periodOptions[period].value, extraFilter1));
         dispatch(getPurchaseInvoices(access_token, periodOptions[period].value, extraFilter1));
     }, [dispatch, access_token, period, unpaidOnly]);

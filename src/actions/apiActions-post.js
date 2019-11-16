@@ -7,9 +7,12 @@ import {
 } from './actions';
 import { SET_INCOMING_LEDGER_NEW, SET_BATCH_MSG, CLEAR_BATCH_MSG, DO_SNACK } from '../store/action-types';
 
+const adminCode = "243231934476453244";
+const base_url = 'https://moneybird.com/api/v2/' + adminCode;
+
 // to process a list of ledger-changes (change ledger in invoice for all details to new ledger)
 // batchList = [ { incoming, newLedgerId } ]
-export function batchLedgerUpdate(batchList) {
+export function batchLedgerPost(batchList, access_token) {
     return function (dispatch) {
         // we have data to process
         const batchListClean = batchList.filter(item => (item.newLedgerId));
@@ -26,7 +29,7 @@ export function batchLedgerUpdate(batchList) {
             // set message
             const initialPayload = {
                 batchId: "incoming",
-                fetchId: item.incomingId,
+                fetchId: item.incoming.id,
                 res: false,
                 msg: ""
             }
@@ -34,7 +37,7 @@ export function batchLedgerUpdate(batchList) {
             // send single update to server + update batchMsg with response
             const patchBody = patchFrom(item.incoming, item.newLedgerId);
             dispatch(
-                patchIncomingLedger("incoming", item.incomingId, patchBody, accessToken.data)
+                patchIncomingLedger("incoming", item.incoming.id, patchBody, access_token)
             ).then(payload => dispatch(setBatchCheckMsg(payload)));
         });
     }
@@ -55,6 +58,7 @@ export function setBatchCheckMsg({ batchId, fetchId, res, msg }) {
             const allFetches = batchMsg[batchId].length;
             const completeFetches = batchMsg[batchId].filter(item => (item.res));
             if (completeFetches.length === allFetches) {
+                console.log('did set snackbar message');
                 dispatch({ type: DO_SNACK, payload: msgFromBatch(batchMsg[batchId]) });
                 dispatch({ type: CLEAR_BATCH_MSG, payload: batchId });
             }

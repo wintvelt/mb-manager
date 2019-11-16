@@ -54,6 +54,7 @@ class Snackbar extends Component {
 	}
 
 	render() {
+		console.log({snacks: this.state.snacks});
 		const snackbarOpen = this.state.snackbarOpen? "container" : "container hide";
 		return (
 			<div className={snackbarOpen} 

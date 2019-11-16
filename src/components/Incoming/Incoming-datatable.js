@@ -33,10 +33,12 @@ export const addInfo = (incoming, ledgers) => {
     return incoming.map(oldIncoming => {
         const newIncoming = {
             id: oldIncoming.id,
+            type: oldIncoming.type,
             date: oldIncoming.date,
             reference: oldIncoming.reference,
             state: oldIncoming.state,
             ledger_account_id: oldIncoming.details[0].ledger_account_id,
+            details: oldIncoming.details,
             amount: oldIncoming.total_price_incl_tax_base && parseFloat(oldIncoming.total_price_incl_tax_base),
             contactId: oldIncoming.contact_id,
             contact_name: oldIncoming.contact && oldIncoming.contact.company_name

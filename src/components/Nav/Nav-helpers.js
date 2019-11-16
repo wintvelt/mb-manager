@@ -219,8 +219,8 @@ export const NavWrapper = (props) => {
                     </Icon>
                 </IconButton>
             </div>
-            <Box component='h3' p={2} my={0}>
-                MoblyBird
+            <Box p={2} my={0}>
+                <Typography variant='h4'>MoblyBird</Typography>
             </Box>
             <Divider className={classes.divider} />
             <List dense className={classes.list}>

@@ -125,6 +125,7 @@ const ConnectedApp = (props) => {
 					} />
 				</Switch>
 				<Route render={(propsFromRoute) => {
+					console.log('got inside snackbar route')
 					const newSnackFromRoute =
 						(propsFromRoute.location.state) ? propsFromRoute.location.state.newSnack : null;
 					return <Snackbar newSnack={snackFromStore} newSnackFromRoute={newSnackFromRoute} />
