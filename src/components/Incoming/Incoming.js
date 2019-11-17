@@ -16,11 +16,8 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
-import Button from '@material-ui/core/Button';
 import IncomingTable from './IncomingTable';
 import Dialog from '../Page/Dialog';
-import { NOTIFY } from '../../store/action-types';
-import { enqueueSnack, closeSnack } from '../../helpers/snackbar/updateSnacks';
 
 const updateFilters = makeReducer(filterConfig);
 const initFilters = initialFilters(filterConfig);
@@ -129,33 +126,7 @@ export default function Incoming() {
         paymentDownload(selectedRows);
     }
 
-    const updateSnacks = action => dispatch({type: NOTIFY, payload: action});
-
-    // TEMP:
-    const makeSnack = (long) => {
-        const newSnackAction = enqueueSnack({
-            message: long?
-                'Failed fetching data. En daar komt nog een best lange tekst achteraan'
-                : 'Simply short.',
-            options: {
-                key: new Date().getTime() + Math.random(),
-                variant: 'info'
-            },
-            hasClose: true
-        });
-        updateSnacks(newSnackAction);
-    };
-
-    const dismissSnacks = () => {
-        updateSnacks(closeSnack());
-    };
-
-
     return <div className={classes.root}>
-        <Button variant="contained" onClick={() => makeSnack(true)}>Long Snack</Button>
-        <Button variant="contained" onClick={() => makeSnack(false)}>Short snackbar</Button>
-        <Button variant="contained" onClick={dismissSnacks}>Dismiss all snackbars</Button>
-
         <IncomingData expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
             access_token={access_token}
             receipts={receipts} purchaseInvoices={purchaseInvoices}

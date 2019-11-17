@@ -58,7 +58,6 @@ export function setBatchCheckMsg({ batchId, fetchId, res, msg }) {
             const allFetches = batchMsg[batchId].length;
             const completeFetches = batchMsg[batchId].filter(item => (item.res));
             if (completeFetches.length === allFetches) {
-                console.log('did set snackbar message');
                 dispatch({ type: DO_SNACK, payload: msgFromBatch(batchMsg[batchId]) });
                 dispatch({ type: CLEAR_BATCH_MSG, payload: batchId });
             }

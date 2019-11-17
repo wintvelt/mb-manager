@@ -124,7 +124,6 @@ function rootReducer(state = initialState, action) {
         }
         // payload = msg
         case DO_SNACK: {
-            console.log(`did set snack in state with '${action.payload}'`);
             const newSnackAction = enqueueSnack({
                 message: action.payload,
                 options: {
@@ -140,10 +139,18 @@ function rootReducer(state = initialState, action) {
         }
 
         case DO_SNACK_ERROR: {
-            // for now, simply display message
-            return Object.assign({}, state, {
-                newSnack: action.payload
-            })
+            const newSnackAction = enqueueSnack({
+                message: action.payload,
+                options: {
+                    key: new Date().getTime() + Math.random(),
+                    variant: 'warning'
+                },
+                hasClose: true
+            });
+            return {
+                ...state,
+                notifications: updateSnacks(state.notifications, newSnackAction)
+            }
         }
 
         // payload = ()
