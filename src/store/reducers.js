@@ -13,7 +13,7 @@ import {
     SET_BANK, SET_MATCH,
     SET_PAYMENTS_NEW, SET_CONTACTS_NEW, SET_ACCOUNTS_NEW,
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW,
-    SET_INCOMING_LEDGER_NEW
+    SET_INCOMING_LEDGER_NEW, NOTIFY
 } from "./action-types";
 import {
     setLedgerInRow, setCustomFieldInRow, setPaymentInRow
@@ -23,6 +23,7 @@ import { initBankData, setBank } from './reducer-helpers-bank';
 import { initialMatch, matchReducer } from "../components/Match-store";
 import { initApiDataMulti, apiUpdateMulti, apiUpdateMultiMulti } from '../helpers/apiData/apiData-multi';
 import { apiUpdate, initApiData } from '../helpers/apiData/apiData';
+import { defaultNotifications, updateSnacks, enqueueSnack } from "../helpers/snackbar/updateSnacks";
 
 // initial state also exported to root (to set default when initializing)
 export const initialState = {
@@ -40,6 +41,7 @@ export const initialState = {
     receipts: initApiDataMulti,
     purchaseInvoices: initApiDataMulti,
     ledgersNew: initApiData,
+    notifications: defaultNotifications,
     contacts: newApiData(),
     received: newApiData(),
     incomingSums: null,
@@ -96,7 +98,6 @@ function rootReducer(state = initialState, action) {
         case SET_INCOMING_LEDGER_NEW: {
             const { incoming, newLedgerId } = payload;
             // make optimistic update inside 1 incoming apiData thing
-            // TODO: TEST of this
             // do an update of 1 record in immutable receipts.apiData.data (or purchaseInvoices)
             const incomingStateKey = incoming.type === 'receipt' ? 'receipts' : 'purchaseInvoices';
             const indexOfListToUpdate = state[incomingStateKey].getIn(['apiData', 'data']).findIndex(listItem => {
@@ -109,10 +110,42 @@ function rootReducer(state = initialState, action) {
                     'details'
                 ],
                 (details) => details.map(detail => detail.set('ledger_account_id', newLedgerId)));
-            // TODO: save newIncomingState in global state
-            return state;
+            return {
+                ...state,
+                [incomingStateKey]: newIncomingState
+            }
 
         }
+        case NOTIFY: {
+            return {
+                ...state,
+                notifications: updateSnacks(state.notifications, action.payload)
+            }
+        }
+        // payload = msg
+        case DO_SNACK: {
+            console.log(`did set snack in state with '${action.payload}'`);
+            const newSnackAction = enqueueSnack({
+                message: action.payload,
+                options: {
+                    key: new Date().getTime() + Math.random(),
+                    variant: 'info'
+                },
+                hasClose: true
+            });
+            return {
+                ...state,
+                notifications: updateSnacks(state.notifications, newSnackAction)
+            }
+        }
+
+        case DO_SNACK_ERROR: {
+            // for now, simply display message
+            return Object.assign({}, state, {
+                newSnack: action.payload
+            })
+        }
+
         // payload = ()
         case TEST_CONNECTION: {
             return Object.assign({}, state, {
@@ -325,20 +358,6 @@ function rootReducer(state = initialState, action) {
             const newBatchMsg = Object.assign({}, state.batchMsg);
             delete newBatchMsg[action.payload];
             return Object.assign({}, state, { batchMsg: newBatchMsg });
-        }
-
-        // payload = msg
-        case DO_SNACK: {
-            console.log(`did set snack in state with '${action.payload}'`);
-            return Object.assign({}, state, {
-                newSnack: action.payload
-            })
-        }
-        case DO_SNACK_ERROR: {
-            // for now, simply display message
-            return Object.assign({}, state, {
-                newSnack: action.payload
-            })
         }
 
         case LOGIN: {

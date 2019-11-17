@@ -11,6 +11,7 @@
     "immutable": "^4.0.0-rc.12",
     "materialize-css": "^1.0.0",
     "moment": "^2.24.0",
+    "notistack": "^0.9.6",
     "react": "^16.8.6",
     "react-collapsible": "^2.6.0",
     "react-devtools": "^3.6.1",

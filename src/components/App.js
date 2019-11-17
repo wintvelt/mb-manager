@@ -1,12 +1,11 @@
 import React from 'react';
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 
 import '../css/App.css';
 
 import Nav from './Nav';
 import NewNav from './Nav/Nav';
-import Snackbar from './Snackbar';
 import Connection from './Connection';
 import Contacts from './Contacts';
 import ContactKeywords from './Contacts-Keywords';
@@ -28,6 +27,9 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import blueGrey from '@material-ui/core/colors/blueGrey';
 import teal from '@material-ui/core/colors/teal';
 import blue from '@material-ui/core/colors/blue';
+import { SnackbarProvider } from '../../node_modules/notistack/build/index';
+import Notifier from '../helpers/snackbar/Notifier';
+import { DO_SNACK } from '../store/action-types';
 
 function mapStateToProps(state) {
 	return {
@@ -46,20 +48,20 @@ const theme = createMuiTheme({
 		},
 	},
 	overrides: {
-	    'MuiLink': {
-	        root: {
-	            color: blue.A400,
-	        }
+		'MuiLink': {
+			root: {
+				color: blue.A400,
+			}
 		},
-	    'MuiDialog': {
-	        paper: {
-	            overflowY: 'visible',
-	        }
+		'MuiDialog': {
+			paper: {
+				overflowY: 'visible',
+			}
 		},
-	    'MuiDialogContent': {
-	        root: {
-	            overflowY: 'visible',
-	        }
+		'MuiDialogContent': {
+			root: {
+				overflowY: 'visible',
+			}
 		},
 	},
 });
@@ -85,58 +87,55 @@ const NavRoute = (props) => {
 
 }
 
-const Dummy= (props) => <></>
+const Dummy = (props) => <></>
 
 const ConnectedApp = (props) => {
-	let snackFromStore = props.newSnack;
+	const dispatch = useDispatch();
 	// only goes to /secret path in non-production environments
 	let secretPath = (process.env.NODE_ENV !== 'production') ? '/secret' : '/';
 	return (
 		<ThemeProvider theme={theme}>
-			<Router>
-				<NavRoute {...props} />
-				<Switch>
-					<Route exact path="/" component={Home} />
-					<PrivateRoute exact path="/contacten/lijst" component={Contacts}
-						isConnected={props.isConnected} />
-					<PrivateRoute exact path="/contacten/keywords" component={ContactKeywords}
-						isConnected={props.isConnected} />
-					<PrivateRoute path="/inkomend" component={Dummy}
-						isConnected={props.isConnected} />
-					<PrivateRoute exact path="/betalingen/lijst" component={Dummy}
-						isConnected={props.isConnected} />
-					<PrivateRoute exact path="/betalingen/match" component={MatchBankTransactions}
-						isConnected={props.isConnected} />
-					<PrivateRoute path="/export" component={Export}
-						isConnected={props.isConnected} />
-					<Route exact path="/connection" component={Connection} />
-					<Route exact path="/bankmutations" component={Bankmutations} />
-					<Route exact path={secretPath} component={Secret} />
-					<Route render={(routeprops) => {
-						const newSnack = "De pagina \"" +
-							routeprops.location.pathname +
-							"\" bestaat helaas (nog) niet. Gelukkig is er al genoeg anders te doen.";
-						return <Redirect to={{
-							pathname: "/", state: {
-								newSnack: newSnack
-							}
-						}} />
-					}
-					} />
-				</Switch>
-				<Route render={(propsFromRoute) => {
-					console.log('got inside snackbar route')
-					const newSnackFromRoute =
-						(propsFromRoute.location.state) ? propsFromRoute.location.state.newSnack : null;
-					return <Snackbar newSnack={snackFromStore} newSnackFromRoute={newSnackFromRoute} />
-				}
-				} />
-			</Router>
-			<ScrollTop>
-				<Fab color="secondary" size="small" aria-label="scroll back to top">
-					<Icon>keyboard_arrow_up</Icon>
-				</Fab>
-			</ScrollTop>
+			<SnackbarProvider maxSnack={4}>
+				<Notifier />
+				<Router>
+					<NavRoute {...props} />
+					<Switch>
+						<Route exact path="/" component={Home} />
+						<PrivateRoute exact path="/contacten/lijst" component={Contacts}
+							isConnected={props.isConnected} />
+						<PrivateRoute exact path="/contacten/keywords" component={ContactKeywords}
+							isConnected={props.isConnected} />
+						<PrivateRoute path="/inkomend" component={Dummy}
+							isConnected={props.isConnected} />
+						<PrivateRoute exact path="/betalingen/lijst" component={Dummy}
+							isConnected={props.isConnected} />
+						<PrivateRoute exact path="/betalingen/match" component={MatchBankTransactions}
+							isConnected={props.isConnected} />
+						<PrivateRoute path="/export" component={Export}
+							isConnected={props.isConnected} />
+						<Route exact path="/connection" component={Connection} />
+						<Route exact path="/bankmutations" component={Bankmutations} />
+						<Route exact path={secretPath} component={Secret} />
+						<Route render={(routeprops) => {
+							const newSnack = "De pagina \"" +
+								routeprops.location.pathname +
+								"\" bestaat helaas (nog) niet. Gelukkig is er al genoeg anders te doen.";
+							dispatch({type: DO_SNACK, payload: newSnack})
+							return <Redirect to={{
+								pathname: "/", state: {
+									newSnack: newSnack
+								}
+							}} />
+						}
+						} />
+					</Switch>
+				</Router>
+				<ScrollTop>
+					<Fab color="secondary" size="small" aria-label="scroll back to top">
+						<Icon>keyboard_arrow_up</Icon>
+					</Fab>
+				</ScrollTop>
+			</SnackbarProvider>
 		</ThemeProvider>
 	);
 }
