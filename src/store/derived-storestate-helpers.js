@@ -13,5 +13,5 @@ export const hasData = (store) => {
         const hasData = entry.isMulti ?
             store[entry.key].get('apiData').toJS().hasData : store[entry.key].toJS().hasData
         return res || hasData;
-    }, false)
+    }, false) || store.accessVerified;
 }

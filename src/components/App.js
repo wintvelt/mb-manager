@@ -6,7 +6,7 @@ import '../css/App.css';
 
 import Nav from './Nav';
 import NewNav from './Nav/Nav';
-import Connection from './Connection';
+import Connection from './Connection/Connection';
 import Contacts from './Contacts';
 import ContactKeywords from './Contacts-Keywords';
 import Incoming from './Incoming/Incoming';
@@ -68,7 +68,8 @@ const theme = createMuiTheme({
 
 const newRoutes = [
 	'/betalingen/lijst',
-	'/inkomend'
+	'/inkomend',
+	'/connection'
 ]
 
 const NavRoute = (props) => {
@@ -80,6 +81,7 @@ const NavRoute = (props) => {
 						isConnected={props.isConnected} />
 					<PrivateRoute exact path="/inkomend" component={Incoming}
 						isConnected={props.isConnected} />
+					<Route exact path="/connection" component={Connection} />
 				</Switch>
 			</NewNav>
 			: <Nav activePath={routeprops.location.pathname} />
@@ -113,7 +115,7 @@ const ConnectedApp = (props) => {
 							isConnected={props.isConnected} />
 						<PrivateRoute path="/export" component={Export}
 							isConnected={props.isConnected} />
-						<Route exact path="/connection" component={Connection} />
+						<Route exact path="/connection" component={Dummy} />
 						<Route exact path="/bankmutations" component={Bankmutations} />
 						<Route exact path={secretPath} component={Secret} />
 						<Route render={(routeprops) => {
