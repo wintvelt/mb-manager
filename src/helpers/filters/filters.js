@@ -33,7 +33,7 @@ export const makeReducer = filterConfig => (state, action) => {
     })
 }
 
-export const makeFilters = (filterConfig) => (rows, selected, filterState) => {
+export const makeFilters = (filterConfig) => (rows, selected, filterState, edited) => {
     const filters = filterConfig.map(fConfig => {
         const optionsList = (fConfig.type !== filterType.BOOLEAN) &&
             [...new Set([...filterRows(filterConfig)(rows, selected, filterState.filter(f => f.id !== fConfig.id))
@@ -52,15 +52,15 @@ export const makeFilters = (filterConfig) => (rows, selected, filterState) => {
             disabled: false // TODO: at a later moment
         }
     });
-    const filteredRows = filterRows(filterConfig)(rows, selected, filterState);
+    const filteredRows = filterRows(filterConfig)(rows, selected, filterState, edited);
     return [filters, filteredRows]
 }
 
-export const filterRows = filterConfig => (rows, selected, filterState) => {
+export const filterRows = filterConfig => (rows, selected, filterState, edited) => {
     return rows.filter(row => {
         return filterState.reduce((acc, filter) => {
             const thisConfig = filterConfig.find(f => f.id === filter.id);
-            const rowPassesFilter = thisConfig.itemFilter(selected, filter.value, row);
+            const rowPassesFilter = thisConfig.itemFilter(selected, filter.value, row, edited);
             return acc && rowPassesFilter;
         }, true)
     })
