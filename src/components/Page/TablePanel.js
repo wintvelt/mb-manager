@@ -14,6 +14,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Tooltip from '@material-ui/core/Tooltip';
 import Icon from '@material-ui/core/Icon';
@@ -150,6 +151,11 @@ const EnhancedTableToolbar = props => {
             </div>
             <div className={classes.spacer} />
             <div className={classes.actions}>
+                <Tooltip title="Bewerkingen opslaan">
+                    <Button aria-label="Opslaan bewerkingen" color='primary' size='small'>
+                        Opslaan
+                    </Button>
+                </Tooltip>
                 {numSelected > 0 && onMulti && <Tooltip title="Bewerk geselecteerde regels">
                     <IconButton aria-label="Bewerk regels" onClick={onMulti}>
                         <Icon>edit</Icon>
@@ -227,6 +233,7 @@ const Editable = (props) => {
             InputProps={{
                 autoFocus: true,
                 onKeyDown: onKey,
+                onBlur: () => handleSubmit(curValue),
                 endAdornment: <InputAdornment position="end">
                     <IconButton
                         aria-label="toggle edit"

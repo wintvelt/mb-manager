@@ -156,12 +156,12 @@ export default function Incoming() {
             open={actionState.open}
             dialogTitle={`${numSelected} ${numSelected === 1 ? 'bonnetje of factuur' : 'bonnetjes en facturen'} bewerken`}
             dialogText={'Kies een nieuwe categorie voor je selectie.'}
-            label='Categorie'
-            placeholder='kies een categorie'
-            onHandleClose={() => onActionOpen(false)}
-            onChange={item => setActionState({ open: true, selected: item })}
-            onSubmit={() => onActionSubmit(access_token)}
             options={actionOptions}
+            onChange={item => setActionState({ open: true, selected: item })}
+            placeholder='kies een categorie'
+            label='Categorie'
+            onHandleClose={() => onActionOpen(false)}
+            onSubmit={() => onActionSubmit(access_token)}
             selected={actionState.selected}
         />
     </div >
