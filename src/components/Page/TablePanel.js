@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
@@ -18,6 +18,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Tooltip from '@material-ui/core/Tooltip';
 import Icon from '@material-ui/core/Icon';
 import Link from '@material-ui/core/Link';
+import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 
 function desc(a, b, orderBy) {
@@ -202,26 +203,45 @@ const Editable = (props) => {
     const { onChange: emitChange, initValue, curValue: curPropValue } = props;
     const [isEditing, setIsEditing] = useState(false);
     const [curValue, setCurValue] = useState(curPropValue);
-    const onChange = e => {
-        setCurValue(e.target.value);
+    const handleChange = newVal => {
+        setCurValue(newVal);
+    }
+    const handleSubmit = newVal => {
+        setIsEditing(false);
+        emitChange(newVal);
+    }
+    const onKey = e => {
+        if (e.keyCode === 13) handleSubmit(e.target.value)
+    }
+    const onClick = e => {
+        setIsEditing(true)
     }
 
     const fieldStyle = {
         color: (initValue !== curValue) ? '#128675' : 'inherit'
     }
-    return <TextField value={curValue}
-        fullWidth={true}
-        inputProps={{ style: { ...fieldStyle, width: '100%' } }}
-        InputProps={{
-            endAdornment: <InputAdornment position="end">
-                <IconButton
-                    aria-label="toggle edit"
-                    onClick={() => alert('clicked edit')}
-                ><Icon fontSize='small'>keyboard_return</Icon>
-                </IconButton>
-            </InputAdornment>
-        }}
-        onChange={onChange} />
+    return isEditing ?
+        <TextField value={curValue}
+            fullWidth={true}
+            inputProps={{ style: { ...fieldStyle, width: '100%' } }}
+            InputProps={{
+                autoFocus: true,
+                onKeyDown: onKey,
+                endAdornment: <InputAdornment position="end">
+                    <IconButton
+                        aria-label="toggle edit"
+                        onClick={() => handleSubmit(curValue)}
+                    ><Icon fontSize='small'>keyboard_return</Icon>
+                    </IconButton>
+                </InputAdornment>
+            }}
+            onChange={e => handleChange(e.target.value)} />
+        : <Box style={{ display: 'flex', alignItems: 'center' }} onClick={onClick}>
+            <Typography style={{ ...fieldStyle, flex: 1 }}>{curValue}</Typography>
+            <IconButton>
+                <Icon fontSize='small'>edit</Icon>
+            </IconButton>
+        </Box>
 }
 
 const RowCell = (props) => {
@@ -246,7 +266,8 @@ const RowCell = (props) => {
 }
 
 export function EnhancedTable(props) {
-    const { rows, selected, onSelect, edited, onEdit, onDownload, onMulti, tableTitle, headCells, rowCells } = props;
+    const { rows, selected, onSelect, edited = { ids: [], edits: [] },
+        onEdit, onDownload, onMulti, tableTitle, headCells, rowCells } = props;
     const { initOrder = 'desc', initOrderBy = 'date' } = props;
     const classes = useStyles();
     const [order, setOrder] = React.useState(initOrder);
@@ -287,23 +308,29 @@ export function EnhancedTable(props) {
         onSelect(newSelected);
     };
 
-    const handleEdit = (event, id, field) => {
-        const value = event.target.value;
+    const handleEdit = (initVal = '', newVal, id, field) => {
         let editedIndex = edited.ids.indexOf(id);
         const newEdited = editedIndex === -1 ?
             {
                 ids: [...edited.ids, id],
-                edits: [...edited.edits, { [field]: value }]
+                edits: [...edited.edits, { [field]: newVal }]
             }
-            : {
-                ids: edited.ids,
-                edits: [
-                    ...edited.edits.slice(0, editedIndex),
-                    { ...edited.edits[editedIndex], [field]: value },
-                    ...edited.edits.slice(editedIndex + 1)
-                ]
-
-            }
+            : newVal === initVal ?
+                {
+                    ids: [...edited.ids.slice(0, editedIndex), ...edited.ids.slice(editedIndex + 1)],
+                    edits: [
+                        ...edited.edits.slice(0, editedIndex),
+                        ...edited.edits.slice(editedIndex + 1)
+                    ]
+                }
+                : {
+                    ids: edited.ids,
+                    edits: [
+                        ...edited.edits.slice(0, editedIndex),
+                        { ...edited.edits[editedIndex], [field]: newVal },
+                        ...edited.edits.slice(editedIndex + 1)
+                    ]
+                }
         onEdit(newEdited);
     }
 
@@ -376,7 +403,9 @@ export function EnhancedTable(props) {
                                                 return <RowCell key={i}
                                                     row={row} cellConfig={cellConfig}
                                                     edits={edits}
-                                                    onChange={e => handleEdit(e, row.id, cellConfig.key)} />
+                                                    onChange={newVal => {
+                                                        handleEdit(row[cellConfig.key], newVal, row.id, cellConfig.key)
+                                                    }} />
                                             })}
                                         </TableRow>
                                     );

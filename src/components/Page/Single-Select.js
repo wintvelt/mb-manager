@@ -106,7 +106,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function SingleSelect(props) {
-    const { options, placeholder, label, onChange } = props;
+    const { options, placeholder, label, onChange, autoFocus } = props;
     const classes = useStyles();
 
     const [inputValue, setInputValue] = React.useState('');
@@ -142,7 +142,8 @@ export default function SingleSelect(props) {
             }) => {
                 const { onBlur, onChange, onFocus, ...inputProps } = getInputProps({
                     placeholder,
-                    onFocus: openMenu
+                    onFocus: openMenu,
+                    autoFocus
                 });
 
                 return (
