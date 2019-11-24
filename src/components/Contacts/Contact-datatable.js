@@ -23,9 +23,9 @@ export const derivedContacts = (contacts, ledgers) => {
 /* make consolidated set from contacts and ledgers
 (only when contacts or ledgers updates, so in useMemo)
 */
-const getFromCustom = (customfields = []) => (name) => {
+const getFromCustom = (customfields = []) => (name, key = 'value') => {
     const field = customfields.find(field => field.name === name)
-    return field && field.value;
+    return field && field[key];
 }
 
 export const addInfo = (contacts, ledgers) => {
@@ -42,7 +42,8 @@ export const addInfo = (contacts, ledgers) => {
             std_payment: getCustomField('Standaard betaling'),
             std_ledger_name,
             std_ledger_id: std_ledger && std_ledger.id,
-            keywords: getCustomField('Keywords')
+            keywords: getCustomField('Keywords'),
+            keywordsId: getCustomField('Keywords', 'id')
         }
         return contact;
     })

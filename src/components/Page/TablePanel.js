@@ -130,7 +130,7 @@ const useToolbarStyles = makeStyles(theme => ({
 
 const EnhancedTableToolbar = props => {
     const classes = useToolbarStyles();
-    const { numSelected, onDownload, onMulti, tableTitle } = props;
+    const { numSelected, onDownload, onMulti, tableTitle, onSaveEdit } = props;
 
     return (
         <Toolbar
@@ -142,7 +142,7 @@ const EnhancedTableToolbar = props => {
                 {numSelected > 0 ? (
                     <Typography color="inherit" variant="subtitle1">
                         {numSelected} regel{numSelected !== 1 && 's'} geselecteerd
-          </Typography>
+                    </Typography>
                 ) : (
                         <Typography variant="h6" id="tableTitle">
                             {tableTitle}
@@ -151,11 +151,13 @@ const EnhancedTableToolbar = props => {
             </div>
             <div className={classes.spacer} />
             <div className={classes.actions}>
-                <Tooltip title="Bewerkingen opslaan">
-                    <Button aria-label="Opslaan bewerkingen" color='primary' size='small'>
-                        Opslaan
+                {numSelected === 0 && onSaveEdit && <Tooltip title="Bewerkingen opslaan">
+                    <Button aria-label="Opslaan bewerkingen" color='primary' size='small'
+                        fullWidth={true}
+                        onClick={onSaveEdit}>
+                        Edits opslaan
                     </Button>
-                </Tooltip>
+                </Tooltip>}
                 {numSelected > 0 && onMulti && <Tooltip title="Bewerk geselecteerde regels">
                     <IconButton aria-label="Bewerk regels" onClick={onMulti}>
                         <Icon>edit</Icon>
@@ -212,12 +214,13 @@ const Editable = (props) => {
     const handleChange = newVal => {
         setCurValue(newVal);
     }
-    const handleSubmit = newVal => {
+    const handleSubmit = () => {
         setIsEditing(false);
-        emitChange(newVal);
+        emitChange(curValue);
     }
     const onKey = e => {
-        if (e.keyCode === 13) handleSubmit(e.target.value)
+        if (e.keyCode === 13) handleSubmit(e.target.value);
+        if (e.keyCode === 27) handleSubmit(e.target.value);
     }
     const onClick = e => {
         setIsEditing(true)
@@ -227,17 +230,16 @@ const Editable = (props) => {
         color: (initValue !== curValue) ? '#128675' : 'inherit'
     }
     return isEditing ?
-        <TextField value={curValue}
+        <TextField value={curValue || ''}
             fullWidth={true}
             inputProps={{ style: { ...fieldStyle, width: '100%' } }}
             InputProps={{
                 autoFocus: true,
                 onKeyDown: onKey,
-                onBlur: () => handleSubmit(curValue),
+                onBlur: () => handleSubmit(),
                 endAdornment: <InputAdornment position="end">
                     <IconButton
                         aria-label="toggle edit"
-                        onClick={() => handleSubmit(curValue)}
                     ><Icon fontSize='small'>keyboard_return</Icon>
                     </IconButton>
                 </InputAdornment>
@@ -274,7 +276,7 @@ const RowCell = (props) => {
 
 export function EnhancedTable(props) {
     const { rows, selected, onSelect, edited = { ids: [], edits: [] },
-        onEdit, onDownload, onMulti, tableTitle, headCells, rowCells } = props;
+        onEdit, onDownload, onMulti, onSaveEdit, tableTitle, headCells, rowCells } = props;
     const { initOrder = 'desc', initOrderBy = 'date' } = props;
     const classes = useStyles();
     const [order, setOrder] = React.useState(initOrder);
@@ -315,14 +317,24 @@ export function EnhancedTable(props) {
         onSelect(newSelected);
     };
 
-    const handleEdit = (initVal = '', newVal, id, field) => {
-        let editedIndex = edited.ids.indexOf(id);
-        const newEdited = editedIndex === -1 ?
+    const handleEdit = (initVal = '', newVal = '', id, field) => {
+        const editedIndex = edited.ids.indexOf(id);
+        const wasInList = (editedIndex !== -1);
+        const isInit = (newVal === initVal);
+        const newFieldRecord = { [field]: newVal };
+        const oldRecordForRow = wasInList ? edited.edits[editedIndex] : {};
+        const { [field]: removed, ...recordWithoutField } = oldRecordForRow;
+        const hasOtherFields = (Object.keys(recordWithoutField).length > 0);
+        const newEdited = hasOtherFields ?
             {
-                ids: [...edited.ids, id],
-                edits: [...edited.edits, { [field]: newVal }]
+                ids: edited.ids,
+                edits: [
+                    ...edited.edits.slice(0, editedIndex),
+                    isInit ? recordWithoutField : { ...recordWithoutField, ...newFieldRecord },
+                    ...edited.edits.slice(editedIndex + 1)
+                ]
             }
-            : newVal === initVal ?
+            : isInit ?
                 {
                     ids: [...edited.ids.slice(0, editedIndex), ...edited.ids.slice(editedIndex + 1)],
                     edits: [
@@ -330,14 +342,19 @@ export function EnhancedTable(props) {
                         ...edited.edits.slice(editedIndex + 1)
                     ]
                 }
-                : {
-                    ids: edited.ids,
-                    edits: [
-                        ...edited.edits.slice(0, editedIndex),
-                        { ...edited.edits[editedIndex], [field]: newVal },
-                        ...edited.edits.slice(editedIndex + 1)
-                    ]
-                }
+                : wasInList ?
+                    {
+                        ids: edited.ids,
+                        edits: [
+                            ...edited.edits.slice(0, editedIndex),
+                            newFieldRecord,
+                            ...edited.edits.slice(editedIndex + 1)
+                        ]
+                    }
+                    : {
+                        ids: [...edited.ids, id],
+                        edits: [...edited.edits, newFieldRecord]
+                    }
         onEdit(newEdited);
     }
 
@@ -364,7 +381,7 @@ export function EnhancedTable(props) {
         <div className={classes.root}>
             <Paper className={classes.paper}>
                 <EnhancedTableToolbar numSelected={selected.length} onDownload={onDownload} onMulti={onMulti}
-                    tableTitle={tableTitle} />
+                    onSaveEdit={onSaveEdit} tableTitle={tableTitle} />
                 <div className={classes.tableWrapper}>
                     <Table
                         className={classes.table}

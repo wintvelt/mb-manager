@@ -2,13 +2,16 @@
 import React, { useState, useEffect, useMemo, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { getContacts, getLedgers } from '../../actions/apiActions-new';
+import { getContacts, getLedgers, getCustomFields } from '../../actions/apiActions-new';
+import { batchKeywordsPost } from '../../actions/apiActions-post';
+
 import { derivedContacts } from './Contact-datatable';
 import ContactData from './ContactData';
 import { filterConfig } from './Contact-filters';
 import { FilterPanel } from '../Page/FilterPanel';
 import { contactDownload } from './Contact-xls-download';
 import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
+import Dialog from '../Page/Dialog';
 
 import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -53,6 +56,8 @@ export default function Contacts() {
     const notAsked = contactsList.notAsked;
     const ledgers = useSelector(store => store.ledgersNew);
     const ledgersList = ledgers.toJS();
+    const customFields = useSelector(store => store.customFieldsNew);
+    const customFieldsList = customFields.toJS();
     const contactsData = useMemo(() => {
         return derivedContacts(contactsList.data, ledgersList.data)
     }, [contactsList.data, ledgersList.data])
@@ -60,6 +65,7 @@ export default function Contacts() {
     const [expanded, setExpanded] = useState([]);
     const [selected, setSelected] = useState([]);
     const [edited, setEdited] = useState({ ids: [], edits: [] });
+    const [actionOpen, setActionOpen] = useState(false);
     const [filterState, setFilters] = useReducer(updateFilters, initFilters);
     const [filters, rows] = getFilters(contactsData, selected, filterState, edited.ids);
     const filterObj = filters.map(f => {
@@ -83,6 +89,7 @@ export default function Contacts() {
         if (notAsked) {
             dispatch(getContacts(access_token));
             dispatch(getLedgers(access_token));
+            dispatch(getCustomFields(access_token));
         }
     }, [dispatch, access_token, notAsked])
 
@@ -98,10 +105,25 @@ export default function Contacts() {
         contactDownload(selectedRows);
     }
 
+    const onActionSubmit = (access_token) => {
+        setActionOpen(false);
+        const keywordsField = customFieldsList.data.find(field => field.name === 'Keywords');
+        const keywordsId = keywordsField && keywordsField.id;
+        const contactsToUpdate = edited.ids.map((id, i) => {
+            return {
+                id,
+                keywordsId,
+                keywords: edited.edits[i].keywords
+            }
+        });
+        dispatch(batchKeywordsPost(contactsToUpdate, access_token));
+        setEdited({ ids: [], edits: [] });
+    }
+
     return <div className={classes.root}>
         <ContactData expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
             access_token={access_token}
-            contacts={contacts} ledgers={ledgers} />
+            contacts={contacts} ledgers={ledgers} customFields={customFields} />
         <ExpansionPanel expanded={expanded.includes('filters')} onChange={handlePanel('filters')}>
             <ExpansionPanelSummary
                 expandIcon={<Icon>expand_more</Icon>}
@@ -121,7 +143,15 @@ export default function Contacts() {
         <ContactsTable rows={rows}
             selected={selected} onSelect={setSelected}
             edited={edited} onEdit={setEdited}
+            onSaveEdit={edited.ids.length > 0 && (() => setActionOpen(true))}
             onDownload={handleDownload}
             tableTitle='Contacten' />
+        <Dialog
+            open={actionOpen}
+            dialogTitle={`${edited.ids.length} ${edited.ids.length === 1 ? 'contact' : 'contacten'} met bewerking opslaan.`}
+            dialogText={'Stuur de bewerkingen van keywords door naar Moneybird.'}
+            onHandleClose={() => setActionOpen(false)}
+            onSubmit={() => onActionSubmit(access_token)}
+        />
     </div >
 }

@@ -38,14 +38,15 @@ const useStyles = makeStyles(theme => ({
 
 // receives data through props
 export default (props) => {
-    const { contacts, ledgers, expanded, onChange } = props;
+    const { contacts, ledgers, customFields, expanded, onChange } = props;
 
     const contactsList = contacts.toJS();
     const ledgersList = ledgers.toJS();
+    const customFieldsList = customFields.toJS();
     const loadingApiData = {
-        isLoading: contactsList.isLoading || ledgersList.isLoading,
-        hasError: contactsList.hasError || ledgersList.hasError,
-        hasAllData: contactsList.hasAllData && ledgersList.hasAllData
+        isLoading: contactsList.isLoading || ledgersList.isLoading || customFieldsList.isLoading,
+        hasError: contactsList.hasError || ledgersList.hasError || customFieldsList.hasError,
+        hasAllData: contactsList.hasAllData && ledgersList.hasAllData && customFieldsList.hasAllData
     }
     const loadingApiText = (loadingApiData.hasAllData) ?
         `${contactsList.data.length} contacten opgehaald.`
@@ -75,6 +76,7 @@ export default (props) => {
             <List>
                 <LoadingComp name='contacten' apiData={contactsList} />
                 <LoadingComp name='categorieën' apiData={ledgersList} />
+                <LoadingComp name='extra velden' apiData={customFieldsList} />
             </List>
         </ExpansionPanelDetails>
     </ExpansionPanel>

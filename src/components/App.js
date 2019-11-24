@@ -64,6 +64,11 @@ const theme = createMuiTheme({
 				overflowY: 'visible',
 			}
 		},
+		'MuiButton': {
+			label: {
+				whiteSpace: 'nowrap'
+			}
+		}
 	},
 });
 

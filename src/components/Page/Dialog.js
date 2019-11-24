@@ -21,18 +21,18 @@ export default function FormDialog(props) {
                     <DialogContentText>
                         {dialogText}
                     </DialogContentText>
-                    <SingleSelect
+                    {options && <SingleSelect
                         options={options}
                         onChange={onChange}
                         placeholder={placeholder}
                         label={label}
-                    />
+                    />}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="primary">
+                    <Button onClick={handleClose}>
                         Afbreken
                     </Button>
-                    <Button onClick={onSubmit} color="primary" disabled={selected.value? false : true}>
+                    <Button onClick={onSubmit} color="primary" disabled={(!selected || selected.value)? false : true}>
                         Verwerken
                     </Button>
                 </DialogActions>

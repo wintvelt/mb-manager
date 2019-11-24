@@ -30,13 +30,14 @@ const rowCells = [
 ]
 
 export default function ContactsTable(props) {
-  const { rows, selected, onSelect, edited, onEdit, onDownload, onMulti } = props;
+  const { rows, selected, onSelect, edited, onEdit, onDownload, onMulti, onSaveEdit } = props;
   return <EnhancedTable rows={rows}
     selected={selected} onSelect={onSelect}
     edited={edited} onEdit={onEdit}
     tableTitle='Contacten'
     onDownload={onDownload}
     onMulti={onMulti}
+    onSaveEdit={onSaveEdit}
     headCells={headCells}
     rowCells={rowCells}
     initOrder='asc'

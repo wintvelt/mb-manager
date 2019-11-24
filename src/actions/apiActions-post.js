@@ -5,7 +5,8 @@
 import {
     doSnack
 } from './actions';
-import { SET_INCOMING_LEDGER_NEW, SET_BATCH_MSG, CLEAR_BATCH_MSG, DO_SNACK } from '../store/action-types';
+import { SET_INCOMING_LEDGER_NEW, SET_BATCH_MSG, CLEAR_BATCH_MSG, DO_SNACK,
+    SET_CONTACT_KEYWORDS } from '../store/action-types';
 
 const adminCode = "243231934476453244";
 const base_url = 'https://moneybird.com/api/v2/' + adminCode;
@@ -43,28 +44,6 @@ export function batchLedgerPost(batchList, access_token) {
     }
 }
 
-// for single batch message setting + check to do snack and clear if needed
-export function setBatchCheckMsg({ batchId, fetchId, res, msg }) {
-    return function (dispatch, getState) {
-        const payload = {
-            batchId: batchId,
-            fetchId: fetchId,
-            res: res,
-            msg: msg
-        }
-        dispatch({ type: SET_BATCH_MSG, payload });
-        const { batchMsg } = getState();
-        if (batchMsg[batchId]) {
-            const allFetches = batchMsg[batchId].length;
-            const completeFetches = batchMsg[batchId].filter(item => (item.res));
-            if (completeFetches.length === allFetches) {
-                dispatch({ type: DO_SNACK, payload: msgFromBatch(batchMsg[batchId]) });
-                dispatch({ type: CLEAR_BATCH_MSG, payload: batchId });
-            }
-        }
-    }
-}
-
 // POST update to Moneybird - to update details of 1 receipt or purchase invoice
 export function patchIncomingLedger(batchId, incomingId, body, access_token) {
     return function (dispatch) {
@@ -93,7 +72,6 @@ export function patchIncomingLedger(batchId, incomingId, body, access_token) {
     }
 }
 
-
 // returns body for update of Ledger in Incoming= {}
 const patchFrom = (incoming, newLedgerId) => {
     let details = {};
@@ -108,6 +86,101 @@ const patchFrom = (incoming, newLedgerId) => {
     body[incoming.type] = { "details_attributes": details };
     return body;
 }
+
+// to process keyword-updates for list of contacts
+// keywordList = [ { id, keywordsId, keywords } ]
+export function batchKeywordsPost(batchList, access_token) {
+    return function (dispatch) {
+        // we have data to process
+        const batchListClean = batchList.filter(item => (item.id));
+        // removes invalid or missing ledgers
+        const invalidContacts = (batchList.length - batchListClean.length);
+        if (invalidContacts > 0) {
+            const msg = invalidContacts + " contacten zonder id";
+            dispatch(doSnack(msg));
+        }
+        // loop over cleaned list
+        batchListClean.forEach((item) => {
+            // optimistic update of store
+            dispatch({ type: SET_CONTACT_KEYWORDS, payload: item });
+            // set message
+            const initialPayload = {
+                batchId: "contacts",
+                fetchId: item.id,
+                res: false,
+                msg: ""
+            }
+            dispatch(setBatchCheckMsg(initialPayload));
+            // send single update to server + update batchMsg with response
+            const patchBody = {
+                "contact":
+                {
+                    "custom_fields_attributes":
+                    {
+                        "0":
+                        {
+                            "id": item.keywordsId,
+                            "value": item.keywords
+                        }
+                    }
+                }
+            };
+            dispatch(
+                patchContactKeywords("contact", item.id, patchBody, access_token)
+            ).then(payload => dispatch(setBatchCheckMsg(payload)));
+        });
+    }
+}
+
+// POST update keywords on 1 contact
+export function patchContactKeywords(batchId, contactId, body, access_token) {
+    return function (dispatch) {
+        const url = base_url + '/contacts/' + contactId + ".json";
+        return (
+            postData(url, body, "PATCH", access_token)
+                .then((res) => {
+                    // do OK message in dispatch { batchId, fetchId, res, msg }
+                    return {
+                        batchId: batchId,
+                        fetchId: contactId,
+                        res: true,
+                        msg: "contacten bijgewerkt"
+                    };
+                })
+                .catch((err) => {
+                    return {
+                        batchId: batchId,
+                        fetchId: contactId,
+                        res: true,
+                        msg: "regels zijn niet gelukt :("
+                    };
+                })
+        )
+    }
+}
+
+// for single batch message setting + check to do snack and clear if needed
+export function setBatchCheckMsg({ batchId, fetchId, res, msg }) {
+    return function (dispatch, getState) {
+        const payload = {
+            batchId: batchId,
+            fetchId: fetchId,
+            res: res,
+            msg: msg
+        }
+        dispatch({ type: SET_BATCH_MSG, payload });
+        const { batchMsg } = getState();
+        if (batchMsg[batchId]) {
+            const allFetches = batchMsg[batchId].length;
+            const completeFetches = batchMsg[batchId].filter(item => (item.res));
+            if (completeFetches.length === allFetches) {
+                dispatch({ type: DO_SNACK, payload: msgFromBatch(batchMsg[batchId]) });
+                dispatch({ type: CLEAR_BATCH_MSG, payload: batchId });
+            }
+        }
+    }
+}
+
 
 // taaldingetje (vervangt meervoud door enkelvoud als nodig)
 const stringFromMsg = (count, string) => {

@@ -13,7 +13,9 @@ import {
     SET_BANK, SET_MATCH,
     SET_PAYMENTS_NEW, SET_CONTACTS_NEW, SET_ACCOUNTS_NEW,
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW,
-    SET_INCOMING_LEDGER_NEW, NOTIFY
+    SET_INCOMING_LEDGER_NEW, NOTIFY,
+    SET_CONTACT_KEYWORDS,
+    SET_CUSTOM_FIELDS_NEW
 } from "./action-types";
 import {
     setLedgerInRow, setCustomFieldInRow, setPaymentInRow
@@ -37,6 +39,7 @@ export const initialState = {
     incoming: newApiData(),
     payments: initApiDataMulti,
     contactsNew: initApiDataMulti,
+    customFieldsNew: initApiData,
     accountsNew: initApiData,
     receipts: initApiDataMulti,
     purchaseInvoices: initApiDataMulti,
@@ -115,6 +118,26 @@ function rootReducer(state = initialState, action) {
                 [incomingStateKey]: newIncomingState
             }
 
+        }
+        case SET_CUSTOM_FIELDS_NEW: {
+            const newCustomFields = apiUpdate(state.customFieldsNew, payload);
+            return { ...state, customFieldsNew: newCustomFields }
+        }
+        case SET_CONTACT_KEYWORDS: {
+            const { id, keywordsId, keywords } = payload;
+            const indexOfContactToUpdate = state.contactsNew.getIn(['apiData', 'data']).findIndex(contact => {
+                return contact.get('id') === id;
+            });
+            const newContacts = state.contactsNew.updateIn([
+                'apiData', 'data',
+                indexOfContactToUpdate,
+                'custom_fields'
+            ], custom_fields => custom_fields.map(field => {
+                return field.get('id') === keywordsId ?
+                    field.set('value', keywords)
+                    : field
+            }))
+            return { ...state, contactsNew: newContacts }
         }
         case NOTIFY: {
             return {
