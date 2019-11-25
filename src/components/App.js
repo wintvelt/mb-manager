@@ -8,12 +8,8 @@ import Nav from './Nav';
 import NewNav from './Nav/Nav';
 import Connection from './Connection/Connection';
 import Contacts from './Contacts/Contacts';
-import ContactKeywords from './Contacts-Keywords';
 import Incoming from './Incoming/Incoming';
 import Payments from './Payments/Payments';
-// import Contacts from './Contacts';
-// import Incoming from './Incoming';
-// import Received from './Received';
 import MatchBankTransactions from './Match';
 import Export from './Export';
 import Bankmutations from './Bankmutations';
@@ -76,7 +72,7 @@ const newRoutes = [
 	'/betalingen/lijst',
 	'/inkomend',
 	'/connection',
-	'/contacten/lijst'
+	'/contacten'
 ]
 
 const NavRoute = (props) => {
@@ -88,7 +84,7 @@ const NavRoute = (props) => {
 						isConnected={props.isConnected} />
 					<PrivateRoute exact path="/inkomend" component={Incoming}
 						isConnected={props.isConnected} />
-					<PrivateRoute exact path="/contacten/lijst" component={Contacts}
+					<PrivateRoute exact path="/contacten" component={Contacts}
 						isConnected={props.isConnected} />
 					<Route exact path="/connection" component={Connection} />
 				</Switch>
@@ -112,9 +108,7 @@ const ConnectedApp = (props) => {
 					<NavRoute {...props} />
 					<Switch>
 						<Route exact path="/" component={Home} />
-						<PrivateRoute exact path="/contacten/lijst" component={Dummy}
-							isConnected={props.isConnected} />
-						<PrivateRoute exact path="/contacten/keywords" component={ContactKeywords}
+						<PrivateRoute exact path="/contacten" component={Dummy}
 							isConnected={props.isConnected} />
 						<PrivateRoute path="/inkomend" component={Dummy}
 							isConnected={props.isConnected} />

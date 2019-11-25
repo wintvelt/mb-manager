@@ -4,8 +4,7 @@ import { NavWrapper } from './Nav-helpers';
 import { hasData } from '../../store/derived-storestate-helpers';
 
 const menu = [
-    { icon: 'import_contacts', link: '/contacten/lijst', text: 'Contacten' },
-    { icon: 'spellcheck', link: '/contacten/keywords', text: 'Contacten keywords' },
+    { icon: 'import_contacts', link: '/contacten', text: 'Contacten' },
     { icon: 'receipt', link: '/inkomend', text: 'Bonnetjes en facturen', badge: true },
     { icon: 'account_balance', link: '/betalingen/lijst', text: 'Banktransacties', badge: true },
     { icon: 'attachment', link: '/betalingen/match', text: 'Betalingen matchen' },

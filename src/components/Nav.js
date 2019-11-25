@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { Link } from 'react-router-dom';
 
 const menu = [
-	{ path: "/contacten", link: "/contacten/lijst", text: "Contacten" },
+	{ path: "/contacten", link: "/contacten", text: "Contacten" },
 	{ path: "/inkomend", text: "Inkomend" },
 	{ path: "/betalingen", link: "/betalingen/match", text: "Betalingen", badge: 'NIEUW' },
 	{ path: "/export", text: "Export" },
@@ -15,12 +15,6 @@ const menu = [
 const subMenusFor = (activePath) => {
 	const pathMenu = activePath.slice(1).split('/')[0];
 	switch (pathMenu) {
-		case 'contacten':
-			return [
-				{ path: '/contacten/lijst', text: 'Lijst' },
-				{ path: '/contacten/keywords', text: 'Keywords' },
-			]
-
 		case 'betalingen':
 			return [
 				{ path: '/betalingen/lijst', text: 'Lijst' },

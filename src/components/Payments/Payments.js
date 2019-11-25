@@ -52,9 +52,10 @@ export default function Payments() {
     const paymentsList = payments.toJS();
     const contacts = useSelector(store => store.contactsNew.get('apiData'));
     const contactsList = contacts.toJS();
-    const hasContacts = contactsList.hasAllData;
+    const contactsNotAsked = contactsList.notAsked;
     const accounts = useSelector(store => store.accountsNew);
     const accountsList = accounts.toJS();
+    const accountsNotAsked = accountsList.notAsked;
     const paymentsData = useMemo(() => {
         return derivedPayments(paymentsList.data, contactsList.data, accountsList.data)
     }, [paymentsList.data, contactsList.data, accountsList.data])
@@ -81,11 +82,9 @@ export default function Payments() {
     const filterCount = appliedFilters.length > 0 ? appliedFilters.length : 'Geen';
 
     useEffect(() => {
-        if (!hasContacts) {
-            dispatch(getAccounts(access_token));
-            dispatch(getContacts(access_token));
-        }
-    }, [dispatch, access_token, hasContacts])
+        if (accountsNotAsked) dispatch(getAccounts(access_token));
+        if (contactsNotAsked) dispatch(getContacts(access_token));
+    }, [dispatch, access_token, contactsNotAsked, accountsNotAsked])
 
     const handlePanel = panel => (event, isIn) => {
         const newExpanded = (!isIn) ?

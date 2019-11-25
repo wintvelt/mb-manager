@@ -53,11 +53,13 @@ export default function Contacts() {
     const access_token = accessToken.data;
     const contacts = useSelector(store => store.contactsNew.get('apiData'));
     const contactsList = contacts.toJS();
-    const notAsked = contactsList.notAsked;
+    const contactsNotAsked = contactsList.notAsked;
     const ledgers = useSelector(store => store.ledgersNew);
     const ledgersList = ledgers.toJS();
+    const ledgersNotAsked = ledgersList.notAsked;
     const customFields = useSelector(store => store.customFieldsNew);
     const customFieldsList = customFields.toJS();
+    const customNotAsked = customFieldsList.notAsked;
     const contactsData = useMemo(() => {
         return derivedContacts(contactsList.data, ledgersList.data)
     }, [contactsList.data, ledgersList.data])
@@ -86,12 +88,10 @@ export default function Contacts() {
     const filterCount = appliedFilters.length > 0 ? appliedFilters.length : 'Geen';
 
     useEffect(() => {
-        if (notAsked) {
-            dispatch(getContacts(access_token));
-            dispatch(getLedgers(access_token));
-            dispatch(getCustomFields(access_token));
-        }
-    }, [dispatch, access_token, notAsked])
+        if (contactsNotAsked) dispatch(getContacts(access_token));
+        if (ledgersNotAsked) dispatch(getLedgers(access_token));
+        if (customNotAsked) dispatch(getCustomFields(access_token));
+    }, [dispatch, access_token, contactsNotAsked, ledgersNotAsked, customNotAsked])
 
     const handlePanel = panel => (event, isIn) => {
         const newExpanded = (!isIn) ?
