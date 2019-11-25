@@ -6,9 +6,9 @@ import { getContacts, getLedgers, getCustomFields } from '../../actions/apiActio
 import { batchKeywordsPost } from '../../actions/apiActions-post';
 
 import { derivedContacts } from './Contact-datatable';
-import ContactData from './ContactData';
 import { filterConfig } from './Contact-filters';
 import { FilterPanel } from '../Page/FilterPanel';
+import { DataPanel } from '../Page/DataPanel';
 import { contactDownload } from './Contact-xls-download';
 import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
 import Dialog from '../Page/Dialog';
@@ -121,9 +121,13 @@ export default function Contacts() {
     }
 
     return <div className={classes.root}>
-        <ContactData expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
+        <DataPanel expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
             access_token={access_token}
-            contacts={contacts} ledgers={ledgers} customFields={customFields} />
+            title='contacten'
+            apiDataSources={[contacts, ledgers, customFields]}
+            apiTitles={['contacten', 'categorieën', 'extra velden']}
+            contacts={contacts} ledgers={ledgers} customFields={customFields} 
+            />
         <ExpansionPanel expanded={expanded.includes('filters')} onChange={handlePanel('filters')}>
             <ExpansionPanelSummary
                 expandIcon={<Icon>expand_more</Icon>}

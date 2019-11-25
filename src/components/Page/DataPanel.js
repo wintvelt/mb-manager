@@ -1,4 +1,5 @@
-// PaymentsData.js
+// DataPanel.js
+// Generic Panel to use on a generic page
 import React from 'react';
 import { LoadingComp, LoadingIcon } from '../../helpers/apiData/apiData-components';
 
@@ -6,6 +7,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Box from '@material-ui/core/Box';
@@ -36,22 +38,24 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-// receives data through props
-export default (props) => {
-    const { contacts, ledgers, customFields, expanded, onChange } = props;
-
-    const contactsList = contacts.toJS();
-    const ledgersList = ledgers.toJS();
-    const customFieldsList = customFields.toJS();
-    const loadingApiData = {
-        isLoading: contactsList.isLoading || ledgersList.isLoading || customFieldsList.isLoading,
-        hasError: contactsList.hasError || ledgersList.hasError || customFieldsList.hasError,
-        hasAllData: contactsList.hasAllData && ledgersList.hasAllData && customFieldsList.hasAllData
+export const makeLoadingApiData = dataSources => {
+    return {
+        isLoading: dataSources.reduce((out, data) => out || data.isLoading, false),
+        hasError: dataSources.reduce((out, data) => out || data.hasError, false),
+        hasAllData: dataSources.reduce((out, data) => out && data.hasAllData, true),
     }
-    const loadingApiText = (loadingApiData.hasAllData) ?
-        `${contactsList.data.length} contacten opgehaald.`
+}
+
+// receives data through props
+export const DataPanel = (props) => {
+    const { apiDataSources = [], apiTitles = [], expanded, onChange, title, loadingText } = props;
+    const dataSources = apiDataSources.map(apiData => apiData.toJS());
+
+    const loadingApiData = makeLoadingApiData(dataSources);
+    const loadingApiText = loadingText || (loadingApiData.hasAllData) ?
+        `${dataSources[0].data.length} ${title} opgehaald.`
         : loadingApiData.hasError ? 'Fout bij het laden.'
-            : loadingApiData.isLoading ? `...contacten ophalen.`
+            : loadingApiData.isLoading ? `...${title} ophalen.`
                 : '';
 
     const classes = useStyles();
@@ -74,10 +78,14 @@ export default (props) => {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
             <List>
-                <LoadingComp name='contacten' apiData={contactsList} />
-                <LoadingComp name='categorieën' apiData={ledgersList} />
-                <LoadingComp name='extra velden' apiData={customFieldsList} />
+                {apiTitles.map((apiTitle, i) => {
+                    return <LoadingComp key={apiTitle} name={apiTitle} apiData={dataSources[i]} />
+                })}
             </List>
         </ExpansionPanelDetails>
+        {props.children && <ExpansionPanelActions>
+            {props.children}
+        </ExpansionPanelActions>
+        }
     </ExpansionPanel>
 }

@@ -3,17 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { getReceipts, getPurchaseInvoices } from '../../actions/apiActions-new';
 import { LoadingComp, LoadingIcon } from '../../helpers/apiData/apiData-components';
+import { makeLoadingApiData, DataPanel } from '../Page/DataPanel';
 
 import { makeStyles } from '@material-ui/core/styles';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
-import Divider from '@material-ui/core/Divider';
-import Typography from '@material-ui/core/Typography';
-import Icon from '@material-ui/core/Icon';
-import Box from '@material-ui/core/Box';
-import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
 
 
@@ -43,23 +35,6 @@ const periodOptions = [
 
 // styles
 const useStyles = makeStyles(theme => ({
-    heading: {
-        fontSize: theme.typography.pxToRem(15),
-        color: theme.palette.text.secondary,
-        flexBasis: '10rem',
-        flexShrink: 0,
-        display: 'flex',
-        alignItems: 'center'
-    },
-    secondaryHeading: {
-        fontSize: theme.typography.pxToRem(15),
-        color: theme.palette.text.primary,
-        alignSelf: 'center'
-    },
-    icon: {
-        marginRight: '1rem',
-        height: '24px;'
-    },
     listButton: {
         marginRight: '1rem'
     }
@@ -69,9 +44,7 @@ const useStyles = makeStyles(theme => ({
 export default (props) => {
     const { access_token, receipts, purchaseInvoices, ledgers, expanded, onChange } = props;
 
-    const receiptsList = receipts.toJS();
-    const purchaseInvoicesList = purchaseInvoices.toJS();
-    const ledgersList = ledgers.toJS();
+    const apiDataSources = [receipts, purchaseInvoices, ledgers];
 
     const [period, setPeriod] = useState(0);
     const [unpaidOnly, setUnpaidOnly] = useState(true);
@@ -80,13 +53,9 @@ export default (props) => {
     const nextPeriod = (period < periodOptions.length - 1) ?
         periodOptions[period + 1].label.toLowerCase()
         : null;
-    const loadingApiData = {
-        isLoading: receiptsList.isLoading || ledgersList.isLoading,
-        hasError: receiptsList.hasError || ledgersList.hasError,
-        hasAllData: receiptsList.hasAllData && ledgersList.hasAllData
-    }
+    const loadingApiData = makeLoadingApiData(apiDataSources);
     const loadingApiText1 = (loadingApiData.hasAllData) ?
-        `${receiptsList.data.length + purchaseInvoicesList.data.length} bonnetjes en facturen ${curPeriod} opgehaald.`
+        `${receipts.toJS().data.length + purchaseInvoices.toJS().data.length} bonnetjes en facturen ${curPeriod} opgehaald.`
         : loadingApiData.hasError ? 'Fout bij het laden.'
             : loadingApiData.isLoading ? `...bonnetjes en facturen ${curPeriod} ophalen.`
                 : '';
@@ -106,47 +75,28 @@ export default (props) => {
 
     const classes = useStyles();
 
-    return <ExpansionPanel expanded={expanded} onChange={onChange}>
-        <ExpansionPanelSummary
-            expandIcon={<Icon>expand_more</Icon>}
-            aria-controls="panel1bh-content"
-            id="panel1bh-header"
-        >
-            <Box className={classes.heading}>
-                <span className={classes.icon}>
-                    <LoadingIcon apiData={loadingApiData} defaultIcon='cloud_queue' />
-                </span>
-                Gegevens
-        </Box>
-            <Typography className={classes.secondaryHeading}>
-                {loadingApiText}
-            </Typography>
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails>
-            <List>
-                <LoadingComp name={`bonnetjes ${periodOptions[period].label.toLowerCase()}`}
-                    apiData={receiptsList} />
-                <LoadingComp name={`facturen ${periodOptions[period].label.toLowerCase()}`}
-                    apiData={purchaseInvoicesList} />
-                <LoadingComp name='categorieën' apiData={ledgersList} />
-            </List>
-        </ExpansionPanelDetails>
-        <Divider />
-        <ExpansionPanelActions>
-            <Button color='primary' className={classes.listButton}
-                disabled={(nextPeriod) ? false : true}
-                onClick={handleMore}>
-                {(nextPeriod) ?
-                    `Bonnetjes en facturen ${nextPeriod} ophalen..`
-                    : `Alle bonnetjes en facturen (${curPeriod}) zijn opgehaald`}
-            </Button>
-            <Button color='primary' className={classes.listButton}
-                disabled={!unpaidOnly}
-                onClick={() => setUnpaidOnly(false)}>
-                {(unpaidOnly) ?
-                    `Ook betaalde bonnetjes ophalen`
-                    : `Betaalde bonnetjes ook opgehaald`}
-            </Button>
-        </ExpansionPanelActions>
-    </ExpansionPanel>
+    return <DataPanel expanded={expanded} onChange={onChange}
+        title='bonnetjes en facturen'
+        apiDataSources={apiDataSources}
+        apiDataTitles={[
+            `bonnetjes ${periodOptions[period].label.toLowerCase()}`,
+            `facturen ${periodOptions[period].label.toLowerCase()}`,
+            'categorieën'
+        ]}
+        loadingApiText={loadingApiText}>
+        <Button color='primary' className={classes.listButton}
+            disabled={(nextPeriod) ? false : true}
+            onClick={handleMore}>
+            {(nextPeriod) ?
+                `Bonnetjes en facturen ${nextPeriod} ophalen..`
+                : `Alle bonnetjes en facturen (${curPeriod}) zijn opgehaald`}
+        </Button>
+        <Button color='primary' className={classes.listButton}
+            disabled={!unpaidOnly}
+            onClick={() => setUnpaidOnly(false)}>
+            {(unpaidOnly) ?
+                `Ook betaalde bonnetjes ophalen`
+                : `Betaalde bonnetjes ook opgehaald`}
+        </Button>
+    </DataPanel>
 }
