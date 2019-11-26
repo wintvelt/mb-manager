@@ -261,7 +261,7 @@ const RowCell = (props) => {
     const content = prettify ? prettify(initValue, row) : initValue;
     const isJustContent = !hrefBase && !editable;
     return <TableCell padding={padding || 'default'} align={align || 'inherit'} >
-        {hrefBase &&
+        {(hrefBase && initValue) &&
             <Link href={hrefBase + row[hrefKey]}
                 target='_blank' rel='noopener noreferrer'>
                 <span>
