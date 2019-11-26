@@ -15,6 +15,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
+import Chip from '@material-ui/core/Chip';
 import PaymentsTable from './PaymentsTable';
 
 const updateFilters = makeReducer(filterConfig);
@@ -80,6 +81,9 @@ export default function Payments() {
 
     });
     const filterCount = appliedFilters.length > 0 ? appliedFilters.length : 'Geen';
+    const filterBadgeTxt = filterCount > 0 ?
+        `${rows.length} van ${paymentsData.length}`
+        : '';
 
     useEffect(() => {
         if (accountsNotAsked) dispatch(getAccounts(access_token));
@@ -114,6 +118,7 @@ export default function Payments() {
                         </Typography>
                 <Typography className={classes.secondaryHeading}>
                     {`${filterCount} filter${filterCount === 1 ? '' : 's'} toegepast`}
+                    {filterBadgeTxt && <Chip size='small' label={filterBadgeTxt} />}
                 </Typography>
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />

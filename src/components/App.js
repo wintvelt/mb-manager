@@ -64,6 +64,13 @@ const theme = createMuiTheme({
 			label: {
 				whiteSpace: 'nowrap'
 			}
+		},
+		'MuiChip': {
+			sizeSmall: {
+				height: '23px',
+				marginLeft: '8px',
+				marginBottom: '1px'
+			}
 		}
 	},
 });

@@ -86,7 +86,7 @@ export default (props) => {
             'rekeningen',
             'contacten'
         ]}
-        loadingApiText={loadingApiText} >
+        loadingText={loadingApiText} >
         <Button color='primary' className={classes.listButton}
             disabled={(nextPeriod) ? false : true}
             onClick={handleMore}>

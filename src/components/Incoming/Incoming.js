@@ -16,6 +16,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
+import Chip from '@material-ui/core/Chip';
 import IncomingTable from './IncomingTable';
 import Dialog from '../Page/Dialog';
 
@@ -83,6 +84,9 @@ export default function Incoming() {
 
     });
     const filterCount = appliedFilters.length > 0 ? appliedFilters.length : 'Geen';
+    const filterBadgeTxt = filterCount > 0 ?
+        `${rows.length} van ${incomingData.length}`
+        : '';
 
     useEffect(() => {
         if (!hasLedgers) {
@@ -140,9 +144,10 @@ export default function Incoming() {
                 <Typography className={classes.heading}>
                     <Icon className={classes.icon}>filter_list</Icon>
                     Filters
-                        </Typography>
-                <Typography className={classes.secondaryHeading}>
+                </Typography>
+                <Typography component='div' className={classes.secondaryHeading}>
                     {`${filterCount} filter${filterCount === 1 ? '' : 's'} toegepast`}
+                    {filterBadgeTxt && <Chip size='small' label={filterBadgeTxt} />}
                 </Typography>
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />

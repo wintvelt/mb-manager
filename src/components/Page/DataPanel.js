@@ -38,7 +38,8 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export const makeLoadingApiData = dataSources => {
+export const makeLoadingApiData = apiDataSources => {
+    const dataSources = apiDataSources.map(apiData => apiData.toJS());
     return {
         isLoading: dataSources.reduce((out, data) => out || data.isLoading, false),
         hasError: dataSources.reduce((out, data) => out || data.hasError, false),
@@ -49,14 +50,14 @@ export const makeLoadingApiData = dataSources => {
 // receives data through props
 export const DataPanel = (props) => {
     const { apiDataSources = [], apiTitles = [], expanded, onChange, title, loadingText } = props;
-    const dataSources = apiDataSources.map(apiData => apiData.toJS());
 
-    const loadingApiData = makeLoadingApiData(dataSources);
-    const loadingApiText = loadingText || (loadingApiData.hasAllData) ?
-        `${dataSources[0].data.length} ${title} opgehaald.`
+    const loadingApiData = makeLoadingApiData(apiDataSources);
+    const dataCount = apiDataSources[0].toJS().data? apiDataSources[0].toJS().data.length : '0';
+    const loadingApiText = loadingText || ((loadingApiData.hasAllData) ?
+        `${dataCount} ${title} opgehaald.`
         : loadingApiData.hasError ? 'Fout bij het laden.'
-            : loadingApiData.isLoading ? `...${title} ophalen.`
-                : '';
+            : loadingApiData.isLoading ? `...${title} ophalen (${dataCount}).`
+                : '');
 
     const classes = useStyles();
 
@@ -79,7 +80,7 @@ export const DataPanel = (props) => {
         <ExpansionPanelDetails>
             <List>
                 {apiTitles.map((apiTitle, i) => {
-                    return <LoadingComp key={apiTitle} name={apiTitle} apiData={dataSources[i]} />
+                    return <LoadingComp key={apiTitle} name={apiTitle} apiData={apiDataSources[i].toJS()} />
                 })}
             </List>
         </ExpansionPanelDetails>

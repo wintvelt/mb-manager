@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { getReceipts, getPurchaseInvoices } from '../../actions/apiActions-new';
-import { LoadingComp, LoadingIcon } from '../../helpers/apiData/apiData-components';
 import { makeLoadingApiData, DataPanel } from '../Page/DataPanel';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -54,8 +53,10 @@ export default (props) => {
         periodOptions[period + 1].label.toLowerCase()
         : null;
     const loadingApiData = makeLoadingApiData(apiDataSources);
+    const dataCount = (receipts.toJS().data? receipts.toJS().data.length : 0) +
+        (purchaseInvoices.toJS().data? purchaseInvoices.toJS().data.length : 0)
     const loadingApiText1 = (loadingApiData.hasAllData) ?
-        `${receipts.toJS().data.length + purchaseInvoices.toJS().data.length} bonnetjes en facturen ${curPeriod} opgehaald.`
+        `${dataCount} bonnetjes en facturen ${curPeriod} opgehaald.`
         : loadingApiData.hasError ? 'Fout bij het laden.'
             : loadingApiData.isLoading ? `...bonnetjes en facturen ${curPeriod} ophalen.`
                 : '';
@@ -78,12 +79,12 @@ export default (props) => {
     return <DataPanel expanded={expanded} onChange={onChange}
         title='bonnetjes en facturen'
         apiDataSources={apiDataSources}
-        apiDataTitles={[
+        apiTitles={[
             `bonnetjes ${periodOptions[period].label.toLowerCase()}`,
             `facturen ${periodOptions[period].label.toLowerCase()}`,
             'categorieën'
         ]}
-        loadingApiText={loadingApiText}>
+        loadingText={loadingApiText}>
         <Button color='primary' className={classes.listButton}
             disabled={(nextPeriod) ? false : true}
             onClick={handleMore}>
