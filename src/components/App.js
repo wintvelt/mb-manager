@@ -10,7 +10,6 @@ import Connection from './Connection/Connection';
 import Contacts from './Contacts/Contacts';
 import Incoming from './Incoming/Incoming';
 import Payments from './Payments/Payments';
-import MatchBankTransactions from './Match';
 import Export from './Export';
 import Bankmutations from './Bankmutations';
 import Secret from './Secret';
@@ -27,6 +26,7 @@ import blue from '@material-ui/core/colors/blue';
 import { SnackbarProvider } from '../../node_modules/notistack/build/index';
 import Notifier from '../helpers/snackbar/Notifier';
 import { DO_SNACK } from '../store/action-types';
+import Match from './Match/Match';
 
 function mapStateToProps(state) {
 	return {
@@ -77,6 +77,7 @@ const theme = createMuiTheme({
 
 const newRoutes = [
 	'/betalingen/lijst',
+	'/betalingen/match',
 	'/inkomend',
 	'/connection',
 	'/contacten'
@@ -88,6 +89,8 @@ const NavRoute = (props) => {
 			<NewNav activePath={routeprops.location.pathname}>
 				<Switch>
 					<PrivateRoute exact path="/betalingen/lijst" component={Payments}
+						isConnected={props.isConnected} />
+					<PrivateRoute exact path="/betalingen/match" component={Match}
 						isConnected={props.isConnected} />
 					<PrivateRoute exact path="/inkomend" component={Incoming}
 						isConnected={props.isConnected} />
@@ -121,7 +124,7 @@ const ConnectedApp = (props) => {
 							isConnected={props.isConnected} />
 						<PrivateRoute exact path="/betalingen/lijst" component={Dummy}
 							isConnected={props.isConnected} />
-						<PrivateRoute exact path="/betalingen/match" component={MatchBankTransactions}
+						<PrivateRoute exact path="/betalingen/match" component={Dummy}
 							isConnected={props.isConnected} />
 						<PrivateRoute path="/export" component={Export}
 							isConnected={props.isConnected} />

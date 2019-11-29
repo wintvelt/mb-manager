@@ -1,17 +1,15 @@
-// Contacts.js
+// Match.js
 import React, { useState, useEffect, useMemo, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { getContacts, getLedgers, getCustomFields } from '../../actions/apiActions-new';
-import { batchKeywordsPost } from '../../actions/apiActions-post';
-
-import { derivedContacts } from './Contact-datatable';
-import { filterConfig } from './Contact-filters';
+import { getAccounts, getLedgers } from '../../actions/apiActions-new';
+import { derivedMatch } from './Match-datatable';
+import MatchData from './MatchData';
+import MatchTable from './MatchTable';
+import MatchAction from './MatchAction';
+import { filterConfig } from './Match-filters';
 import { FilterPanel } from '../Page/FilterPanel';
-import { DataPanel } from '../Page/DataPanel';
-import { contactDownload } from './Contact-xls-download';
 import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
-import Dialog from '../Page/Dialog';
 
 import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -19,7 +17,6 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Chip from '@material-ui/core/Chip';
-import ContactsTable from './ContactTable';
 
 const updateFilters = makeReducer(filterConfig);
 const initFilters = initialFilters(filterConfig);
@@ -48,29 +45,32 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function Contacts() {
+export default function Match() {
     const classes = useStyles();
     const accessToken = useSelector(store => store.accessToken);
     const access_token = accessToken.data;
-    const contacts = useSelector(store => store.contactsNew.get('apiData'));
-    const contactsList = contacts.toJS();
-    const contactsNotAsked = contactsList.notAsked;
+    const payments = useSelector(store => store.payments.get('apiData'));
+    const paymentsList = payments.toJS();
+    const accounts = useSelector(store => store.accountsNew);
+    const accountsList = accounts.toJS();
+    const accountsNotAsked = accountsList.notAsked;
     const ledgers = useSelector(store => store.ledgersNew);
     const ledgersList = ledgers.toJS();
     const ledgersNotAsked = ledgersList.notAsked;
-    const customFields = useSelector(store => store.customFieldsNew);
-    const customFieldsList = customFields.toJS();
-    const customNotAsked = customFieldsList.notAsked;
-    const contactsData = useMemo(() => {
-        return derivedContacts(contactsList.data, ledgersList.data)
-    }, [contactsList.data, ledgersList.data])
+    const receipts = useSelector(store => store.receipts.get('apiData'));
+    const receiptsList = receipts.toJS();
+    const purchaseInvoices = useSelector(store => store.purchaseInvoices.get('apiData'));
+    const purchaseInvoicesList = purchaseInvoices.toJS();
+    const matchData = useMemo(() => {
+        return derivedMatch(paymentsList.data, accountsList.data,
+            ledgersList.data, receiptsList.data, purchaseInvoicesList.data)
+    }, [paymentsList.data, accountsList.data, ledgersList.data,
+    receiptsList.data, purchaseInvoicesList.data])
     const dispatch = useDispatch();
     const [expanded, setExpanded] = useState([]);
     const [selected, setSelected] = useState([]);
-    const [edited, setEdited] = useState({ ids: [], edits: [] });
-    const [actionOpen, setActionOpen] = useState(false);
     const [filterState, setFilters] = useReducer(updateFilters, initFilters);
-    const [filters, rows] = getFilters(contactsData, selected, filterState, edited.ids);
+    const [filters, rows] = getFilters(matchData, selected, filterState);
     const filterObj = filters.map(f => {
         return {
             ...f,
@@ -88,14 +88,13 @@ export default function Contacts() {
     });
     const filterCount = appliedFilters.length > 0 ? appliedFilters.length : 'Geen';
     const filterBadgeTxt = filterCount > 0 ?
-        `${rows.length} van ${contactsData.length}`
+        `${rows.length} van ${matchData.length}`
         : '';
 
     useEffect(() => {
-        if (contactsNotAsked) dispatch(getContacts(access_token));
+        if (accountsNotAsked) dispatch(getAccounts(access_token));
         if (ledgersNotAsked) dispatch(getLedgers(access_token));
-        if (customNotAsked) dispatch(getCustomFields(access_token));
-    }, [dispatch, access_token, contactsNotAsked, ledgersNotAsked, customNotAsked])
+    }, [dispatch, access_token, accountsNotAsked, ledgersNotAsked])
 
     const handlePanel = panel => (event, isIn) => {
         const newExpanded = (!isIn) ?
@@ -104,34 +103,11 @@ export default function Contacts() {
         setExpanded(newExpanded);
     };
 
-    const handleDownload = () => {
-        const selectedRows = contactsData.filter(item => selected.includes(item.id));
-        contactDownload(selectedRows);
-    }
-
-    const onActionSubmit = (access_token) => {
-        setActionOpen(false);
-        const keywordsField = customFieldsList.data.find(field => field.name === 'Keywords');
-        const keywordsId = keywordsField && keywordsField.id;
-        const contactsToUpdate = edited.ids.map((id, i) => {
-            return {
-                id,
-                keywordsId,
-                keywords: edited.edits[i].keywords
-            }
-        });
-        dispatch(batchKeywordsPost(contactsToUpdate, access_token));
-        setEdited({ ids: [], edits: [] });
-    }
-
     return <div className={classes.root}>
-        <DataPanel expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
+        <MatchData expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
             access_token={access_token}
-            title='contacten'
-            apiDataSources={[contacts, ledgers, customFields]}
-            apiTitles={['contacten', 'categorieën', 'extra velden']}
-            contacts={contacts} ledgers={ledgers} customFields={customFields} 
-            />
+            payments={payments} accounts={accounts} ledgers={ledgers} 
+                        receipts={receipts} purchaseInvoices={purchaseInvoices} />
         <ExpansionPanel expanded={expanded.includes('filters')} onChange={handlePanel('filters')}>
             <ExpansionPanelSummary
                 expandIcon={<Icon>expand_more</Icon>}
@@ -149,18 +125,9 @@ export default function Contacts() {
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />
         </ExpansionPanel>
-        <ContactsTable rows={rows}
+        <MatchAction selected={selected} />
+        <MatchTable rows={rows}
             selected={selected} onSelect={setSelected}
-            edited={edited} onEdit={setEdited}
-            onSaveEdit={edited.ids.length > 0 && (() => setActionOpen(true))}
-            onDownload={handleDownload}
-            tableTitle='Contacten' />
-        <Dialog
-            open={actionOpen}
-            dialogTitle={`${edited.ids.length} ${edited.ids.length === 1 ? 'contact' : 'contacten'} met bewerking opslaan.`}
-            dialogText={'Stuur de bewerkingen van keywords door naar Moneybird.'}
-            onHandleClose={() => setActionOpen(false)}
-            onSubmit={() => onActionSubmit(access_token)}
-        />
+            tableTitle='Betalingen om te matchen' />
     </div >
 }

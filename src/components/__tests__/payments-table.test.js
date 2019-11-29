@@ -1,4 +1,4 @@
-import { extractKeywords, addInfo } from '../Payments/Payments-table';
+import { extractKeywords, addInfo } from '../Payments/Payments-datatable';
 
 const contacts = [
     {

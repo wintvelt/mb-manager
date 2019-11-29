@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { getContacts, getAccounts } from '../../actions/apiActions-new';
-import { derivedPayments } from './Payments-table';
+import { derivedPayments } from './Payments-datatable';
 import PaymentsData from './PaymentsData';
 import { filterConfig } from './Payment-filters';
 import { FilterPanel } from '../Page/FilterPanel';
@@ -116,7 +116,7 @@ export default function Payments() {
                     <Icon className={classes.icon}>filter_list</Icon>
                     Filters
                         </Typography>
-                <Typography className={classes.secondaryHeading}>
+                <Typography component='div' className={classes.secondaryHeading}>
                     {`${filterCount} filter${filterCount === 1 ? '' : 's'} toegepast`}
                     {filterBadgeTxt && <Chip size='small' label={filterBadgeTxt} />}
                 </Typography>

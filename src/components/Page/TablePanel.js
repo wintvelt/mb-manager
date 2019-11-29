@@ -18,9 +18,9 @@ import Button from '@material-ui/core/Button';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Tooltip from '@material-ui/core/Tooltip';
 import Icon from '@material-ui/core/Icon';
-import Link from '@material-ui/core/Link';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
+import { TableLink } from './helpers';
 
 function desc(a, b, orderBy) {
     if (!a[orderBy] || b[orderBy] < a[orderBy]) {
@@ -261,14 +261,7 @@ const RowCell = (props) => {
     const content = prettify ? prettify(initValue, row) : initValue;
     const isJustContent = !hrefBase && !editable;
     return <TableCell padding={padding || 'default'} align={align || 'inherit'} >
-        {(hrefBase && initValue) &&
-            <Link href={hrefBase + row[hrefKey]}
-                target='_blank' rel='noopener noreferrer'>
-                <span>
-                    <span>{content}</span>
-                    <Icon fontSize='small' style={{ marginBottom: '-5px', marginLeft: '4px' }}>launch</Icon>
-                </span>
-            </Link>}
+        <TableLink hrefBase={hrefBase} hrefEnd={row[hrefKey]} initValue={initValue} content={content} />
         {editable && <Editable initValue={initValue} curValue={curValue} onChange={onChange} />}
         {isJustContent && content}
     </TableCell>
