@@ -160,14 +160,17 @@ const SuggestionBlock = props => {
     const { payment, selected, onSelect } = props;
     const related = payment.related || [];
     const [selectedSuggestion, setSelectedSuggestion] = useState(selected);
-    const midCount = related.filter(it => it.percScore >= 50 && it.percScore < 90).length;
-    const lowCount = related.filter(it => it.percScore < 50).length;
+    const midCount = related.filter(it => it.percScore >= 50 && it.percScore < 90
+        && it.id !== selectedSuggestion).length;
+    const lowCount = related.filter(it => it.percScore < 50
+        && it.id !== selectedSuggestion).length;
     const [scoreShown, setScoreShown] = useState(90);
     const relatedToShow = related.filter(it => it.percScore >= scoreShown || it.id === selectedSuggestion);
     const shownCount = relatedToShow.length;
     const moreSuggestions = scoreShown === 90 ? midCount + lowCount
         : scoreShown === 50 ? lowCount : 0;
     const hasMore = moreSuggestions > 0;
+    const hasLess = scoreShown < 90 && midCount + lowCount > 0;
 
     const classes = useStyles();
 
@@ -192,7 +195,7 @@ const SuggestionBlock = props => {
                     selected={isSelected} onSelect={handleSelect(r.id)} />
             }
             )}
-            {(hasMore || scoreShown < 90) && <ListItem>
+            {(hasMore || hasLess) && <ListItem>
                 <Button color='primary' aria-label="suggestions"
                     onClick={onMore}>
                     <Icon>{hasMore ? 'expand_more' : 'expand_less'}</Icon>

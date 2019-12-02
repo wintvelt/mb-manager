@@ -59,15 +59,16 @@ const getOpenAmount = (incoming) => {
     }
 }
 
-const amtFmt = (amtStr) => {
+const amtFmt = (amtStr, currency = '€') => {
     const [eur, cnt] = amtStr.split('.');
     const cntStr = (cnt) ? (cnt.length === 1) ? cnt + '0' : cnt : '00';
-    return `€ ${eur},${cntStr}`;
+    return `${currency} ${eur},${cntStr}`;
 }
 
 const mapIncoming = type => incoming => {
     const company = incoming.contact && incoming.contact.company_name;
-    const detailText = incoming.details.map(d => `${d.amount} ${amtFmt(d.price)}`).join(', ')
+    const currency = (incoming.currency === 'EUR')? '€' : incoming.currency;
+    const detailText = incoming.details.map(d => `${d.amount} ${amtFmt(d.price, currency)}`).join(', ')
     return {
         id: incoming.id,
         type,
