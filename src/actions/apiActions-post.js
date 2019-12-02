@@ -6,7 +6,7 @@ import {
     doSnack
 } from './actions';
 import { SET_INCOMING_LEDGER_NEW, SET_BATCH_MSG, CLEAR_BATCH_MSG, DO_SNACK,
-    SET_CONTACT_KEYWORDS } from '../store/action-types';
+    SET_CONTACT_KEYWORDS, SET_PAY_CONNECT } from '../store/action-types';
 
 const adminCode = "243231934476453244";
 const base_url = 'https://moneybird.com/api/v2/' + adminCode;
@@ -159,6 +159,63 @@ export function patchContactKeywords(batchId, contactId, body, access_token) {
     }
 }
 
+// to connect list of payment, invoice combos
+// connectList = [ { paymentId, invoiceId, amount } ]
+export function batchMatchPost(batchList, access_token) {
+    return function (dispatch) {
+        // we have data to process
+        batchList.forEach((item) => {
+            // optimistic update of store
+            dispatch({ type: SET_PAY_CONNECT, payload: item });
+            // set message
+            const initialPayload = {
+                batchId: "connections",
+                fetchId: item.paymentId,
+                res: false,
+                msg: ""
+            }
+            dispatch(setBatchCheckMsg(initialPayload));
+            // send single update to server + update batchMsg with response
+            const patchBody = {
+                booking_type: 'Document',
+                booking_id: item.invoiceId,
+                price_base: item.amount,
+                description: 'Transactie gekoppeld uit Moblybird ;)'
+            };
+            dispatch(
+                patchMatch("connections", item.paymentId, patchBody, access_token)
+            ).then(payload => dispatch(setBatchCheckMsg(payload)));
+        });
+    }
+}
+
+// POST update 1 connection between payment-invoice
+export function patchMatch(batchId, paymentId, body, access_token) {
+    return function (dispatch) {
+        const url = base_url + `/financial_mutations/${paymentId}/link_booking.json`;
+        return (
+            postData(url, body, "PATCH", access_token)
+                .then((res) => {
+                    // do OK message in dispatch { batchId, fetchId, res, msg }
+                    return {
+                        batchId: batchId,
+                        fetchId: paymentId,
+                        res: true,
+                        msg: "betalingen aan bonnetjes gelinkt"
+                    };
+                })
+                .catch((err) => {
+                    return {
+                        batchId: batchId,
+                        fetchId: paymentId,
+                        res: true,
+                        msg: "regels zijn niet gelukt :("
+                    };
+                })
+        )
+    }
+}
+
 // for single batch message setting + check to do snack and clear if needed
 export function setBatchCheckMsg({ batchId, fetchId, res, msg }) {
     return function (dispatch, getState) {
@@ -180,7 +237,6 @@ export function setBatchCheckMsg({ batchId, fetchId, res, msg }) {
         }
     }
 }
-
 
 // taaldingetje (vervangt meervoud door enkelvoud als nodig)
 const stringFromMsg = (count, string) => {

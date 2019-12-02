@@ -17,7 +17,7 @@ export const filterConfig = [
         itemFilter: (selected, filterState, item) => {
             return !filterState || item.isTopper
         },
-        initial: false
+        initial: true
     },
     {
         id: 'selected',

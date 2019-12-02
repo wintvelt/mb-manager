@@ -107,7 +107,6 @@ const LinkedDoc = (props) => {
 
 const LinkedCat = (props) => {
     const { ledgerItem } = props;
-    const classes = useStyles();
 
     const content = `Gekoppeld aan categorie ${ledgerItem.ledger_name}`;
     return <ListItem>
@@ -156,35 +155,38 @@ const SuggestionLine = props => {
     </ListItem>
 }
 
+const THRESHOLD_TOPPER = 75;
+const THRESHOLD_MID = 50;
+
 const SuggestionBlock = props => {
     const { payment, selected, onSelect } = props;
     const related = payment.related || [];
     const [selectedSuggestion, setSelectedSuggestion] = useState(selected);
-    const midCount = related.filter(it => it.percScore >= 50 && it.percScore < 90
+    const midCount = related.filter(it => it.percScore >= THRESHOLD_MID && it.percScore < THRESHOLD_TOPPER
         && it.id !== selectedSuggestion).length;
-    const lowCount = related.filter(it => it.percScore < 50
+    const lowCount = related.filter(it => it.percScore < THRESHOLD_MID
         && it.id !== selectedSuggestion).length;
-    const [scoreShown, setScoreShown] = useState(90);
+    const [scoreShown, setScoreShown] = useState(THRESHOLD_TOPPER);
     const relatedToShow = related.filter(it => it.percScore >= scoreShown || it.id === selectedSuggestion);
     const shownCount = relatedToShow.length;
-    const moreSuggestions = scoreShown === 90 ? midCount + lowCount
-        : scoreShown === 50 ? lowCount : 0;
+    const moreSuggestions = scoreShown === THRESHOLD_TOPPER ? midCount + lowCount
+        : scoreShown === THRESHOLD_MID ? lowCount : 0;
     const hasMore = moreSuggestions > 0;
-    const hasLess = scoreShown < 90 && midCount + lowCount > 0;
+    const hasLess = scoreShown < THRESHOLD_TOPPER && midCount + lowCount > 0;
 
     const classes = useStyles();
 
-    const handleSelect = id => e => {
+    const handleSelect = (id, openAmount) => e => {
         if (e.target.parentNode && e.target.parentNode.href) return;
         setSelectedSuggestion(id !== selectedSuggestion && id);
-        onSelect(id);
+        onSelect(id, openAmount);
     }
     const onMore = e => {
         const newScoreShown =
-            scoreShown === 0 ? 90
-                : scoreShown === 50 ?
-                    lowCount > 0 ? 0 : 90
-                    : midCount > 0 ? 50 : 0;
+            scoreShown === 0 ? THRESHOLD_TOPPER
+                : scoreShown === THRESHOLD_MID ?
+                    lowCount > 0 ? 0 : THRESHOLD_TOPPER
+                    : midCount > 0 ? THRESHOLD_MID : 0;
         setScoreShown(newScoreShown);
     }
     return <div className={classes.actionBar}>
@@ -192,7 +194,7 @@ const SuggestionBlock = props => {
             {relatedToShow.map(r => {
                 const isSelected = r.id === selectedSuggestion;
                 return <SuggestionLine related={r} key={r.id}
-                    selected={isSelected} onSelect={handleSelect(r.id)} />
+                    selected={isSelected} onSelect={handleSelect(r.id, r.openAmount || r.amount)} />
             }
             )}
             {(hasMore || hasLess) && <ListItem>
@@ -210,8 +212,8 @@ const MatchCard = (props) => {
     const classes = useStyles();
     const { payment, onSelect, selected } = props;
     const relatedCount = payment.related ? payment.related.length : 0;
-    const handleSelect = invoiceId => {
-        onSelect(payment.id, invoiceId);
+    const handleSelect = (invoiceId, openAmount) => {
+        onSelect(payment.id, invoiceId, openAmount);
     }
 
     return <Card className={classes.matchCard}>
@@ -228,10 +230,10 @@ const MatchCard = (props) => {
 }
 
 export default function MatchTable(props) {
-    const { rows, selected, onSelect, onDownload, onMulti } = props;
+    const { rows, selected, onSelect } = props;
 
-    const handleSelect = (paymentId, invoiceId) => {
-        const newPayment = { paymentId, invoiceId };
+    const handleSelect = (paymentId, invoiceId, openAmount) => {
+        const newPayment = { paymentId, invoiceId, amount: -openAmount };
         const oldPaymentInSelected = selected && selected.find(s => s.paymentId === paymentId);
         const shouldRemoveOld = oldPaymentInSelected && oldPaymentInSelected.invoiceId === invoiceId;
         const newSelected = oldPaymentInSelected ?

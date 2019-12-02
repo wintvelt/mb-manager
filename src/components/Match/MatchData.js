@@ -39,6 +39,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
+// Main data loading component
 // receives data through props
 export default (props) => {
     const { access_token, payments, accounts, ledgers,

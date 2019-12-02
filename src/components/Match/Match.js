@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { getAccounts, getLedgers } from '../../actions/apiActions-new';
+import { batchMatchPost } from '../../actions/apiActions-post';
 import { derivedMatch } from './Match-datatable';
 import MatchData from './MatchData';
 import MatchTable from './MatchTable';
@@ -103,6 +104,10 @@ export default function Match() {
         setExpanded(newExpanded);
     };
 
+    const onSubmit = e => {
+        dispatch(batchMatchPost(selected, access_token));
+    }
+
     return <div className={classes.root}>
         <MatchData expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
             access_token={access_token}
@@ -125,7 +130,7 @@ export default function Match() {
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />
         </ExpansionPanel>
-        <MatchAction selected={selected} />
+        <MatchAction selected={selected} onSubmit={onSubmit}/>
         <MatchTable rows={rows}
             selected={selected} onSelect={setSelected}
             tableTitle='Betalingen om te matchen' />

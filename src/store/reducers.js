@@ -15,7 +15,8 @@ import {
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW,
     SET_INCOMING_LEDGER_NEW, NOTIFY,
     SET_CONTACT_KEYWORDS,
-    SET_CUSTOM_FIELDS_NEW
+    SET_CUSTOM_FIELDS_NEW,
+    SET_PAY_CONNECT
 } from "./action-types";
 import {
     setLedgerInRow, setCustomFieldInRow, setPaymentInRow
@@ -138,6 +139,23 @@ function rootReducer(state = initialState, action) {
                     : field
             }))
             return { ...state, contactsNew: newContacts }
+        }
+        case SET_PAY_CONNECT: {
+            const { paymentId, invoiceId } = payload;
+            const newPurchaseInvoices = state.purchaseInvoices.updateIn(['apiData', 'data'], data => {
+                return data.filter(item => item.get('id') !== invoiceId)
+            });
+            const newReceipts = state.receipts.updateIn(['apiData', 'data'], data => {
+                return data.filter(item => item.get('id') !== invoiceId)
+            });
+            const newPayments = state.payments.updateIn(['apiData', 'data'], data => {
+                return data.filter(item => item.get('id') !== paymentId)
+            });
+            return { ...state, 
+                purchaseInvoices: newPurchaseInvoices,
+                receipts: newReceipts,
+                payments: newPayments
+            }
         }
         case NOTIFY: {
             return {

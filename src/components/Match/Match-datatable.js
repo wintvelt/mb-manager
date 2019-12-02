@@ -65,6 +65,12 @@ const amtFmt = (amtStr, currency = '€') => {
     return `${currency} ${eur},${cntStr}`;
 }
 
+const getKeywords = contact => {
+    const kwObj = contact && contact.custom_fields &&
+            contact.custom_fields.find(cf => (cf.name === 'Keywords'));
+    return (kwObj) ? kwObj.value.split(',').map(word => word.trim().toLowerCase()) : [];
+}
+
 const mapIncoming = type => incoming => {
     const company = incoming.contact && incoming.contact.company_name;
     const currency = (incoming.currency === 'EUR')? '€' : incoming.currency;
@@ -74,7 +80,9 @@ const mapIncoming = type => incoming => {
         type,
         date: incoming.date,
         message: incoming.reference + (company && (' - ' + company)),
+        keywords: getKeywords(incoming.contact),
         detailText,
+        details: incoming.details,
         amount: -parseFloat(incoming.total_price_incl_tax_base),
         openAmount: getOpenAmount(incoming)
     }
@@ -85,10 +93,10 @@ const makeIncoming = (receipts, purchaseInvoices) => [
     ...purchaseInvoices.map(mapIncoming('INK')),
 ];
 
-const flip = (str) => {
-    if (!str) return str;
-    return (str.slice(0, 1) === '-') ? str.slice(1) : '-' + str;
-}
+// const flip = (str) => {
+//     if (!str) return str;
+//     return (str.slice(0, 1) === '-') ? str.slice(1) : '-' + str;
+// }
 // to calc days difference
 const daysDiff = (a, b) => {
     const d1 = new Date(a);
@@ -101,7 +109,7 @@ const daysDiff = (a, b) => {
 // helper for score calc
 const scorePerc = (score) => {
     const perc = (score > 15) ? 100
-        : (score >= 10) ? 75
+        : (score >= 10) ? 80
             : (score >= 5) ? 50
                 : (score > 0) ? 10
                     : 1;
@@ -117,6 +125,7 @@ const scoreSort = (a, b) => {
 
 const THRESHOLD_AMOUNT = 1;
 const THRESHOLD_DAYS = 3;
+const THRESHOLD_TOPPER = 75;
 
 const getRelated = (payment, invoiceData) => {
     const { amount, amount_open: amount_openStr, date, message } = payment;
@@ -125,7 +134,7 @@ const getRelated = (payment, invoiceData) => {
     const related = invoiceData.map(inv => {
         const amDiff = inv.amount - amt;
         const amountScore =
-            (amount === inv.amount) ? 5
+            (amt === inv.amount) ? 5
                 : (amDiff > -THRESHOLD_AMOUNT && amDiff < THRESHOLD_AMOUNT) ? 2
                     : 0;
         const openScore = (amount_open === 0) ? 0
@@ -134,12 +143,9 @@ const getRelated = (payment, invoiceData) => {
                     : 0;
         const openInvScore = (amount_open !== 0 && amount_open === inv.amount_open) ? 5 : 0;
         const detailScore = (inv.details && inv.details.length > 1) ?
-            (inv.details.find(d => (d.amount === '1 x' && d.price === flip(amount)))) ? 5 : 0 : 0;
-        const kwObj = inv.contact && inv.contact.custom_fields &&
-            inv.contact.custom_fields.find(cf => (cf.name === 'Keywords'));
-        const keywords = (kwObj) ? kwObj.value.split(',').map(word => word.trim().toLowerCase()) : [];
+            (inv.details.find(d => (d.amount === '1 x' && parseFloat(d.price) === -amt))) ? 5 : 0 : 0;
         let kwScore = 0;
-        for (const kw of keywords) {
+        for (const kw of inv.keywords) {
             if (message.toLowerCase().includes(kw)) kwScore += 5;
         }
         const dateScore =
@@ -147,12 +153,15 @@ const getRelated = (payment, invoiceData) => {
                 : (daysDiff(date, inv.date) < THRESHOLD_DAYS) ? 1
                     : 0;
         const totalScore = dateScore + amountScore + openScore + openInvScore + detailScore + kwScore;
-        const scores = [amountScore, openScore, openInvScore, detailScore, kwScore, dateScore];
+        const percScore = scorePerc(totalScore);
+        const isTopper = percScore > THRESHOLD_TOPPER;
+        const scores = [amountScore, openScore, openInvScore, detailScore, kwScore, dateScore ];
         return {
             ...inv,
             total_price_incl_tax_base: amt,
             totalScore,
-            percScore: scorePerc(totalScore),
+            percScore,
+            isTopper,
             scores
         }
     })
@@ -176,7 +185,8 @@ export const derivedMatch = (payments, accounts, ledgers, receipts = [], purchas
             ...p,
             account_name,
             ledger_account_bookings,
-            related
+            related,
+            isTopper: !!related.find(r => r.isTopper)
         }
     })
     return newPayments;
