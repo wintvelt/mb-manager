@@ -9,6 +9,7 @@ import { exportRows, exportHeaders, getFromSums } from '../../constants/data-hel
 import { SortableTable, tHeadAddSelect } from '../../constants/table-helpers';
 import { doSnack } from "../../actions/actions";
 
+import { DataPanel } from '../Page/DataPanel';
 import { ExportData } from './ExportData';
 import { ExportStats } from './ExportStats';
 

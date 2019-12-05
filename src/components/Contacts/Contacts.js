@@ -130,7 +130,6 @@ export default function Contacts() {
             title='contacten'
             apiDataSources={[contacts, ledgers, customFields]}
             apiTitles={['contacten', 'categorieën', 'extra velden']}
-            contacts={contacts} ledgers={ledgers} customFields={customFields} 
             />
         <ExpansionPanel expanded={expanded.includes('filters')} onChange={handlePanel('filters')}>
             <ExpansionPanelSummary
