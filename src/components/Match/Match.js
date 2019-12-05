@@ -10,6 +10,8 @@ import MatchTable from './MatchTable';
 import MatchAction from './MatchAction';
 import { filterConfig } from './Match-filters';
 import { FilterPanel } from '../Page/FilterPanel';
+import Dialog from '../Page/Dialog';
+
 import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -70,6 +72,8 @@ export default function Match() {
     const dispatch = useDispatch();
     const [expanded, setExpanded] = useState([]);
     const [selected, setSelected] = useState([]);
+    const numSelected = selected.length;
+    const [actionOpen, setActionOpen] = useState(false);
     const [filterState, setFilters] = useReducer(updateFilters, initFilters);
     const [filters, rows] = getFilters(matchData, selected, filterState);
     const filterObj = filters.map(f => {
@@ -104,15 +108,17 @@ export default function Match() {
         setExpanded(newExpanded);
     };
 
-    const onSubmit = e => {
+    const onActionSubmit = e => {
         dispatch(batchMatchPost(selected, access_token));
+        setActionOpen(false);
+        setSelected([]);
     }
 
     return <div className={classes.root}>
         <MatchData expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
             access_token={access_token}
-            payments={payments} accounts={accounts} ledgers={ledgers} 
-                        receipts={receipts} purchaseInvoices={purchaseInvoices} />
+            payments={payments} accounts={accounts} ledgers={ledgers}
+            receipts={receipts} purchaseInvoices={purchaseInvoices} />
         <ExpansionPanel expanded={expanded.includes('filters')} onChange={handlePanel('filters')}>
             <ExpansionPanelSummary
                 expandIcon={<Icon>expand_more</Icon>}
@@ -130,9 +136,16 @@ export default function Match() {
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />
         </ExpansionPanel>
-        <MatchAction selected={selected} onSubmit={onSubmit}/>
+        <MatchAction selected={selected} onSubmit={() => setActionOpen(true)} />
         <MatchTable rows={rows}
             selected={selected} onSelect={setSelected}
             tableTitle='Betalingen om te matchen' />
+        <Dialog
+            open={actionOpen}
+            dialogTitle={`${numSelected} betaling${numSelected === 1 ? '' : 'en'} koppelen`}
+            dialogText={'Bevestig verwerking in Moneybird met knop hieronder.'}
+            onHandleClose={() => setActionOpen(false)}
+            onSubmit={onActionSubmit}
+        />
     </div >
 }

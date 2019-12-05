@@ -64,11 +64,12 @@ const valToCell = (val, i) => {
 // function to extract stuff to render
 // to extract info from incomingSums
 // USES MUTABLES INSIDE
-export function getFromSums(incomingSums, state, optDeleted) {
+export function getFromSums(maybeIncomingSums, state, optDeleted) {
+    const incomingSums = maybeIncomingSums || [];
     const yearOptions = [...new Set(incomingSums.map(item => { 
         return item.createDate.slice(0, 4) }))].sort().reverse()
         .map(i => { return { value: i, label: i } });
-    const selectedYear = state.selectedYear || yearOptions[0];
+    const selectedYear = state.selectedYear || yearOptions[0] || { value: 'loading', label: 'loading'};
     var createFromTo = { min: "", max: "" };
     var invoiceFromTo = { min: "", max: "" };
     var unexportedCount = 0;

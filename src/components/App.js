@@ -10,7 +10,7 @@ import Connection from './Connection/Connection';
 import Contacts from './Contacts/Contacts';
 import Incoming from './Incoming/Incoming';
 import Payments from './Payments/Payments';
-import Export from './Export';
+import Export from './Export/Export';
 import Bankmutations from './Bankmutations';
 import Secret from './Secret';
 import Home from './Home';
@@ -80,7 +80,8 @@ const newRoutes = [
 	'/betalingen/match',
 	'/inkomend',
 	'/connection',
-	'/contacten'
+	'/contacten',
+	'/export'
 ]
 
 const NavRoute = (props) => {
@@ -95,6 +96,8 @@ const NavRoute = (props) => {
 					<PrivateRoute exact path="/inkomend" component={Incoming}
 						isConnected={props.isConnected} />
 					<PrivateRoute exact path="/contacten" component={Contacts}
+						isConnected={props.isConnected} />
+					<PrivateRoute path="/export" component={Export}
 						isConnected={props.isConnected} />
 					<Route exact path="/connection" component={Connection} />
 				</Switch>
@@ -126,7 +129,7 @@ const ConnectedApp = (props) => {
 							isConnected={props.isConnected} />
 						<PrivateRoute exact path="/betalingen/match" component={Dummy}
 							isConnected={props.isConnected} />
-						<PrivateRoute path="/export" component={Export}
+						<PrivateRoute path="/export" component={Dummy}
 							isConnected={props.isConnected} />
 						<Route exact path="/connection" component={Dummy} />
 						<Route exact path="/bankmutations" component={Bankmutations} />

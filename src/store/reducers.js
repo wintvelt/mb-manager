@@ -48,11 +48,10 @@ export const initialState = {
     notifications: defaultNotifications,
     contacts: newApiData(),
     received: newApiData(),
-    incomingSums: null,
+    incomingSums: initApiData,
     exportPending: 0,
     optDeleted: [],
     syncPending: false,
-    lastSync: "",
     bankData: initBankData,
     matchStuff: initialMatch,
     batchMsg: {},
@@ -163,6 +162,15 @@ function rootReducer(state = initialState, action) {
                 notifications: updateSnacks(state.notifications, action.payload)
             }
         }
+        case SET_INCOMING_SUMS: {
+            const newIncomingSums = apiUpdate(state.incomingSums, payload);
+            return {
+                ...state,
+                incomingSums: newIncomingSums,
+                lastSync: payload.syncDate || state.lastSync
+            }
+        }
+
         // payload = msg
         case DO_SNACK: {
             const newSnackAction = enqueueSnack({
@@ -235,13 +243,6 @@ function rootReducer(state = initialState, action) {
             return Object.assign({}, state, {
                 customFields: api.set(state.customFields, action.payload),
                 accessVerified: (!action.payload.ERROR)
-            })
-        }
-
-        case SET_INCOMING_SUMS: {
-            return Object.assign({}, state, {
-                incomingSums: action.payload.incomingSums,
-                lastSync: action.payload.lastSync || state.lastSync
             })
         }
 
