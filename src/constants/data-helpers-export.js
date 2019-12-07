@@ -64,38 +64,38 @@ const valToCell = (val, i) => {
 // function to extract stuff to render
 // to extract info from incomingSums
 // USES MUTABLES INSIDE
-export function getFromSums(maybeIncomingSums, state, optDeleted) {
+export function getFromSums(maybeIncomingSums, filters, year, optDeleted) {
     const incomingSums = maybeIncomingSums || [];
     const yearOptions = [...new Set(incomingSums.map(item => { 
         return item.createDate.slice(0, 4) }))].sort().reverse()
         .map(i => { return { value: i, label: i } });
-    const selectedYear = state.selectedYear || yearOptions[0] || { value: 'loading', label: 'loading'};
-    var createFromTo = { min: "", max: "" };
-    var invoiceFromTo = { min: "", max: "" };
-    var unexportedCount = 0;
-    var mutatedCount = 0;
-    var docCount = 0;
-    var fileStats = {}; // uses fileName as key
-    var selStatObj = {
+    const selectedYear = year || yearOptions[0] || { value: 'loading', label: 'loading'};
+    let createFromTo = { min: "", max: "" };
+    let invoiceFromTo = { min: "", max: "" };
+    let unexportedCount = 0;
+    let mutatedCount = 0;
+    let docCount = 0;
+    let fileStats = {}; // uses fileName as key
+    let selStatObj = {
         mutatedCount: 0, docCount: 0, unexportedCount: 0,
         createFromTo: { min: "", max: "" },
         invoiceFromTo: { min: "", max: "" }
     };
 
-    var selection = incomingSums.filter(item => {
+    let selection = incomingSums.filter(item => {
         if (item.createDate.slice(0, 4) !== selectedYear.value) return false;
         const inState =
-            (state.mutSelected === 'mut' && item.mutations.length > 0) ||
-            (state.mutSelected === 'new' && (!item.fileName || optDeleted.includes(item.fileName))) ||
-            (state.mutSelected === 'all');
-        const inCreatedFrom = (!state.createFrom || state.createFrom.length < 7) ||
-            (item.createDate >= state.createFrom);
-        const inCreatedTo = (!state.createTo || state.createTo.length < 7) ||
-            (item.createDate.slice(0, state.createTo.length) <= state.createTo);
-        const inInvoiceFrom = (!state.invoiceFrom || state.invoiceFrom.length < 7) ||
-            (item.invoiceDate >= state.invoiceFrom);
-        const inInvoiceTo = (!state.invoiceTo || state.invoiceTo.length < 7) ||
-            (item.invoiceDate.slice(0, state.invoiceTo.length) <= state.invoiceTo);
+            (filters.mutSelected === 'mut' && item.mutations.length > 0) ||
+            (filters.mutSelected === 'new' && (!item.fileName || optDeleted.includes(item.fileName))) ||
+            (filters.mutSelected === 'all');
+        const inCreatedFrom = (!filters.createFrom || filters.createFrom.length < 7) ||
+            (item.createDate >= filters.createFrom);
+        const inCreatedTo = (!filters.createTo || filters.createTo.length < 7) ||
+            (item.createDate.slice(0, filters.createTo.length) <= filters.createTo);
+        const inInvoiceFrom = (!filters.invoiceFrom || filters.invoiceFrom.length < 7) ||
+            (item.invoiceDate >= filters.invoiceFrom);
+        const inInvoiceTo = (!filters.invoiceTo || filters.invoiceTo.length < 7) ||
+            (item.invoiceDate.slice(0, filters.invoiceTo.length) <= filters.invoiceTo);
         return inState && inCreatedFrom && inCreatedTo && inInvoiceFrom && inInvoiceTo;
     }).map(item => item.id);
     for (let i = 0; i < incomingSums.length; i++) {
@@ -155,7 +155,7 @@ export function getFromSums(maybeIncomingSums, state, optDeleted) {
         fileStats: Object.keys(fileStats).map(key => fileStats[key]),
         selection: selection,
         selStats: selStatObj,
-        selectedYear: selectedYear
+        selectedYear: year
     }
 }
 

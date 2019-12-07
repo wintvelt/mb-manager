@@ -52,7 +52,9 @@ export const DataPanel = (props) => {
     const { apiDataSources = [], apiTitles = [], expanded, onChange, title, loadingText } = props;
 
     const loadingApiData = makeLoadingApiData(apiDataSources);
-    const dataCount = apiDataSources[0].toJS().data? apiDataSources[0].toJS().data.length : '0';
+    const dataCount = !apiDataSources[0].toJS().data ? '0'
+        : apiDataSources[0].toJS().data.length ?
+            apiDataSources[0].toJS().data.length : '';
     const loadingApiText = loadingText || ((loadingApiData.hasAllData) ?
         `${dataCount} ${title} opgehaald.`
         : loadingApiData.hasError ? 'Fout bij het laden.'

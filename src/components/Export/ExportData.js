@@ -54,7 +54,7 @@ const yearComp = (yearOptions, selectedYear, setYear) => {
                 className='inline_select'
                 classNamePrefix='inline_select'
             />}
-        {yearOptions.length == 1 && yearOptions[0].value}
+        {yearOptions.length === 1 && yearOptions[0].value}
     </Paper>
 }
 

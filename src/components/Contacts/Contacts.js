@@ -126,7 +126,6 @@ export default function Contacts() {
 
     return <div className={classes.root}>
         <DataPanel expanded={expanded.includes('loading')} onChange={handlePanel('loading')}
-            access_token={access_token}
             title='contacten'
             apiDataSources={[contacts, ledgers, customFields]}
             apiTitles={['contacten', 'categorieën', 'extra velden']}
