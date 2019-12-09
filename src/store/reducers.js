@@ -166,8 +166,7 @@ function rootReducer(state = initialState, action) {
             const newIncomingSums = apiUpdate(state.incomingSums, payload);
             return {
                 ...state,
-                incomingSums: newIncomingSums,
-                lastSync: payload.syncDate || state.lastSync
+                incomingSums: newIncomingSums
             }
         }
 

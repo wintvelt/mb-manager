@@ -71,6 +71,17 @@ const theme = createMuiTheme({
 				marginLeft: '8px',
 				marginBottom: '1px'
 			}
+		},
+		'MuiTableCell': {
+			sizeSmall: {
+				padding: '16px 0px 16px 16px'
+			}
+		},
+		'MuiTableSortLabel': {
+			icon: {
+				marginLeft: 0,
+				marginRight: 0
+			}
 		}
 	},
 });

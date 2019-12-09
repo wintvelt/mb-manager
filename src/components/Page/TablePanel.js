@@ -47,7 +47,8 @@ function getSorting(order, orderBy) {
 }
 
 function EnhancedTableHead(props) {
-    const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, headCells } = props;
+    const { classes, onSelectAllClick, order, orderBy, selectable,
+        numSelected, rowCount, onRequestSort, headCells } = props;
     const createSortHandler = property => event => {
         onRequestSort(event, property);
     };
@@ -55,7 +56,7 @@ function EnhancedTableHead(props) {
     return (
         <TableHead>
             <TableRow>
-                <TableCell padding="checkbox">
+                {selectable && <TableCell padding="checkbox">
                     <Checkbox
                         indeterminate={numSelected > 0 && numSelected < rowCount}
                         checked={numSelected === rowCount && rowCount > 0}
@@ -63,14 +64,17 @@ function EnhancedTableHead(props) {
                         inputProps={{ 'aria-label': 'alle betalingen selecteren' }}
                         color='primary'
                     />
-                </TableCell>
+                </TableCell>}
                 {headCells.map(headCell => (
                     <TableCell
                         key={headCell.id}
                         align={headCell.numeric ? 'right' : headCell.center ? 'center' : 'left'}
                         padding={headCell.disablePadding ? 'none' : 'default'}
                         sortDirection={orderBy === headCell.id ? order : false}
-                        style={{ [headCell.numeric ? 'paddingLeft' : 'paddingRight']: headCell.wider }}
+                        style={{
+                            [headCell.numeric ? 'paddingLeft' : 'paddingRight']: headCell.wider,
+                            width: headCell.width || 'inherit'
+                        }}
                     >
                         <TableSortLabel
                             active={orderBy === headCell.id}
@@ -204,6 +208,9 @@ const useStyles = makeStyles(theme => ({
         position: 'absolute',
         top: 20,
         width: 1,
+    },
+    editIcon: {
+        padding: '6px'
     }
 }));
 
@@ -211,6 +218,7 @@ const Editable = (props) => {
     const { onChange: emitChange, initValue, curValue: curPropValue } = props;
     const [isEditing, setIsEditing] = useState(false);
     const [curValue, setCurValue] = useState(curPropValue);
+    const classes = useStyles();
     const handleChange = newVal => {
         setCurValue(newVal);
     }
@@ -247,7 +255,7 @@ const Editable = (props) => {
             onChange={e => handleChange(e.target.value)} />
         : <Box style={{ display: 'flex', alignItems: 'center' }} onClick={onClick}>
             <Typography style={{ ...fieldStyle, flex: 1 }}>{curValue}</Typography>
-            <IconButton>
+            <IconButton className={classes.editIcon}>
                 <Icon fontSize='small'>edit</Icon>
             </IconButton>
         </Box>
@@ -268,7 +276,7 @@ const RowCell = (props) => {
 }
 
 export function EnhancedTable(props) {
-    const { rows, selected, onSelect, edited = { ids: [], edits: [] },
+    const { rows, selected = [], onSelect, selectable = true, edited = { ids: [], edits: [] },
         onEdit, onDownload, onMulti, onSaveEdit, tableTitle, headCells, rowCells } = props;
     const { initOrder = 'desc', initOrderBy = 'date' } = props;
     const classes = useStyles();
@@ -373,15 +381,16 @@ export function EnhancedTable(props) {
     return (
         <div className={classes.root}>
             <Paper className={classes.paper}>
-                <EnhancedTableToolbar numSelected={selected.length} onDownload={onDownload} onMulti={onMulti}
-                    onSaveEdit={onSaveEdit} tableTitle={tableTitle} />
+                {selectable && <EnhancedTableToolbar numSelected={selected.length} onDownload={onDownload} onMulti={onMulti}
+                    onSaveEdit={onSaveEdit} tableTitle={tableTitle} />}
                 <div className={classes.tableWrapper}>
                     <Table
                         className={classes.table}
                         aria-labelledby="tableTitle"
-                        size={'medium'}
+                        size={'small'}
                     >
                         <EnhancedTableHead
+                            selectable={selectable}
                             classes={classes}
                             numSelected={selected.length}
                             order={order}
@@ -404,17 +413,17 @@ export function EnhancedTable(props) {
                                             role="checkbox"
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={row.id}
+                                            key={row.id || index}
                                             selected={isItemSelected}
                                         >
-                                            <TableCell padding="checkbox">
+                                            {selectable && <TableCell padding="checkbox">
                                                 <Checkbox
                                                     color='primary'
                                                     onClick={event => handleClick(event, row.id)}
                                                     checked={isItemSelected}
                                                     inputProps={{ 'aria-labelledby': labelId }}
                                                 />
-                                            </TableCell>
+                                            </TableCell>}
                                             {rowCells.map((cellConfig, i) => {
                                                 const edits = rowEdits && rowEdits[cellConfig.key];
                                                 return <RowCell key={i}

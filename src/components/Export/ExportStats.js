@@ -11,15 +11,15 @@ import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles(theme => ({
     root: { flexGrow: 1 },
     paper: {
-        height: 120,
+        height: 100,
         padding: theme.spacing(1),
         backgroundColor: '#cfd8dc',
         position: 'relative'
     },
     syncButton: {
         position: 'absolute',
-        right: theme.spacing(1),
-        bottom: theme.spacing(1)
+        right: '4px',
+        bottom: '4px'
     }
 }));
 
@@ -54,7 +54,7 @@ function Widget({ title, text, icon, btnFunc, pending }) {
         <Grid item key={text} xs={6} md={4} lg={2} className={classes.root}>
             <Paper className={classes.paper}>
                 <Typography variant='h6' gutterBottom>{title}</Typography>
-                <Typography>{text}</Typography>
+                <Typography variant='subtitle2'>{text}</Typography>
                 {(icon && pending) &&
                     <div className="progress small">
                         <div className="indeterminate"></div>

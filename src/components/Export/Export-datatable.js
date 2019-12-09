@@ -1,7 +1,7 @@
 // data-helpers-exprt
 // bevat ook tabel-bouw functies en tabel logica
 
-import { tHead, tCell } from '../constants/table-helpers';
+import { tHead, tCell } from '../../constants/table-helpers';
 
 export const exportHeaders = [
     { value: "Bestand", shorten: false },

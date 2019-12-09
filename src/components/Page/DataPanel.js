@@ -16,6 +16,11 @@ import List from '@material-ui/core/List';
 
 // styles
 const useStyles = makeStyles(theme => ({
+    flatPanel: {
+        marginBottom: theme.spacing(3),
+        backgroundColor: 'inherit',
+        boxShadow: 'none'
+    },
     heading: {
         fontSize: theme.typography.pxToRem(15),
         color: theme.palette.text.secondary,
@@ -49,7 +54,7 @@ export const makeLoadingApiData = apiDataSources => {
 
 // receives data through props
 export const DataPanel = (props) => {
-    const { apiDataSources = [], apiTitles = [], expanded, onChange, title, loadingText } = props;
+    const { apiDataSources = [], apiTitles = [], expanded, onChange, title, loadingText, flat } = props;
 
     const loadingApiData = makeLoadingApiData(apiDataSources);
     const dataCount = !apiDataSources[0].toJS().data ? '0'
@@ -62,10 +67,13 @@ export const DataPanel = (props) => {
                 : '');
 
     const classes = useStyles();
+    const panelClass = flat && classes.flatPanel;
+    const hasOneData = apiTitles.length === 1;
+    const hasOneAction = props.children && React.Children.count(props.children) === 1;
 
-    return <ExpansionPanel expanded={expanded} onChange={onChange}>
+    return <ExpansionPanel expanded={expanded} onChange={onChange} className={panelClass}>
         <ExpansionPanelSummary
-            expandIcon={<Icon>expand_more</Icon>}
+            expandIcon={(hasOneData && hasOneAction)? props.children : <Icon>expand_more</Icon>}
             aria-controls="panel1bh-content"
             id="panel1bh-header"
         >
@@ -79,13 +87,13 @@ export const DataPanel = (props) => {
                 {loadingApiText}
             </Typography>
         </ExpansionPanelSummary>
-        <ExpansionPanelDetails>
+        {!hasOneData && <ExpansionPanelDetails>
             <List>
                 {apiTitles.map((apiTitle, i) => {
                     return <LoadingComp key={apiTitle} name={apiTitle} apiData={apiDataSources[i].toJS()} />
                 })}
             </List>
-        </ExpansionPanelDetails>
+        </ExpansionPanelDetails>}
         {props.children && <ExpansionPanelActions>
             {props.children}
         </ExpansionPanelActions>

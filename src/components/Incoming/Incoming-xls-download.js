@@ -1,5 +1,5 @@
 // Payment-xls download
-import Excel from 'exceljs/modern.browser';
+import Excel from 'exceljs';
 import { saveAs } from 'file-saver';
 
 const makeXls = (columns, rows) => {
