@@ -23,6 +23,7 @@ export const INIT = 'INIT'; // to reset an existing apiData object
 export const SET_LOADING = 'SET_LOADING'; // to set the apiData to loading (with id)
 export const SET_DATA = 'SET_DATA'; // to set the (success) data results from API call (with id)
 export const SET_ERROR = 'SET_ERROR'; // if the API call resulted in error (with id)
+const OVERRIDE = 'OVERRIDE'; // to manually override ID check
 
 export const apiUpdate = (state, action) => {
     const { type, payload } = action;
@@ -42,7 +43,7 @@ export const apiUpdate = (state, action) => {
 
         case SET_DATA: {
             const stateId = state.get('id');
-            if (stateId && payload.id !== stateId) {
+            if (payload.id !== OVERRIDE && stateId && payload.id !== stateId) {
                 console.log(`tried to update apiData of id "${stateId}" with new data of id "${payload.id}"`);
                 return state;
             }
@@ -151,4 +152,10 @@ const apiFlag = (flagId) => {
         [flagId]: true
     })
     return newObj.set('hasAllData', newObj.get('hasData'));
+}
+
+export const apiActionManual = params => {
+    const { data } = params;
+    const id = OVERRIDE;
+    return { type: SET_DATA, payload: { id, data } }
 }

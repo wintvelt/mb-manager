@@ -1,11 +1,14 @@
 // apiActions with New apiData lib
 import { apiActionPaged, apiActionSync } from '../helpers/apiData/apiData-multi';
-import { apiAction } from '../helpers/apiData/apiData';
+import { apiAction, apiActionManual } from '../helpers/apiData/apiData';
+import { postData, getData } from './apiActions';
+
 import {
     SET_CONTACTS_NEW, SET_PAYMENTS_NEW, SET_ACCOUNTS_NEW,
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW, SET_CUSTOM_FIELDS_NEW,
-    SET_INCOMING_SUMS
+    SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_SYNC_PENDING, SET_OPT_DELETED
 } from '../store/action-types';
+import { doSnack, doSnackError } from './actions';
 
 export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
     url: 'https://moneybird.com/api/v2/243231934476453244/contacts?per_page=50&page=',
@@ -88,3 +91,97 @@ export const getIncomingSums = () => apiAction({
         return { type: SET_INCOMING_SUMS, payload }
     }
 })
+
+export function exportDocs(body, access_token) {
+    return function (dispatch) {
+        // const url = (process.env.NODE_ENV === 'development') ?
+        // 	'http://localhost:3030/export'
+        // 	: 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export/';
+        const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/export';
+        dispatch({ type: SET_EXPORT_PENDING, payload: body.ids.length });
+        dispatch(doSnack('Export wordt gemaakt voor ' + body.ids.length + ' document(en)'));
+        postData(url, body, "POST", access_token)
+            .then(res => {
+                dispatch({ type: SET_EXPORT_PENDING, payload: 0 });
+                dispatch(doSnack('Export met ' + body.ids.length + ' documenten klaar voor download'));
+                dispatch({
+                    type: SET_INCOMING_SUMS,
+                    payload: apiActionManual({
+                        data: {
+                            list: res,
+                            syncDate: Date.now()
+                        }
+                    })
+                });
+            })
+            .catch(error => {
+                const msg = "Export helaas mislukt met fout \""
+                    + error.message + "\".";
+                dispatch({ type: SET_EXPORT_PENDING, payload: 0 });
+                dispatch(doSnackError(msg));
+            })
+    }
+}
+
+export function syncFiles(access_token) {
+    return function (dispatch) {
+        // const url = (process.env.NODE_ENV === 'development') ?
+        // 	'http://localhost:3030/sync'
+        // 	: 'https://';
+        const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/sync';
+
+        dispatch({ type: SET_SYNC_PENDING, payload: true });
+        dispatch(doSnack('Laatste stand van zaken van Moneybird ophalen'));
+        getData(url, access_token)
+            .then(res => {
+                dispatch({ type: SET_SYNC_PENDING, payload: false });
+                dispatch({
+                    type: SET_INCOMING_SUMS,
+                    payload: apiActionManual({
+                        data: {
+                            list: res,
+                            syncDate: Date.now()
+                        }
+                    })
+                });
+            })
+            .catch(error => {
+                const msg = "Export helaas mislukt met fout \""
+                    + error.message + "\".";
+                dispatch(doSnackError(msg));
+                dispatch({ type: SET_SYNC_PENDING, payload: false });
+            })
+    }
+}
+
+export function deleteFile(filename, access_token) {
+    return function (dispatch) {
+        // const url = (process.env.NODE_ENV === 'development') ?
+        // 	'http://localhost:3030/export'
+        // 	: 'https://';
+        const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/export';
+
+        const body = { filename: filename };
+        dispatch({type: SET_OPT_DELETED, payload: filename});
+        postData(url, body, "DELETE", access_token)
+            .then(res => {
+                dispatch({type: SET_OPT_DELETED, payload: []});
+                dispatch({
+                    type: SET_INCOMING_SUMS,
+                    payload: apiActionManual({
+                        data: {
+                            list: res,
+                            syncDate: Date.now()
+                        }
+                    })
+                });
+            })
+            .catch(error => {
+                dispatch({type: SET_OPT_DELETED, payload: []});
+                const msg = "File deleten helaas mislukt met fout \""
+                    + error.message + "\".";
+                dispatch(doSnackError(msg));
+            })
+    }
+}
+

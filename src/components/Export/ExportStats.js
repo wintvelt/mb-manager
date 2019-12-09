@@ -6,6 +6,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
@@ -25,14 +26,14 @@ const useStyles = makeStyles(theme => ({
 
 // Stat Container
 export const ExportStats = (props) => {
-    const { lastSync, accessToken, syncPending, invoiceFromTo, createFromTo,
+    const { lastSync, accessToken, onSync, syncPending, invoiceFromTo, createFromTo,
         docCount, unexportedCount, mutatedCount } = props;
     return <Grid container spacing={2}>
         {[
             {
                 title: moment(lastSync).format('D MMM YYYY'),
                 text: 'Datum van laatste sync',
-                icon: 'sync', btnFunc: (() => this.sync(accessToken.data)),
+                icon: 'sync', btnFunc: (() => onSync(accessToken.data)),
                 pending: syncPending
             },
             {
@@ -53,15 +54,14 @@ function Widget({ title, text, icon, btnFunc, pending }) {
     return (
         <Grid item key={text} xs={6} md={4} lg={2} className={classes.root}>
             <Paper className={classes.paper}>
-                <Typography variant='h6' gutterBottom>{title}</Typography>
+                <Typography variant='h6'>{title}</Typography>
                 <Typography variant='subtitle2'>{text}</Typography>
                 {(icon && pending) &&
-                    <div className="progress small">
-                        <div className="indeterminate"></div>
-                    </div>
+                    <LinearProgress />
                 }
                 {(icon && !pending) &&
-                    <IconButton size='small' onClick={btnFunc} className={classes.syncButton}>
+                    <IconButton size='small' className={classes.syncButton} color='primary'
+                        onClick={btnFunc} >
                         <Icon>{icon}</Icon>
                     </IconButton>
                 }

@@ -2,10 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from "react-redux";
 
-import { exportDocs, deleteFile, syncFiles } from '../../actions/api-AWS-actions';
-import { getIncomingSums } from '../../actions/apiActions-new';
-import { exportRows, exportHeaders, getFromSums } from './Export-datatable';
-import { SortableTable, tHeadAddSelect } from '../../constants/table-helpers';
+import { getIncomingSums, exportDocs, deleteFile, syncFiles } from '../../actions/apiActions-new';
+import { getFromSums } from './Export-datatable';
 import { doSnack } from "../../actions/actions";
 
 import { DataPanel } from '../Page/DataPanel';
@@ -55,16 +53,13 @@ export const Export = props => {
     }, [dispatch, accessToken, incomingSums]);
 
     const onDelete = (filename) => {
-        if (filename === selectedForDelete) {
+        if (selectedForDelete && filename === selectedForDelete) {
             dispatch(doSnack('exportbestand "' + filename + '" verwijderd.'));
             dispatch(deleteFile(filename));
             setSelectedForDelete('');
         } else {
             setSelectedForDelete(filename)
         }
-    }
-    const onClearDelete = () => {
-        setSelectedForDelete('')
     }
     const onExport = (selection, access_token) => {
         var body = {
@@ -86,6 +81,9 @@ export const Export = props => {
         }
         dispatch(exportDocs(body, access_token));
     }
+    const onSync = access_token => {
+        dispatch(syncFiles(access_token));
+    }
 
     // main view with data
     const incomingSumsList = incomingSums.toJS().data && incomingSums.toJS().data.list;
@@ -97,6 +95,7 @@ export const Export = props => {
     const activeYear = yearOptions[selectedYear] ? ` uit ${yearOptions[selectedYear].label}` : '';
     const rows = fileStats.map(item => {
         return {
+            id: item.fileName,
             filename: item.fileName,
             mutatedCount: item.mutatedCount,
             docCount: item.docCount,
@@ -106,21 +105,6 @@ export const Export = props => {
             createTo: item.createFromTo.max,
         }
     });
-    // const rows = exportRows(fileStats).map(row => {
-    //     if (row[0].value.includes('initial')) {
-    //         return [...row.slice(0, 7),
-    //         Object.assign({}, row[7], { value: 'do_not_disturb', disabled: true })]
-    //     }
-    //     if (row[0].value !== selectedForDelete) return row;
-    //     const newDeleteCell = Object.assign({}, row[7],
-    //         { className: 'red white-text', value: 'delete_forever' })
-    //     return [...row.slice(0, 7), newDeleteCell];
-    // }).sort((a, b) => {
-    //     var x = 0;
-    //     if (a[0].value > b[0].value) x = 1;
-    //     if (a[0].value < b[0].value) x = -1;
-    //     return x;
-    // });
     const olderYear = yearOptions[selectedYear + 1] && yearOptions[selectedYear + 1].label;
     return (
         <Grid>
@@ -139,15 +123,18 @@ export const Export = props => {
                     : <></>}
             </DataPanel>
             {hasData && <ExportStats lastSync={lastSyncDate} accessToken={accessToken}
-                syncPending={syncPending}
+                onSync={onSync} syncPending={syncPending}
                 invoiceFromTo={invoiceFromTo} createFromTo={createFromTo}
                 docCount={docCount} unexportedCount={unexportedCount} mutatedCount={mutatedCount} />}
             {hasData && <Grid container spacing={2} style={{ alignItems: 'stretch', paddingTop: '24px' }}>
                 <ExportFilters unexportedCount={unexportedCount} docCount={docCount} mutatedCount={mutatedCount}
                     filters={filters} onChangeInput={onChangeInput} />
-                <ExportAction filters={filters} selStats={selStats} exportPending={exportPending} />
+                <ExportAction filters={filters} selStats={selStats} 
+                    exportPending={exportPending} onExport={() => onExport(selection, accessToken.data)}/>
             </Grid>}
-            <ExportTable rows={rows} />
+            <ExportTable rows={rows}
+                selected={selectedForDelete ? [selectedForDelete] : []}
+                onSelect={onDelete} />
             {/* <div className="row">
                 <div className="section">
                     <SortableTable headers={headers} rows={rows}

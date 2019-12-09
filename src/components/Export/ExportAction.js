@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
 
 
 export const ExportAction = props => {
-    const { selStats, filters, exportPending } = props;
+    const { selStats, filters, exportPending, onExport } = props;
     const classes = useStyles();
     return (
         <Grid item xs={6} style={{ paddingBottom: '24px' }}>
@@ -60,6 +60,7 @@ export const ExportAction = props => {
                                     'nieuw te exporteren' : 'archief (zonder log)'}
                         </Typography>
                         <Button variant='contained' color='primary' className={classes.button}
+                            onClick={onExport}
                             disabled={exportPending > 0}
                             startIcon={<Icon>cloud_download</Icon>} >
                             Maak xlsx export

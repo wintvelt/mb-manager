@@ -76,7 +76,7 @@ function EnhancedTableHead(props) {
                             width: headCell.width || 'inherit'
                         }}
                     >
-                        <TableSortLabel
+                        {!headCell.disableSort && <TableSortLabel
                             active={orderBy === headCell.id}
                             direction={order}
                             onClick={createSortHandler(headCell.id)}
@@ -87,7 +87,8 @@ function EnhancedTableHead(props) {
                                     {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                                 </span>
                             ) : null}
-                        </TableSortLabel>
+                        </TableSortLabel>}
+                        {headCell.disableSort && headCell.label}
                     </TableCell>
                 ))}
             </TableRow>
@@ -262,16 +263,17 @@ const Editable = (props) => {
 }
 
 const RowCell = (props) => {
-    const { row, cellConfig, edits, onChange } = props;
-    const { key, padding, align, prettify, hrefBase, hrefKey, editable } = cellConfig;
+    const { row, cellConfig, edits, onChange, onSelect, isSelected } = props;
+    const { key, padding, align, prettify, hrefBase, hrefKey, editable, render } = cellConfig;
     const initValue = row[key];
     const curValue = typeof edits === 'string' ? edits : initValue;
     const content = prettify ? prettify(initValue, row) : initValue;
-    const isJustContent = !hrefBase && !editable;
+    const isJustContent = !hrefBase && !editable && !render;
     return <TableCell padding={padding || 'default'} align={align || 'inherit'} >
         <TableLink hrefBase={hrefBase} hrefEnd={row[hrefKey]} initValue={initValue} content={content} />
         {editable && <Editable initValue={initValue} curValue={curValue} onChange={onChange} />}
         {isJustContent && content}
+        {render && render(row, isSelected, onSelect)}
     </TableCell>
 }
 
@@ -301,21 +303,25 @@ export function EnhancedTable(props) {
     };
 
     const handleClick = (event, id) => {
-        const selectedIndex = selected.indexOf(id);
-        let newSelected = [];
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id);
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-                selected.slice(0, selectedIndex),
-                selected.slice(selectedIndex + 1),
-            );
+        if (!selectable) {
+            onSelect(id)
+        } else {
+            const selectedIndex = selected.indexOf(id);
+            let newSelected = [];
+            if (selectedIndex === -1) {
+                newSelected = newSelected.concat(selected, id);
+            } else if (selectedIndex === 0) {
+                newSelected = newSelected.concat(selected.slice(1));
+            } else if (selectedIndex === selected.length - 1) {
+                newSelected = newSelected.concat(selected.slice(0, -1));
+            } else if (selectedIndex > 0) {
+                newSelected = newSelected.concat(
+                    selected.slice(0, selectedIndex),
+                    selected.slice(selectedIndex + 1),
+                );
+            }
+            onSelect(newSelected);
         }
-        onSelect(newSelected);
     };
 
     const handleEdit = (initVal = '', newVal = '', id, field) => {
@@ -381,7 +387,8 @@ export function EnhancedTable(props) {
     return (
         <div className={classes.root}>
             <Paper className={classes.paper}>
-                {selectable && <EnhancedTableToolbar numSelected={selected.length} onDownload={onDownload} onMulti={onMulti}
+                {selectable && <EnhancedTableToolbar numSelected={selected.length}
+                    onDownload={onDownload} onMulti={onMulti}
                     onSaveEdit={onSaveEdit} tableTitle={tableTitle} />}
                 <div className={classes.tableWrapper}>
                     <Table
@@ -428,7 +435,9 @@ export function EnhancedTable(props) {
                                                 const edits = rowEdits && rowEdits[cellConfig.key];
                                                 return <RowCell key={i}
                                                     row={row} cellConfig={cellConfig}
+                                                    isSelected={isItemSelected}
                                                     edits={edits}
+                                                    onSelect={event => handleClick(event, row.id)}
                                                     onChange={newVal => {
                                                         handleEdit(row[cellConfig.key], newVal, row.id, cellConfig.key)
                                                     }} />
