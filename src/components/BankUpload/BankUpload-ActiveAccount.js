@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { fetchAWSAPI } from '../actions/apiActions-Bank';
 import { useDispatch, useSelector } from 'react-redux';
 import { FileZone } from '../constants/file-helpers';
-import { BankFiles } from './Bankmutations-Files';
-import { BankConfig } from './Bankmutations-config';
+import { BankFiles } from './BankUpload-Files';
+import { BankConfig } from './BankUpload-config';
 import { setBank, doSnack } from '../actions/actions';
-import { BankActiveCsv } from './Bankmutations-ActiveCsv';
+import { BankActiveCsv } from './BankUpload-ActiveCsv';
 
 export const ActiveAccount = (props) => {
     const { accessToken } = useSelector(store => store);

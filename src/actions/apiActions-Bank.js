@@ -9,13 +9,6 @@ export const adminCode = "243231934476453244";
 export const base_url_MB = 'https://moneybird.com/api/v2/' + adminCode;
 
 
-// returns accounts or fetches them from store - to use with hooks
-// hope this works
-export const fetchMBAPI = (params) => {
-    const options = Object.assign({}, params, { url: base_url_MB + params.path });
-    return fetchAPI(options);
-}
-
 export const fetchAWSAPI = (params) => {
     const url = base_url_AWS + params.path;
     const options = Object.assign({}, params, { url });

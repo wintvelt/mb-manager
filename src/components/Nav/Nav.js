@@ -8,7 +8,7 @@ const menu = [
     { icon: 'receipt', link: '/inkomend', text: 'Bonnetjes en facturen', badge: true },
     { icon: 'account_balance', link: '/betalingen/lijst', text: 'Banktransacties', badge: true },
     { icon: 'attachment', link: '/betalingen/match', text: 'Betalingen matchen' },
-    { icon: 'cloud_upload', link: '/bankmutations', text: 'Upload bankfile' },
+    { icon: 'cloud_upload', link: '/bankupload', text: 'Upload bankfile' },
     { icon: 'sync', link: '/export', text: 'Export Finvision' },
     { icon: 'account_circle', link: '/connection', text: 'Connectie' }
 ];

@@ -6,7 +6,8 @@ import { postData, getData } from './apiActions';
 import {
     SET_CONTACTS_NEW, SET_PAYMENTS_NEW, SET_ACCOUNTS_NEW,
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW, SET_CUSTOM_FIELDS_NEW,
-    SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_SYNC_PENDING, SET_OPT_DELETED
+    SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_SYNC_PENDING, SET_OPT_DELETED,
+    SET_BANK
 } from '../store/action-types';
 import { doSnack, doSnackError } from './actions';
 
@@ -185,3 +186,24 @@ export function deleteFile(filename, access_token) {
     }
 }
 
+const base_url_AWS_Bank = 'https://87xzyymsji.execute-api.eu-central-1.amazonaws.com/Prod';
+
+export const setBank = payload => {
+    return { type: SET_BANK, payload };
+}
+
+export const getBankActiveConfig = (active_account) => apiAction({
+    url: base_url_AWS_Bank + '/config/' + active_account,
+    loadingMsg: 'Csv-conversie-instellingen voor deze rekening ophalen.',
+    storeAction: (payload) => {
+        return setBank({ type: 'setConfig', content: payload })
+    }
+});
+
+export const getBankActiveFiles = (active_account) => apiAction({
+    url: base_url_AWS_Bank + '/files/' + active_account,
+    loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',
+    storeAction: (payload) => {
+        return setBank({ type: 'setFiles', content: payload })
+    }
+});

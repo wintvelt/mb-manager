@@ -23,7 +23,7 @@ import {
 } from './reducer-helpers';
 import { newApiData, api } from '../constants/helpers';
 import { initBankData, setBank } from './reducer-helpers-bank';
-import { initialMatch, matchReducer } from "../components/Match-store";
+// import { initialMatch, matchReducer } from "../components/Match-store";
 import { initApiDataMulti, apiUpdateMulti, apiUpdateMultiMulti } from '../helpers/apiData/apiData-multi';
 import { apiUpdate, initApiData } from '../helpers/apiData/apiData';
 import { defaultNotifications, updateSnacks, enqueueSnack } from "../helpers/snackbar/updateSnacks";
@@ -53,7 +53,7 @@ export const initialState = {
     optDeleted: [],
     syncPending: false,
     bankData: initBankData,
-    matchStuff: initialMatch,
+    // matchStuff: initialMatch,
     batchMsg: {},
     batchError: false
 };
@@ -235,8 +235,10 @@ function rootReducer(state = initialState, action) {
             return Object.assign({}, state, { bankData: newBankData })
         }
         case SET_MATCH: {
-            const newMatchStuff = matchReducer(state.matchStuff, action.payload);
-            return Object.assign({}, state, { matchStuff: newMatchStuff })
+            console.log('how did i get here?')
+            // const newMatchStuff = matchReducer(state.matchStuff, action.payload);
+            // return Object.assign({}, state, { matchStuff: newMatchStuff })
+            return state;
         }
         case SET_CUSTOM_FIELDS: {
             return Object.assign({}, state, {

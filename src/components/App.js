@@ -11,7 +11,7 @@ import Contacts from './Contacts/Contacts';
 import Incoming from './Incoming/Incoming';
 import Payments from './Payments/Payments';
 import Export from './Export/Export';
-import Bankmutations from './Bankmutations';
+import BankUpload from './BankUpload/BankUpload';
 import Secret from './Secret';
 import Home from './Home';
 
@@ -92,7 +92,8 @@ const newRoutes = [
 	'/inkomend',
 	'/connection',
 	'/contacten',
-	'/export'
+	'/export',
+	'/bankupload'
 ]
 
 const NavRoute = (props) => {
@@ -109,6 +110,8 @@ const NavRoute = (props) => {
 					<PrivateRoute exact path="/contacten" component={Contacts}
 						isConnected={props.isConnected} />
 					<PrivateRoute path="/export" component={Export}
+						isConnected={props.isConnected} />
+					<PrivateRoute path="/bankupload" component={BankUpload}
 						isConnected={props.isConnected} />
 					<Route exact path="/connection" component={Connection} />
 				</Switch>
@@ -143,7 +146,7 @@ const ConnectedApp = (props) => {
 						<PrivateRoute path="/export" component={Dummy}
 							isConnected={props.isConnected} />
 						<Route exact path="/connection" component={Dummy} />
-						<Route exact path="/bankmutations" component={Bankmutations} />
+						<Route exact path="/bankmutations" component={Dummy} />
 						<Route exact path={secretPath} component={Secret} />
 						<Route render={(routeprops) => {
 							const newSnack = "De pagina \"" +

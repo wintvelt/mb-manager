@@ -3,7 +3,7 @@ import React, { useState, useReducer } from 'react';
 import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
 import { setBank } from '../actions/actions';
-import { FieldsConfig } from './Bankmutations-config-fields';
+import { FieldsConfig } from './BankUpload-config-fields';
 import { fetchAWSAPI } from '../actions/apiActions-Bank';
 
 

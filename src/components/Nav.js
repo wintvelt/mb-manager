@@ -9,7 +9,7 @@ const menu = [
 	{ path: "/inkomend", text: "Inkomend" },
 	{ path: "/betalingen", link: "/betalingen/match", text: "Betalingen", badge: 'NIEUW' },
 	{ path: "/export", text: "Export" },
-	{ path: "/bankmutations", text: "Transacties", badge: "NIEUW" }
+	{ path: "/bankupload", text: "Transacties", badge: "NIEUW" }
 ];
 
 const subMenusFor = (activePath) => {
