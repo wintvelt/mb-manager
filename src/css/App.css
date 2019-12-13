@@ -22,8 +22,12 @@
 	justify-content: center;
 }
 .upload-zone.dragover {
-	background-color: #b2dfdb;
+	background-color: #009688;
+	color: white;
 	padding: 4px;
+}
+.upload-zone.dragover .upload-border {
+	border-color: white;
 }
 input[type='file'].upload-zone {
 	position: absolute;

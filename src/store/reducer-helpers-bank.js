@@ -1,14 +1,18 @@
 // for csv upload to moneybird
 import { newApiData, api } from '../constants/helpers';
+import { initApiData, apiUpdate} from '../helpers/apiData/apiData';
 
 const defaultBank = { value: '243233339071268359', label: "KBC 1213" }; // KBC 1213 is default
 
 export const initBankData = {
-    activeAccount: null,
-    config: newApiData(),
+    activeAccount: defaultBank,
+    config: initApiData,
     savedConfig: newApiData(),
-    files: newApiData(),
-    activeCsv: newApiData(),
+    files: initApiData,
+    activeCsv: {
+        filename: '',
+        apiData: initApiData
+    },
     convertResult: newApiData(),
     deleteFile: newApiData()
 }
@@ -22,12 +26,13 @@ export const setBank = (state, payload) => {
             return Object.assign({}, initBankData, { activeAccount: defaultBank });
 
         case 'setActiveAccount':
-            return (oldActive && oldActive === payload.content) ?
-                Object.assign({}, oldActive)
+            const noChange = (oldActive && oldActive.value === payload.content.value);
+            return noChange?
+                oldBankData
                 : Object.assign({}, initBankData, { activeAccount: payload.content })
 
         case 'setConfig':
-            const newConfig = api.set(oldBankData.config, payload.content);
+            const newConfig = apiUpdate(oldBankData.config, payload.content);
             return Object.assign({}, oldBankData, { config: newConfig });
 
         case 'setSavedConfig':
@@ -35,12 +40,17 @@ export const setBank = (state, payload) => {
             return Object.assign({}, oldBankData, { config: savedConfig });
 
         case 'setFiles':
-            const newFiles = api.set(oldBankData.files, payload.content, onlyCsv);
+            const newFiles = apiUpdate(oldBankData.files, payload.content);
             return Object.assign({}, oldBankData, { files: newFiles });
 
-        case 'setCsv':
-            const newCsv = api.set(oldBankData.activeCsv, payload.content, parseCsv);
-            return Object.assign({}, oldBankData, { activeCsv: newCsv });
+        case 'setCsv': {
+            const { apiAction, filename } = payload.content;
+            const newCsv = apiUpdate(oldBankData.activeCsv.apiData, apiAction);
+            return Object.assign({}, oldBankData, { activeCsv: {
+                apiData: newCsv,
+                filename
+            }});
+        }
 
         case 'setCsvWithOrigin':
             const newCsvWithOrigin = api.setData(parseCsv(payload.content.data),
@@ -60,7 +70,7 @@ export const setBank = (state, payload) => {
     }
 }
 
-const onlyCsv = (fileList) => {
+export const onlyCsv = (fileList) => {
     return fileList
         .filter(file => (file.last_modified && (file.last_modified.csv || file.last_modified.CSV)))
         .sort(sortDesc('filename'));

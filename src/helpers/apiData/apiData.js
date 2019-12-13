@@ -106,7 +106,8 @@ export const apiAction = (params) => {
                 if (res.ok && res.status >= 200 && res.status <= 299) {
                     const contentType = res.headers.get('content-type');
                     if (contentType.startsWith('application/json')) {
-                        return res.json();
+                        // return res.json();
+                        return res.text();
                     } else {
                         return res.text()
                     };

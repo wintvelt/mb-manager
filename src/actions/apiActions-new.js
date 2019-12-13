@@ -192,18 +192,42 @@ export const setBank = payload => {
     return { type: SET_BANK, payload };
 }
 
-export const getBankActiveConfig = (active_account) => apiAction({
+export const getBankActiveConfig = (active_account, access_token) => apiAction({
     url: base_url_AWS_Bank + '/config/' + active_account,
+    headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'Csv-conversie-instellingen voor deze rekening ophalen.',
     storeAction: (payload) => {
         return setBank({ type: 'setConfig', content: payload })
     }
 });
 
-export const getBankActiveFiles = (active_account) => apiAction({
+export const getBankActiveFiles = (active_account, access_token) => apiAction({
     url: base_url_AWS_Bank + '/files/' + active_account,
+    headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',
     storeAction: (payload) => {
         return setBank({ type: 'setFiles', content: payload })
     }
 });
+
+export const getCsv = (active_account, filename, access_token) => apiAction({
+    url: base_url_AWS_Bank + '/files/' + active_account + '/' + filename,
+    headers: { Authorization: 'Bearer ' + access_token },
+    loadingMsg: 'Even geduld terwijl we csv bestand ophalen',
+    storeAction: (payload) => {
+        return setBank({ type: 'setCsv', content: {
+            apiAction: payload,
+            filename
+        }})
+    }
+});
+
+export const setCsvManual = (filename, data) => {
+    return setBank({
+        type: 'setCsv',
+        content: {
+            apiAction: apiActionManual({ data }),
+            filename
+        }
+    })
+}

@@ -82,6 +82,11 @@ const theme = createMuiTheme({
 				marginLeft: 0,
 				marginRight: 0
 			}
+		},
+		'MuiExpansionPanelSummary': {
+			root: {
+				minHeight: '64px'
+			}
 		}
 	},
 });
@@ -146,13 +151,13 @@ const ConnectedApp = (props) => {
 						<PrivateRoute path="/export" component={Dummy}
 							isConnected={props.isConnected} />
 						<Route exact path="/connection" component={Dummy} />
-						<Route exact path="/bankmutations" component={Dummy} />
+						<Route exact path="/bankupload" component={Dummy} />
 						<Route exact path={secretPath} component={Secret} />
 						<Route render={(routeprops) => {
 							const newSnack = "De pagina \"" +
 								routeprops.location.pathname +
 								"\" bestaat helaas (nog) niet. Gelukkig is er al genoeg anders te doen.";
-							dispatch({type: DO_SNACK, payload: newSnack})
+							dispatch({ type: DO_SNACK, payload: newSnack })
 							return <Redirect to={{
 								pathname: "/", state: {
 									newSnack: newSnack

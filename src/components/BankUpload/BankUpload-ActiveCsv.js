@@ -1,37 +1,38 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setBank } from '../actions/actions';
+import { setBank } from '../../actions/actions';
 
 export const BankActiveCsv = (props) => {
     const { activeCsv } = props;
-    const { data, origin } = activeCsv;
+    const { apiData, filename } = activeCsv;
     const dispatch = useDispatch();
     const [csvVisible, setCvsVisible] = useState(false);
-    const filename = (origin) ? origin.split('/').slice(-1)[0] : '';
-    const onClearCsv = () => {
-        dispatch(setBank({ type: 'setCsv', content: { INIT: true } }));
-        dispatch(setBank({ type: 'convertResult', content: { INIT: true } }));
-    }
-    const headState = (data) ? 'csv-menu-enabled' : 'csv-menu-disabled';
-    const btnClass = (data) ? 'btn btn-flat waves-effect waves-light'
-        : 'btn btn-flat waves-effect waves-light disabled';
-    return <div>
-        <Header filename={filename} headState={headState} btnClass={btnClass}
-            onClick={() => setCvsVisible(true)}
-            onClearCsv={onClearCsv} />
-        {(data && csvVisible) ?
-            <div style={{ width: '100%', height: '0', position: 'relative' }}>
-                <div className='csv-card card grey lighten-3'>
-                    <Header filename={filename} headState='csv-menu-open'
-                        btnClass={btnClass} onClick={() => setCvsVisible(false)} />
-                    <div className='csv-scroll-area'>
-                        <CsvTable rowData={data} />
-                    </div>
-                </div>
-            </div>
-            : <></>
-        }
-    </div>
+    // const filename = (origin) ? origin.split('/').slice(-1)[0] : '';
+    // const onClearCsv = () => {
+    //     dispatch(setBank({ type: 'setCsv', content: { INIT: true } }));
+    //     dispatch(setBank({ type: 'convertResult', content: { INIT: true } }));
+    // }
+    // const headState = (data) ? 'csv-menu-enabled' : 'csv-menu-disabled';
+    // const btnClass = (data) ? 'btn btn-flat waves-effect waves-light'
+    //     : 'btn btn-flat waves-effect waves-light disabled';
+    // return <div>
+    //     <Header filename={filename} headState={headState} btnClass={btnClass}
+    //         onClick={() => setCvsVisible(true)}
+    //         onClearCsv={onClearCsv} />
+    //     {(data && csvVisible) ?
+    //         <div style={{ width: '100%', height: '0', position: 'relative' }}>
+    //             <div className='csv-card card grey lighten-3'>
+    //                 <Header filename={filename} headState='csv-menu-open'
+    //                     btnClass={btnClass} onClick={() => setCvsVisible(false)} />
+    //                 <div className='csv-scroll-area'>
+    //                     <CsvTable rowData={data} />
+    //                 </div>
+    //             </div>
+    //         </div>
+    //         : <></>
+    //     }
+    // </div>
+    return <pre>{JSON.stringify(apiData.toJS(),null,2)}</pre>
 }
 
 const CsvTable = (props) => {

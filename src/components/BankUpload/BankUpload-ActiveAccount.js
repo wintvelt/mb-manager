@@ -1,19 +1,29 @@
 // Component for Active account (sub of Bankmutations)
 import React, { useState } from 'react';
-import { fetchAWSAPI } from '../actions/apiActions-Bank';
 import { useDispatch, useSelector } from 'react-redux';
-import { FileZone } from '../constants/file-helpers';
+import { FileZone } from '../../constants/file-helpers';
 import { BankFiles } from './BankUpload-Files';
-import { BankConfig } from './BankUpload-config';
-import { setBank, doSnack } from '../actions/actions';
+// import { BankConfig } from './BankUpload-config';
+import { setBank, doSnack, doSnackError } from '../../actions/actions';
 import { BankActiveCsv } from './BankUpload-ActiveCsv';
+import { getCsv, setCsvManual } from '../../actions/apiActions-new';
+
+/*
+csv data in store zetten met filename
+*/
 
 export const ActiveAccount = (props) => {
-    const { accessToken } = useSelector(store => store);
+    const { accessToken } = useSelector(store => {
+        const { accessToken } = store;
+        return { accessToken };
+    });
     const { bankData, admin } = props;
+    const bankDataFiles = bankData.files.toJS();
+    const bankDataConfig = bankData.config.toJS();
     const [adminIsOpen, setadminIsOpen] = useState(false);
     const [askConfirm, setAskConfirm] = useState({ ask: false });
     const dispatch = useDispatch();
+
     const fileHandler = (files) => {
         let errorMsg = '';
         if (files.length > 1) errorMsg = 'Je kunt maar 1 bestand tegelijk uploaden.';
@@ -21,38 +31,26 @@ export const ActiveAccount = (props) => {
         const fileExt = file.name.split('.')[1];
         if (fileExt.toLowerCase() !== 'csv') errorMsg = 'Je kunt alleen .csv bestanden uploaden, geen .' + fileExt;
         if (errorMsg) {
-            dispatch(doSnack(errorMsg))
+            dispatch(doSnackError(errorMsg))
         } else {
             let reader = new FileReader();
             reader.onload = (e) => {
-                dispatch(setBank({
-                    type: 'setCsvWithOrigin',
-                    content: { data: e.target.result, filename: file.name }
-                }));
+                dispatch(setCsvManual(file.name, e.target.result));
                 maybeConvertCsvData(file.name, e.target.result)
             };
             reader.readAsText(file);
         }
     }
     const onFileConvert = (filename) => {
-        const getCsvOptions = {
-            stuff: bankData.activeCsv,
-            path: '/files/' + bankData.activeAccount.value + '/' + filename,
-            storeSetFunc: (content) => setBank({ type: 'setCsv', content }),
-            errorMsg: 'Fout bij ophalen csv, melding van AWS: ',
-            accessToken,
-            loadingMsg: 'Even geduld terwijl we csv bestand ophalen',
-            dispatch,
-            callback: (data) => maybeConvertCsvData(filename, data)
-        }
-        fetchAWSAPI(getCsvOptions);
+        dispatch(getCsv(bankData.activeAccount.value, filename, accessToken.data));
     }
     const maybeConvertCsvData = (filename, data) => {
         // check if filename is already converted
         if (fileInList(filename, bankData.files)) {
             setAskConfirm({ ask: true, filename, data });
         } else {
-            convertCsvData(filename, data);
+            alert('convert invoked');
+            // convertCsvData(filename, data);
         }
     }
     const convertCsvData = (filename, data) => {
@@ -81,9 +79,9 @@ export const ActiveAccount = (props) => {
             errorMsg: 'Fout bij conversie: ',
             accessToken,
             dispatch,
-            callback: () => fetchAWSAPI(getFilesOptions)
+            // callback: () => fetchAWSAPI(getFilesOptions)
         }
-        fetchAWSAPI(convertCsvOptions);
+        // fetchAWSAPI(convertCsvOptions);
     }
     const onClickAdmin = () => {
         setadminIsOpen(!adminIsOpen);
@@ -99,22 +97,20 @@ export const ActiveAccount = (props) => {
     }
     return (
         <div>
-            {(bankData.convertResult.isLoading) ?
-                <Loader apiData={bankData.convertResult} className='upload-zone' />
-                : (bankData.activeCsv.isLoading) ?
-                    <Loader apiData={bankData.activeCsv} className='upload-zone' />
-                    : <FileZone fileHandler={fileHandler} message='Drop .csv bestand met transacties hier, of klik.' />
+            {bankDataConfig.hasData && <FileZone
+                fileHandler={fileHandler}
+                message='Drop .csv bestand met transacties hier, of klik.' />
             }
-            {(admin) ?
+            {admin &&
                 <BankActiveCsv activeCsv={bankData.activeCsv} />
-                : <></>
             }
             {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
                 (bankData.convertResult.data.errors || (admin && adminIsOpen))) ?
                 (admin && adminIsOpen) ?
-                    <BankConfig account={bankData.activeAccount.value}
-                        config={bankData.config.data} convertResult={bankData.convertResult.data}
-                        files={bankData.files} />
+                    'temp ding'
+                    // <BankConfig account={bankData.activeAccount.value}
+                    //     config={bankData.config.data} convertResult={bankData.convertResult.data}
+                    //     files={bankData.files} />
                     : <div className="row">
                         <div className="col s12 orange lighten-1 card">
                             <button className="btn-flat btn waves-effect close"
@@ -135,14 +131,12 @@ export const ActiveAccount = (props) => {
                 <Confirmation onClick={onConfirmConvert} filename={askConfirm.filename} />
                 : <></>
             }
-            {(bankData.files.hasError) ?
+            {(bankDataFiles.hasError) ?
                 <p>Er ging iets mis, probeer het later nog eens..</p>
-                : (bankData.files.data && bankData.files.data.length > 0) ?
-                    <BankFiles files={bankData.files.data} isLoading={bankData.files.isLoading}
+                : (bankDataFiles.data && bankDataFiles.data.length > 0) ?
+                    <BankFiles files={bankDataFiles.data} isLoading={bankDataFiles.isLoading}
                         onFileConvert={onFileConvert} admin={admin} />
-                    : (bankData.files.isLoading) ?
-                        <Loader apiData={bankData.files} />
-                        : <></>
+                    : <></>
             }
             {(admin) ? <AdminButton adminIsOpen={adminIsOpen} onClick={onClickAdmin}
                 enabled={(bankData.config.hasAllData && bankData.convertResult.hasAllData)} />
@@ -150,18 +144,6 @@ export const ActiveAccount = (props) => {
             }
         </div>
     );
-}
-
-const Loader = ({ apiData, className }) => {
-    const loadClass = ["section center", className].join(' ');
-    return (
-        <div className={loadClass}>
-            <p>{apiData.loadingMsg}</p>
-            <div className="progress">
-                <div className="indeterminate"></div>
-            </div>
-        </div>
-    )
 }
 
 const AdminButton = (props) => {

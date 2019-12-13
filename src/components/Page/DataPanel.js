@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
     flatPanel: {
         marginBottom: theme.spacing(3),
         backgroundColor: 'inherit',
-        boxShadow: 'none'
+        boxShadow: 'none',
     },
     heading: {
         fontSize: theme.typography.pxToRem(15),
@@ -32,7 +32,8 @@ const useStyles = makeStyles(theme => ({
     secondaryHeading: {
         fontSize: theme.typography.pxToRem(15),
         color: theme.palette.text.primary,
-        alignSelf: 'center'
+        alignSelf: 'center',
+        flexGrow: 1
     },
     icon: {
         marginRight: '1rem',
@@ -40,6 +41,9 @@ const useStyles = makeStyles(theme => ({
     },
     listButton: {
         marginRight: '1rem'
+    },
+    nopointer: {
+        cursor: 'default !important'
     }
 }));
 
@@ -73,7 +77,8 @@ export const DataPanel = (props) => {
 
     return <ExpansionPanel expanded={expanded} onChange={onChange} className={panelClass}>
         <ExpansionPanelSummary
-            expandIcon={(hasOneData && hasOneAction)? props.children : <Icon>expand_more</Icon>}
+            className={flat && classes.nopointer}
+            expandIcon={!(hasOneData && hasOneAction) && <Icon>expand_more</Icon>}
             aria-controls="panel1bh-content"
             id="panel1bh-header"
         >
@@ -86,6 +91,7 @@ export const DataPanel = (props) => {
             <Typography className={classes.secondaryHeading}>
                 {loadingApiText}
             </Typography>
+            {(hasOneData && hasOneAction) && props.children}
         </ExpansionPanelSummary>
         {!hasOneData && <ExpansionPanelDetails>
             <List>

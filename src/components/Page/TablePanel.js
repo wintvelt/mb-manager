@@ -263,22 +263,26 @@ const Editable = (props) => {
 }
 
 const RowCell = (props) => {
-    const { row, cellConfig, edits, onChange, onSelect, isSelected } = props;
+    const { row, cellConfig, edits, onChange, onSelect, isSelected, isDisabled } = props;
     const { key, padding, align, prettify, hrefBase, hrefKey, editable, render } = cellConfig;
     const initValue = row[key];
     const curValue = typeof edits === 'string' ? edits : initValue;
     const content = prettify ? prettify(initValue, row) : initValue;
-    const isJustContent = !hrefBase && !editable && !render;
-    return <TableCell padding={padding || 'default'} align={align || 'inherit'} >
-        <TableLink hrefBase={hrefBase} hrefEnd={row[hrefKey]} initValue={initValue} content={content} />
+    const isJustContent = (!hrefBase && !editable && !render) || (isDisabled && !render);
+    const style = isDisabled? { color: 'grey', backgroundColor: 'lightgrey', textDecoration: 'line-through' } : {}
+    return <TableCell padding={padding || 'default'} align={align || 'inherit'}
+        style={style}>
+        {!isDisabled &&
+            <TableLink hrefBase={hrefBase} hrefEnd={row[hrefKey]} initValue={initValue} content={content} />}
         {editable && <Editable initValue={initValue} curValue={curValue} onChange={onChange} />}
         {isJustContent && content}
-        {render && render(row, isSelected, onSelect)}
+        {render && render(row, isSelected, onSelect, isDisabled)}
     </TableCell>
 }
 
 export function EnhancedTable(props) {
-    const { rows, selected = [], onSelect, selectable = true, edited = { ids: [], edits: [] },
+    const { rows, selected = [], disabled = [], onSelect, selectable = true,
+        edited = { ids: [], edits: [] },
         onEdit, onDownload, onMulti, onSaveEdit, tableTitle, headCells, rowCells } = props;
     const { initOrder = 'desc', initOrderBy = 'date' } = props;
     const classes = useStyles();
@@ -375,6 +379,7 @@ export function EnhancedTable(props) {
     };
 
     const isSelected = id => selected.indexOf(id) !== -1;
+    const isDisabled = id => disabled.indexOf(id) !== -1;
     const edits = id => {
         const editedIndex = edited.ids.indexOf(id);
         return editedIndex !== -1 ?
@@ -412,6 +417,7 @@ export function EnhancedTable(props) {
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
                                     const isItemSelected = isSelected(row.id);
+                                    const isItemDisabled = isDisabled(row.id);
                                     const rowEdits = edits(row.id);
                                     const labelId = `enhanced-table-checkbox-${index}`;
                                     return (
@@ -436,6 +442,7 @@ export function EnhancedTable(props) {
                                                 return <RowCell key={i}
                                                     row={row} cellConfig={cellConfig}
                                                     isSelected={isItemSelected}
+                                                    isDisabled={isItemDisabled}
                                                     edits={edits}
                                                     onSelect={event => handleClick(event, row.id)}
                                                     onChange={newVal => {
