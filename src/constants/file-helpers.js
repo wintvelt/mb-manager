@@ -21,7 +21,6 @@ export const FileZone = (props) => {
     const onFileDrop = (e) => {
         e.stopPropagation();
         e.preventDefault();
-        console.log("File Drop");
         fileHandler(e.dataTransfer.files);
         setDragOver(false);
     }

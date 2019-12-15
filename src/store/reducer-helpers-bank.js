@@ -1,6 +1,7 @@
 // for csv upload to moneybird
 import { newApiData, api } from '../constants/helpers';
-import { initApiData, apiUpdate} from '../helpers/apiData/apiData';
+import { initApiData, apiUpdate, INIT } from '../helpers/apiData/apiData';
+
 
 const defaultBank = { value: '243233339071268359', label: "KBC 1213" }; // KBC 1213 is default
 
@@ -13,7 +14,7 @@ export const initBankData = {
         filename: '',
         apiData: initApiData
     },
-    convertResult: newApiData(),
+    convertResult: initApiData,
     deleteFile: newApiData()
 }
 
@@ -27,7 +28,7 @@ export const setBank = (state, payload) => {
 
         case 'setActiveAccount':
             const noChange = (oldActive && oldActive.value === payload.content.value);
-            return noChange?
+            return noChange ?
                 oldBankData
                 : Object.assign({}, initBankData, { activeAccount: payload.content })
 
@@ -46,20 +47,26 @@ export const setBank = (state, payload) => {
         case 'setCsv': {
             const { apiAction, filename } = payload.content;
             const newCsv = apiUpdate(oldBankData.activeCsv.apiData, apiAction);
-            return Object.assign({}, oldBankData, { activeCsv: {
-                apiData: newCsv,
-                filename
-            }});
+            return Object.assign({}, oldBankData, {
+                activeCsv: {
+                    apiData: newCsv,
+                    filename
+                }
+            });
         }
 
-        case 'setCsvWithOrigin':
-            const newCsvWithOrigin = api.setData(parseCsv(payload.content.data),
-                null, payload.content.filename);
-            return Object.assign({}, oldBankData, { activeCsv: newCsvWithOrigin });
-
         case 'setConvertResult':
-            const newConvertResult = api.set(oldBankData.convertResult, payload.content);
+            const newConvertResult = apiUpdate(oldBankData.convertResult, payload.content);
             return Object.assign({}, oldBankData, { convertResult: newConvertResult });
+
+        case 'resetCsv': {
+            const newCsv = {
+                filename: '',
+                apiData: initApiData
+            };
+            const newConvertResult = initApiData;
+            return { ...oldBankData, activeCsv: newCsv, convertResult: newConvertResult }
+        }
 
         case 'deleteFile':
             const newDeleteFile = api.set(oldBankData.deleteFile, payload.content);
@@ -83,7 +90,7 @@ const sortDesc = (key) => {
     }
 }
 
-const parseCsv = (content) => {
+export const parseCsv = (content) => {
     // need to parse csv string first
     const semiColons = (content.match(/;/g) || []).length;
     const commas = (content.match(/,/g) || []).length;

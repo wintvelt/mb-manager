@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FileZone } from '../../constants/file-helpers';
 import { BankFiles } from './BankUpload-Files';
-// import { BankConfig } from './BankUpload-config';
-import { setBank, doSnack, doSnackError } from '../../actions/actions';
+import { BankConfig } from './BankUpload-config';
+import { setBank, doSnackError } from '../../actions/actions';
 import { BankActiveCsv } from './BankUpload-ActiveCsv';
 import { getCsv, setCsvManual } from '../../actions/apiActions-new';
 
@@ -20,7 +20,8 @@ export const ActiveAccount = (props) => {
     const { bankData, admin } = props;
     const bankDataFiles = bankData.files.toJS();
     const bankDataConfig = bankData.config.toJS();
-    const [adminIsOpen, setadminIsOpen] = useState(false);
+    const bankDataConvertResult = bankData.convertResult.toJS();
+    const hasActiveCsv = bankData.activeCsv.apiData.toJS().hasAllData;
     const [askConfirm, setAskConfirm] = useState({ ask: false });
     const dispatch = useDispatch();
 
@@ -46,7 +47,7 @@ export const ActiveAccount = (props) => {
     }
     const maybeConvertCsvData = (filename, data) => {
         // check if filename is already converted
-        if (fileInList(filename, bankData.files)) {
+        if (fileInList(filename, bankDataFiles)) {
             setAskConfirm({ ask: true, filename, data });
         } else {
             alert('convert invoked');
@@ -83,9 +84,6 @@ export const ActiveAccount = (props) => {
         }
         // fetchAWSAPI(convertCsvOptions);
     }
-    const onClickAdmin = () => {
-        setadminIsOpen(!adminIsOpen);
-    }
     const onConfirmConvert = (ok) => {
         if (ok) {
             convertCsvData(askConfirm.filename, askConfirm.data);
@@ -101,16 +99,18 @@ export const ActiveAccount = (props) => {
                 fileHandler={fileHandler}
                 message='Drop .csv bestand met transacties hier, of klik.' />
             }
-            {admin &&
+            {admin && hasActiveCsv &&
                 <BankActiveCsv activeCsv={bankData.activeCsv} />
             }
-            {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
+            {admin && hasActiveCsv &&
+                    <BankConfig account={bankData.activeAccount.value}
+                        config={bankDataConfig.data} convertResult={bankDataConvertResult.data}
+                        files={bankDataFiles} />
+                }
+            {/* {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
                 (bankData.convertResult.data.errors || (admin && adminIsOpen))) ?
                 (admin && adminIsOpen) ?
                     'temp ding'
-                    // <BankConfig account={bankData.activeAccount.value}
-                    //     config={bankData.config.data} convertResult={bankData.convertResult.data}
-                    //     files={bankData.files} />
                     : <div className="row">
                         <div className="col s12 orange lighten-1 card">
                             <button className="btn-flat btn waves-effect close"
@@ -126,7 +126,7 @@ export const ActiveAccount = (props) => {
                         </div>
                     </div>
                 : <></>
-            }
+            } */}
             {(askConfirm.ask) ?
                 <Confirmation onClick={onConfirmConvert} filename={askConfirm.filename} />
                 : <></>
@@ -138,10 +138,10 @@ export const ActiveAccount = (props) => {
                         onFileConvert={onFileConvert} admin={admin} />
                     : <></>
             }
-            {(admin) ? <AdminButton adminIsOpen={adminIsOpen} onClick={onClickAdmin}
+            {/* {(admin) ? <AdminButton adminIsOpen={adminIsOpen} onClick={onClickAdmin}
                 enabled={(bankData.config.hasAllData && bankData.convertResult.hasAllData)} />
                 : <></>
-            }
+            } */}
         </div>
     );
 }

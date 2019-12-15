@@ -2,18 +2,58 @@
 import React, { useState, useReducer } from 'react';
 import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
-import { setBank } from '../actions/actions';
+import { setBank } from '../../actions/actions';
 import { FieldsConfig } from './BankUpload-config-fields';
-import { fetchAWSAPI } from '../actions/apiActions-Bank';
 
+import { makeStyles } from '@material-ui/core/styles';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import Typography from '@material-ui/core/Typography';
+import Icon from '@material-ui/core/Icon';
+import Grid from '@material-ui/core/Grid';
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+        borderRadius: '4px',
+        backgroundColor: '#b3e5fc',
+        '&:before': {
+            display: 'none',
+        },
+    },
+    details: {
+        flexDirection: 'column'
+    },
+    row: {
+        alignItems: 'center'
+    },
+    rowTitle: {
+        textAlign: 'right'
+    },
+    panelTitle: {
+        flexBasis: '25%',
+        flexShrink: 0,
+    },
+    secTitle: {
+        color: theme.palette.text.secondary,
+        flex: 1
+    },
+    error: {
+        color: theme.palette.error.main
+    },
+}))
 
 export const BankConfig = ({ account, config, convertResult, files }) => {
-    const { errors, csv } = convertResult;
+    const errors = convertResult && convertResult.errors;
+    const csv = convertResult && convertResult.csv;
     const { accessToken, bankData } = useSelector(store => store);
     const dispatch = useDispatch();
     const [confirmed, setConfirmed] = useState(false);
     const [curConfig, setCurConfig] = useReducer(configReducer, config);
-    const changed = (JSON.stringify(curConfig) !== JSON.stringify(config))
+    const changed = (JSON.stringify(curConfig) !== JSON.stringify(config));
+    const classes = useStyles();
     const onClear = () => {
         setConfirmed(true);
     }
@@ -33,7 +73,7 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
             dispatch,
         }
         dispatch(setBank({ type: 'setConvertResult', content: { INIT: true } }));
-        fetchAWSAPI(configSave);
+        // fetchAWSAPI(configSave);
     }
     const onSelect = (id, key, selection) => {
         const newValue = (Array.isArray(selection)) ?
@@ -52,27 +92,35 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
     if (!config) return <div>Some error</div>
 
     const saveClass = (changed) ? 'btn' : 'btn disabled';
-    return <div className='row card'>
-        <div className='card-title center'>csv instellingen</div>
-        <div className='card-content'>
-            {(errors && errors.moneybird_error) ?
-                <div className='row'>
-                    <div className='col s5 right-align'>Foutmelding van Moneybird bij upload</div>
-                    <div className='col s7'>
-                        <pre className='red-text text-lighten-1'>
-                            {JSON.stringify(errors.moneybird_error, null, 2)}
+    return <ExpansionPanel className={classes.root}>
+        <ExpansionPanelSummary
+            expandIcon={<Icon>expand_more</Icon>}
+            aria-controls="panel1bh-content"
+            id="panel1bh-header"
+        >
+            <Typography className={classes.panelTitle}>Configuratie voor csv conversie</Typography>
+            <Typography className={classes.secTitle}>
+                {errors && 'Conversie geeft foutmeldingen'}
+            </Typography>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails className={classes.details}>
+            {(true || (errors && errors.moneybird_error)) &&
+                <Grid container spacing={2} className={classes.row}>
+                    <Grid item xs={5} className={classes.rowTitle}>Foutmelding van Moneybird bij upload:</Grid>
+                    <Grid item xs={7} className={classes.error}>
+                        <pre>
+                            {JSON.stringify('errors.moneybird_error', null, 2)}
                         </pre>
-                    </div>
-                </div>
-                : <></>
+                    </Grid>
+                </Grid>
             }
             <CsvConfig config={config} errors={errors} onSelect={onSelect} />
             <FieldsConfig config={config} curConfig={curConfig} errors={errors} csv={csv} onSelect={onSelect} />
-        </div>
+        </ExpansionPanelDetails>
         <div className='card-action col s12 right-align'>
             <span className={saveClass} onClick={onSave}>Save</span>
         </div>
-    </div>
+    </ExpansionPanel>
 }
 
 const Confirmation = ({ errors, onCancel, onClear }) => {
@@ -101,6 +149,7 @@ const Confirmation = ({ errors, onCancel, onClear }) => {
 
 const CsvConfig = (props) => {
     const { config, errors, onSelect } = props;
+    const classes = useStyles();
     const separator = config.separator || ';';
     const separatorOptions = [
         { value: ';', label: 'separator ;' },
@@ -115,20 +164,25 @@ const CsvConfig = (props) => {
     const onPaypalChange = (val) => {
         onSelect('paypal_special', null, val);
     }
-
     return <>
-        <div className='row flex'>
-            <div className='col s2 right-align'>csv conversie:</div>
-            <SepSelect options={separatorOptions} selected={selected} onChange={onSepChange} />
-            <div className='col s2'></div>
-            <CsvErrors errors={errors} />
-            <div className='col s3'></div>
-        </div>
-        <div className='row flex'>
-            <div className='col s2 right-align'>Paypal filter:</div>
-            <PaypalSelect val={config.paypal_special} onChange={onPaypalChange} />
-            <div className='col s7'></div>
-        </div>
+        <Grid container spacing={2} className={classes.row}>
+            <Grid item xs={2} className={classes.rowTitle}>Conversie van csv:</Grid>
+            <Grid item xs={3}>
+                <SepSelect options={separatorOptions} selected={selected} onChange={onSepChange} />
+            </Grid>
+            <Grid item xs={2}></Grid>
+            <Grid item xs={2}>
+                <CsvErrors errors={errors} />
+            </Grid>
+            <Grid item xs={3}></Grid>
+        </Grid>
+        <Grid container spacing={2} className={classes.row}>
+            <Grid item xs={2} className={classes.rowTitle}>Paypal filter:</Grid>
+            <Grid item xs={3}>
+                <PaypalSelect val={config.paypal_special} onChange={onPaypalChange} />
+            </Grid>
+            <Grid item xs={7}></Grid>
+        </Grid>
     </>
 }
 

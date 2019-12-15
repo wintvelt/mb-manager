@@ -52,7 +52,8 @@ const statusRender = (row, isSelected, onSelect, isDisabled) => {
 
 const actionRender = (isAdmin, onFileConvert) => (row, isSelected, onSelect, isDisabled) => {
     const hasMoneybirdLink = row.status === 'sent';
-    const convertAllowed = row.status !== 'sent' || isAdmin
+    const convertAllowed = row.status !== 'sent' || isAdmin;
+    const [ convertIcon, convertText ] = isAdmin? [ 'open_in_browser', 'open'] : [ 'send', 'verwerken'];
     return isDisabled ?
         null
         : <>
@@ -67,10 +68,10 @@ const actionRender = (isAdmin, onFileConvert) => (row, isSelected, onSelect, isD
                 style={{ marginTop: '-8px', marginBottom: '-8px' }}
                 size='medium'
                 color="primary"
-                startIcon={<Icon>send</Icon>}
+                startIcon={<Icon>{convertIcon}</Icon>}
                 onClick={() => onFileConvert(row.filename)}
             >
-                verwerken
+                {convertText}
           </Button>}
         </>
 }
