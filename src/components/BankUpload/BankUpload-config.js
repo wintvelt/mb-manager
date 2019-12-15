@@ -1,6 +1,5 @@
 // Setting config for bank transactions
 import React, { useState, useReducer } from 'react';
-import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
 import { setBank } from '../../actions/actions';
 import { FieldsConfig } from './BankUpload-config-fields';
@@ -9,9 +8,16 @@ import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
+import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
+import { parseCsv } from '../../store/reducer-helpers-bank';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -30,7 +36,8 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center'
     },
     rowTitle: {
-        textAlign: 'right'
+        textAlign: 'right',
+        color: theme.palette.text.secondary,
     },
     panelTitle: {
         flexBasis: '25%',
@@ -40,14 +47,18 @@ const useStyles = makeStyles(theme => ({
         color: theme.palette.text.secondary,
         flex: 1
     },
+    select: {
+        width: '100%'
+    },
     error: {
         color: theme.palette.error.main
     },
 }))
 
-export const BankConfig = ({ account, config, convertResult, files }) => {
+export const BankConfig = ({ account, config, convertResult, activeCsv, files }) => {
     const errors = convertResult && convertResult.errors;
-    const csv = convertResult && convertResult.csv;
+    const rawCsv = (convertResult && convertResult.csv) || activeCsv;
+    const csv = parseCsv(rawCsv);
     const { accessToken, bankData } = useSelector(store => store);
     const dispatch = useDispatch();
     const [confirmed, setConfirmed] = useState(false);
@@ -76,8 +87,12 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
         // fetchAWSAPI(configSave);
     }
     const onSelect = (id, key, selection) => {
+        console.log({ id, selection });
         const newValue = (Array.isArray(selection)) ?
-            selection.map(it => it.value) : (selection) ? selection.value || selection : '';
+            selection
+            : (selection) ?
+                selection.value || selection
+                : '';
         const payload = {
             field: id,
             key,
@@ -104,7 +119,7 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
             </Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails className={classes.details}>
-            {(true || (errors && errors.moneybird_error)) &&
+            {(errors && errors.moneybird_error) &&
                 <Grid container spacing={2} className={classes.row}>
                     <Grid item xs={5} className={classes.rowTitle}>Foutmelding van Moneybird bij upload:</Grid>
                     <Grid item xs={7} className={classes.error}>
@@ -114,12 +129,12 @@ export const BankConfig = ({ account, config, convertResult, files }) => {
                     </Grid>
                 </Grid>
             }
-            <CsvConfig config={config} errors={errors} onSelect={onSelect} />
+            <CsvConfig config={curConfig} errors={errors} onSelect={onSelect} />
             <FieldsConfig config={config} curConfig={curConfig} errors={errors} csv={csv} onSelect={onSelect} />
         </ExpansionPanelDetails>
-        <div className='card-action col s12 right-align'>
-            <span className={saveClass} onClick={onSave}>Save</span>
-        </div>
+        <ExpansionPanelActions>
+            <Button onClick={onSave}>Opslaan</Button>
+        </ExpansionPanelActions>
     </ExpansionPanel>
 }
 
@@ -166,18 +181,24 @@ const CsvConfig = (props) => {
     }
     return <>
         <Grid container spacing={2} className={classes.row}>
-            <Grid item xs={2} className={classes.rowTitle}>Conversie van csv:</Grid>
+            <Grid item xs={2} className={classes.rowTitle}>
+                <Typography>Conversie van csv:</Typography>
+            </Grid>
             <Grid item xs={3}>
                 <SepSelect options={separatorOptions} selected={selected} onChange={onSepChange} />
             </Grid>
             <Grid item xs={2}></Grid>
             <Grid item xs={2}>
-                <CsvErrors errors={errors} />
+                {errors && errors.csv_read_errors && errors.csv_read_errors.map(it => {
+                    return <p className={classes.error}>{it}</p>
+                })}
             </Grid>
             <Grid item xs={3}></Grid>
         </Grid>
         <Grid container spacing={2} className={classes.row}>
-            <Grid item xs={2} className={classes.rowTitle}>Paypal filter:</Grid>
+            <Grid item xs={2} className={classes.rowTitle}>
+                <Typography>Paypal filter:</Typography>
+            </Grid>
             <Grid item xs={3}>
                 <PaypalSelect val={config.paypal_special} onChange={onPaypalChange} />
             </Grid>
@@ -188,39 +209,35 @@ const CsvConfig = (props) => {
 
 // further helpers
 const SepSelect = ({ options, selected, onChange }) => {
+    const classes = useStyles();
     return (options.length > 1) ?
         <Select
-            options={options}
-            defaultValue={selected}
-            onChange={onChange}
-            name="Scheidingsteken"
-            className='inline_select col s3'
-            classNamePrefix='inline_select'
-        />
-        : <div className='col s3'>{options[0].value}</div>
-}
+            className={classes.select}
+            id="select-separator"
+            value={selected.value}
+            onChange={e => onChange(e.target.value)}
+        >
+            {options.map(option => (
+                <MenuItem value={option.value} key={option.label}>{option.label}</MenuItem>
+            ))}
 
-const CsvErrors = (props) => {
-    const { errors } = props;
-    return <div className='col s2'>
-        {errors && errors.csv_read_errors && errors.csv_read_errors.map(it => {
-            return <p key={it} className='red-text text-lighten-1'>{it}</p>
-        })}
-    </div>
+        </Select>
+        : options[0].value
 }
 
 const PaypalSelect = (props) => {
     const { val, onChange } = props;
-    return <div className='col s3'>
-        <div className="switch">
-            <label>
-                Uit
-                <input type="checkbox" value={val} onChange={(e) => onChange(e.target.checked)} />
-                <span className="lever"></span>
-                Aan
-            </label>
-        </div>
-    </div>
+    return <FormControlLabel
+        control={
+            <Switch
+                checked={!!val}
+                onChange={(e) => onChange(e.target.checked)}
+                inputProps={{ 'aria-label': 'paypal filter checkbox' }}
+                color='primary'
+            />
+        }
+        label={`(staat nu ${val ? 'aan' : 'uit'})`}
+    />
 }
 
 const configReducer = (state, action) => {
@@ -241,13 +258,14 @@ const configReducer = (state, action) => {
                 }
             }
             let newConfig = { ...state };
-            if (state.hasOwnProperty(field)) {
+            if (state.hasOwnProperty(field) || field === 'paypal_special') {
                 newConfig[field] = newFieldConfig;
             } else {
                 let newDetails = { ...state.details };
                 newDetails[field] = newFieldConfig;
                 newConfig = { ...state, details: newDetails };
             }
+            console.log({ newConfig });
             return newConfig;
 
         default:

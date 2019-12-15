@@ -1,6 +1,37 @@
 // Setting FieldsConfig for bank transactions
 import React from 'react';
-import Select from 'react-select';
+import Select from '@material-ui/core/Select';
+import MultiSelect from '../Page/Multi-Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+    row: {
+        alignItems: 'center'
+    },
+    rowTitle: {
+        textAlign: 'right',
+        color: theme.palette.text.secondary,
+    },
+    panelTitle: {
+        flexBasis: '25%',
+        flexShrink: 0,
+    },
+    secTitle: {
+        color: theme.palette.text.secondary,
+        flex: 1
+    },
+    select: {
+        width: '100%'
+    },
+    error: {
+        color: theme.palette.error.main
+    },
+}))
+
 
 const fields = [
     { id: 'identifier', label: 'Check rekeningnummer' },
@@ -68,48 +99,67 @@ export const FieldsConfig = (props) => {
 
 const FieldConfig = ({ props }) => {
     const { id, label, isReq, isDate, isMulti, options, config, curConfig, csv, errors, onSelect } = props;
+    const classes = useStyles();
     const { mappedField, changed, fieldErrors, curFConfig, examples } =
         forField(id, config, curConfig, csv, errors && errors.field_errors);
     const headers = csv[0];
     let mapOptions = (options) ? options.map(it => { return { label: it, value: it } })
         : [...headers].map(f => { return { value: f, label: f } });
     if (!isReq) mapOptions = [{ value: '', label: '(geen)' }, ...mapOptions];
-    const selectedValue = mappedField;
+    const selectedValue = mappedField || '';
     const selectedList = (Array.isArray(selectedValue)) ? selectedValue : (selectedValue) ? [selectedValue] : [];
-    const selected = selectedList.map(f => { return { value: f, label: f } });
-    return <div className='row flex'>
-        <div className='col s2 right-align'>{label}</div>
-        <Select
-            options={mapOptions}
-            defaultValue={(isMulti) ? selected : (selectedValue) ? { value: selectedValue, label: selectedValue } : ''}
-            onChange={(sel) => onSelect(id, null, sel)}
-            name={id}
-            className='inline_select col s3'
-            classNamePrefix='inline_select'
-            isMulti={isMulti}
-        />
-        {(isDate) ?
-            <DateFormat value={curFConfig.formatFrom} onChange={(e) => onSelect(id, 'formatFrom', e.target.value)} />
-            : <div className='col s2'></div>
-        }
-        <FieldLines lines={fieldErrors} colClass='col s2' lineClass='red-text text-lighten-1' changed={changed} />
-        <FieldLines lines={examples} colClass='col s3' />
-    </div>
+    return <Grid container spacing={2} className={classes.row}>
+        <Grid item xs={2} className={classes.rowTitle}>
+            <Typography>{label}</Typography>
+        </Grid>
+        <Grid item xs={3}>
+            {(mapOptions.length > 1) ?
+                isMulti ?
+                    <MultiSelect
+                        options={mapOptions}
+                        placeholder=''
+                        selected={selectedList}
+                        onChange={(sel) => onSelect(id, null, sel)}
+                        />
+                    : <Select
+                        className={classes.select}
+                        id={`select-${label}`}
+                        value={typeof selectedValue.value === 'string'? selectedValue.value : selectedValue}
+                        onChange={e => onSelect(id, null, e.target.value)}
+                    >
+                        {mapOptions.map(option => (
+                            <MenuItem value={option.value} key={option.label}>{option.label}</MenuItem>
+                        ))}
 
+                    </Select>
+                : options[0].value
+            }
+        </Grid>
+        <Grid item xs={2}>
+            {(isDate) ?
+                <DateFormat value={curFConfig.formatFrom} onChange={(e) => onSelect(id, 'formatFrom', e.target.value)} />
+                : <div className='col s2'></div>
+            }
+        </Grid>
+        <FieldLines lines={fieldErrors} colWidth={2} isError changed={changed} />
+        <FieldLines lines={examples} colWidth={3} />
+    </Grid>
 }
 
 const FieldLines = (props) => {
-    const { lines, lineClass, changed, colClass } = props;
-    return (!changed) ?
-        <div className={colClass}>
-            {lines && lines.map((it, i) => <p key={it + i} className={lineClass}>{it}</p>)}
-        </div>
-        : <div className={colClass}></div>
+    const { lines, isError, changed, colWidth } = props;
+    const classes = useStyles();
+    return <Grid item xs={colWidth}>
+        {!changed && lines && lines.map((it, i) => (
+            <Typography color='textSecondary' variant='subtitle2'
+                key={it + i} className={isError && classes.error}>
+                {it}
+            </Typography>
+        ))}
+    </Grid>
 }
 
 const DateFormat = (props) => {
     const { value, onChange } = props;
-    return <div className='col s2'>
-        <input type='text' value={value} onChange={onChange} placeholder='(bv yyyy-mm-dd)' className='csv' />
-    </div>
+    return <TextField value={value} onChange={onChange} placeholder='(bv yyyy-mm-dd)' />
 }

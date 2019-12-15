@@ -72,7 +72,7 @@ function getSuggestions(options, value, selected, { showEmpty = false } = {}) {
         ? []
         : openOptions.filter(option => {
             const keep =
-                count < 5 && (inputLength === 0 || option.label.toLowerCase().includes(inputValue));
+                count < 20 && (inputLength === 0 || option.label.toLowerCase().includes(inputValue));
 
             if (keep) {
                 count += 1;
@@ -205,6 +205,8 @@ const useStyles = makeStyles(theme => ({
         marginTop: theme.spacing(1),
         left: 0,
         right: 0,
+        maxHeight: '200px',
+        overflowY: 'scroll'
     },
     chip: {
         margin: theme.spacing(0.5, 0.25),

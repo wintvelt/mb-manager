@@ -21,7 +21,8 @@ export const ActiveAccount = (props) => {
     const bankDataFiles = bankData.files.toJS();
     const bankDataConfig = bankData.config.toJS();
     const bankDataConvertResult = bankData.convertResult.toJS();
-    const hasActiveCsv = bankData.activeCsv.apiData.toJS().hasAllData;
+    const bankDataActiveCsv = bankData.activeCsv.apiData.toJS();
+    const hasActiveCsv = bankDataActiveCsv.hasAllData;
     const [askConfirm, setAskConfirm] = useState({ ask: false });
     const dispatch = useDispatch();
 
@@ -105,6 +106,7 @@ export const ActiveAccount = (props) => {
             {admin && hasActiveCsv &&
                     <BankConfig account={bankData.activeAccount.value}
                         config={bankDataConfig.data} convertResult={bankDataConvertResult.data}
+                        activeCsv={bankDataActiveCsv.data}
                         files={bankDataFiles} />
                 }
             {/* {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
