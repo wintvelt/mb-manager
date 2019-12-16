@@ -261,3 +261,10 @@ export const convertCsv = (active_account, body, access_token) => apiAction({
     }
 });
 
+export const resetConvertResult = () => {
+    return setBank({
+        type: 'resetConvertResult',
+        content: null
+    })
+}
+

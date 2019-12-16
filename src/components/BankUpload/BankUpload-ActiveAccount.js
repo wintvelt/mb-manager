@@ -4,9 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { FileZone } from '../../constants/file-helpers';
 import { BankFiles } from './BankUpload-Files';
 import { BankConfig } from './BankUpload-config';
-import { setBank, doSnackError } from '../../actions/actions';
+import { doSnackError } from '../../actions/actions';
 import { BankActiveCsv } from './BankUpload-ActiveCsv';
-import { getCsv, setCsvManual, convertCsv } from '../../actions/apiActions-new';
+import { getCsv, setCsvManual, convertCsv, resetConvertResult } from '../../actions/apiActions-new';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -61,7 +61,7 @@ export const ActiveAccount = (props) => {
     const maybeConvertCsvData = (filename, data) => {
         const alreadySentToMoneyBird = isAlreadySent(filename, bankDataFiles);
         const onConvert = (filename, data, convert_only) => e => convertCsvData(filename, data, convert_only);
-        const altFilename = filename.split('.').map((it,i) => i === 0? it+'-2': it).join('.');
+        const altFilename = filename.split('.').map((it, i) => i === 0 ? it + '-2' : it).join('.');
         const dialog = admin ?
             alreadySentToMoneyBird ?
                 {
@@ -104,13 +104,14 @@ export const ActiveAccount = (props) => {
         }
     }
     const convertCsvData = (filename, data, convert_only = false) => {
-        console.log({convert_only, data})
+        console.log({ convert_only, data })
         const postBody = {
             csv_filename: filename,
             csv_content: null,
             convert_only: true
         }
         dispatch(convertCsv(bankData.activeAccount.value, postBody, accessToken.data));
+        setAskConfirm({ ask: false });
         // const getFilesOptions = {
         //     stuff: bankData.files,
         //     path: '/files/' + bankData.activeAccount.value,
@@ -131,18 +132,12 @@ export const ActiveAccount = (props) => {
         //     errorMsg: 'Fout bij conversie: ',
         //     accessToken,
         //     dispatch,
-            // callback: () => fetchAWSAPI(getFilesOptions)
+        // callback: () => fetchAWSAPI(getFilesOptions)
         // }
         // fetchAWSAPI(convertCsvOptions);
     }
-    const onConfirmConvert = (ok) => {
-        if (ok) {
-            convertCsvData(askConfirm.filename, askConfirm.data);
-            setAskConfirm({ ask: false });
-        } else {
-            dispatch(setBank({ type: 'setCsv', content: { INIT: true } }));
-            setAskConfirm({ ask: false });
-        }
+    const onCloseConvertResult = e => {
+        dispatch(resetConvertResult());
     }
     return (
         <div>
@@ -159,6 +154,9 @@ export const ActiveAccount = (props) => {
                     activeCsv={bankDataActiveCsv.data}
                     files={bankDataFiles} />
             }
+            <ConvertResult open={bankDataConvertResult.hasData} isAdmin={admin} 
+            onClose={onCloseConvertResult}
+            convertResult={bankDataConvertResult.data} />
             {/* {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
                 (bankData.convertResult.data.errors || (admin && adminIsOpen))) ?
                 (admin && adminIsOpen) ?
@@ -180,12 +178,10 @@ export const ActiveAccount = (props) => {
                 : <></>
             } */}
             <Confirmation askConfirm={askConfirm} />
-            {(bankDataFiles.hasError) ?
-                <p>Er ging iets mis, probeer het later nog eens..</p>
-                : (bankDataFiles.data && bankDataFiles.data.length > 0) ?
-                    <BankFiles files={bankDataFiles.data} isLoading={bankDataFiles.isLoading}
-                        onFileConvert={onFileConvert} admin={admin} />
-                    : <></>
+            {bankDataFiles.hasError && <p>Er ging iets mis, probeer het later nog eens..</p>}
+            {bankDataFiles.hasData &&
+                <BankFiles files={bankDataFiles.data} isLoading={bankDataFiles.isLoading}
+                    onFileConvert={onFileConvert} admin={admin} />
             }
         </div>
     );
@@ -216,6 +212,27 @@ const Confirmation = (props) => {
                         {button.text}
                     </Button>
                 ))}
+            </DialogActions>
+        </Dialog>)
+}
+
+const ConvertResult = props => {
+    const { open, filename, isAdmin, onClose, convertResult } = props;
+    const errors = convertResult && convertResult.errors;
+    const errorCount = errors && errors.field_errors && errors.field_errors.length;
+    return (
+        <Dialog open={open} onClose={onClose}>
+            <DialogTitle>Resultaten van conversie</DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    {`Het bestand ${filename} is geconverteerd.`}
+                    {errors && `Er zijn in totaal ${errorCount} fouten gevonden.`}
+                    {!errors && 'YES! Helemaal zonder fouten geconverteerd.'}
+                </DialogContentText>
+                {isAdmin && <pre>{JSON.stringify(errors, null, 2)}</pre>}
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose} color='primary'>Duidelijk</Button>
             </DialogActions>
         </Dialog>)
 }
