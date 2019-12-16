@@ -250,3 +250,14 @@ export const setConfigManual = (data) => {
     })
 }
 
+export const convertCsv = (active_account, body, access_token) => apiAction({
+    url: base_url_AWS_Bank + '/convert/' + active_account,
+    method: 'POST',
+    body,
+    headers: { Authorization: 'Bearer ' + access_token },
+    loadingMsg: 'Bezig met converteren van csv bestand..',
+    storeAction: (content) => {
+        return setBank({ type: 'setConvertResult', content})
+    }
+});
+

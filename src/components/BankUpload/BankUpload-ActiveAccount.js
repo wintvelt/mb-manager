@@ -6,9 +6,14 @@ import { BankFiles } from './BankUpload-Files';
 import { BankConfig } from './BankUpload-config';
 import { setBank, doSnackError } from '../../actions/actions';
 import { BankActiveCsv } from './BankUpload-ActiveCsv';
-import { getCsv, setCsvManual } from '../../actions/apiActions-new';
+import { getCsv, setCsvManual, convertCsv } from '../../actions/apiActions-new';
 
 import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
+import Button from '@material-ui/core/Button';
 
 
 /*
@@ -55,73 +60,79 @@ export const ActiveAccount = (props) => {
     }
     const maybeConvertCsvData = (filename, data) => {
         const alreadySentToMoneyBird = isAlreadySent(filename, bankDataFiles);
+        const onConvert = (filename, data, convert_only) => e => convertCsvData(filename, data, convert_only);
+        const altFilename = filename.split('.').map((it,i) => i === 0? it+'-2': it).join('.');
         const dialog = admin ?
             alreadySentToMoneyBird ?
                 {
                     message: `Bestand ${filename} is al verwerkt in Moneybird. Hoe wil je verwerken?`,
                     buttons: [
-                        { text: 'Alleen conversie', action: null },
-                        { text: 'Opslaan + conversie', action: null }
+                        { text: 'Alleen conversie', action: onConvert(filename, null, true) },
+                        { text: 'Opslaan + conversie', action: onConvert(filename, data, true) }
                     ]
                 }
                 : {
                     message: `Bestand ${filename} wordt opgeslagen. Hoe wil je verwerken?`,
                     buttons: [
-                        { text: 'Alleen conversie', action: null},
-                        { text: 'Ook doorsturen', action: null }
+                        { text: 'Alleen conversie', action: onConvert(filename, data, true) },
+                        { text: 'Ook doorsturen', action: onConvert(filename, data, false) }
                     ]
                 }
-                : alreadySentToMoneyBird?
-                data?
-                {
-                    message: `Bestand ${filename} is al verwerkt in Moneybird. Weet je het zeker?`,
-                    buttons: [
-                        { text: 'Ja, verwerken', action: null }
-                    ]
-                }
-                : {
-                    message: `Bestand ${filename} is al verwerkt in Moneybird. Vervangt dit nieuwe bestand de oude?`,
-                    buttons: [
-                        { text: 'Vervang oude', action: null},
-                        { text: 'Verwerk apart', action: null }
-                    ]
-                }
+            : alreadySentToMoneyBird ?
+                data ?
+                    {
+                        message: `Bestand ${filename} is al verwerkt in Moneybird. Vervangt dit nieuwe bestand de oude?`,
+                        buttons: [
+                            { text: 'Vervang oude', action: onConvert(filename, data, false) },
+                            { text: 'Verwerk apart', action: onConvert(altFilename, data, false) }
+                        ]
+                    }
+                    : {
+                        message: `Bestand ${filename} is al verwerkt in Moneybird. Weet je het zeker?`,
+                        buttons: [
+                            { text: 'Ja, verwerken', action: onConvert(filename, null, false) }
+                        ]
+                    }
                 : null;
         if (dialog) {
-            setAskConfirm({ ask: true, filename, data, ...dialog });
+            setAskConfirm({
+                ask: true, filename, data, ...dialog,
+                onCancel: () => setAskConfirm({ ask: false })
+            });
         } else {
-            alert('convert invoked');
-            // convertCsvData(filename, data);
+            convertCsvData(filename, data, false);
         }
     }
-    const convertCsvData = (filename, data) => {
+    const convertCsvData = (filename, data, convert_only = false) => {
+        console.log({convert_only, data})
         const postBody = {
             csv_filename: filename,
-            csv_content: data,
-            convert_only: false
+            csv_content: null,
+            convert_only: true
         }
-        const getFilesOptions = {
-            stuff: bankData.files,
-            path: '/files/' + bankData.activeAccount.value,
-            storeSetFunc: (content) => setBank({ type: 'setFiles', content }),
-            errorMsg: 'Fout bij ophalen files, melding van AWS: ',
-            accessToken,
-            loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',
-            dispatch
-        }
-        const loadingMsg = `bezig met converteren ${filename}`;
-        const convertCsvOptions = {
-            method: 'POST',
-            body: postBody,
-            stuff: bankData.convertResult,
-            path: '/convert/' + bankData.activeAccount.value,
-            storeSetFunc: (content) => setBank({ type: 'setConvertResult', content }),
-            loadingMsg,
-            errorMsg: 'Fout bij conversie: ',
-            accessToken,
-            dispatch,
+        dispatch(convertCsv(bankData.activeAccount.value, postBody, accessToken.data));
+        // const getFilesOptions = {
+        //     stuff: bankData.files,
+        //     path: '/files/' + bankData.activeAccount.value,
+        //     storeSetFunc: (content) => setBank({ type: 'setFiles', content }),
+        //     errorMsg: 'Fout bij ophalen files, melding van AWS: ',
+        //     accessToken,
+        //     loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',
+        //     dispatch
+        // }
+        // const loadingMsg = `bezig met converteren ${filename}`;
+        // const convertCsvOptions = {
+        //     method: 'POST',
+        //     body: postBody,
+        //     stuff: bankData.convertResult,
+        //     path: '/convert/' + bankData.activeAccount.value,
+        //     storeSetFunc: (content) => setBank({ type: 'setConvertResult', content }),
+        //     loadingMsg,
+        //     errorMsg: 'Fout bij conversie: ',
+        //     accessToken,
+        //     dispatch,
             // callback: () => fetchAWSAPI(getFilesOptions)
-        }
+        // }
         // fetchAWSAPI(convertCsvOptions);
     }
     const onConfirmConvert = (ok) => {
@@ -168,9 +179,7 @@ export const ActiveAccount = (props) => {
                     </div>
                 : <></>
             } */}
-            {askConfirm.ask &&
-                <Confirmation onClick={onConfirmConvert} filename={askConfirm.filename} />
-            }
+            <Confirmation askConfirm={askConfirm} />
             {(bankDataFiles.hasError) ?
                 <p>Er ging iets mis, probeer het later nog eens..</p>
                 : (bankDataFiles.data && bankDataFiles.data.length > 0) ?
@@ -178,10 +187,6 @@ export const ActiveAccount = (props) => {
                         onFileConvert={onFileConvert} admin={admin} />
                     : <></>
             }
-            {/* {(admin) ? <AdminButton adminIsOpen={adminIsOpen} onClick={onClickAdmin}
-                enabled={(bankData.config.hasAllData && bankData.convertResult.hasAllData)} />
-                : <></>
-            } */}
         </div>
     );
 }
@@ -195,31 +200,22 @@ const isAlreadySent = (filename, files) => {
         }).length > 0)
 }
 
-const Confirmation = ({ filename, onClick }) => {
-    const onConfirm = () => onClick(true);
-    const onCancel = () => onClick(false);
-
+const Confirmation = (props) => {
+    const { askConfirm } = props;
+    const { ask, message, buttons, onCancel } = askConfirm;
     return (
-        <div className="row">
-            <div className="col s12 m6 offset-m3">
-                <div className="card center">
-                    <span className="card-title">Vraagje</span>
-                    <div className="card-content">
-                        <p>Het bestand {filename} heb je al eerder naar Moneybird doorgestuurd.
-                        Weet je zeker dat je dit opnieuw wilt doen?
-                        Had je het bijbehorende bestand uit Moneybird al verwijderd?</p>
-                    </div>
-                    <div className="card-action right-align">
-                        <span className="btn-flat hide-on-large-only red-text text-lighten-3" onClick={onCancel}>
-                            Annuleer</span>
-                        <span className="btn-flat hide-on-large-only teal-text" onClick={onConfirm}>
-                            OK</span>
-                        <span className="btn-flat hide-on-med-and-down red-text text-lighten-3" onClick={onCancel}>
-                            Nee, Annuleren</span>
-                        <span className="btn-flat hide-on-med-and-down teal-text"
-                            onClick={onConfirm}>Ja, Verwerk</span>
-                    </div>
-                </div>
-            </div>
-        </div>)
+        <Dialog open={ask} onClose={onCancel}>
+            <DialogTitle>Conversie bevestigen</DialogTitle>
+            <DialogContent>
+                <DialogContentText>{message}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onCancel}>Afbreken</Button>
+                {buttons && buttons.map(button => (
+                    <Button key={button.text} onClick={button.action} color='primary'>
+                        {button.text}
+                    </Button>
+                ))}
+            </DialogActions>
+        </Dialog>)
 }

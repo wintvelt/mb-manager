@@ -63,7 +63,7 @@ const useStyles = makeStyles(theme => ({
 export const BankConfig = ({ account, config, convertResult, activeCsv, files }) => {
     const errors = convertResult && convertResult.errors;
     const rawCsv = (convertResult && convertResult.csv) || activeCsv;
-    const csv = parseCsv(rawCsv);
+    const csv = Array.isArray(rawCsv)? rawCsv : parseCsv(rawCsv);
     const { accessToken } = useSelector(store => store);
     const dispatch = useDispatch();
     const [curConfig, setCurConfig] = useReducer(configReducer, config);
