@@ -8,6 +8,9 @@ import { setBank, doSnackError } from '../../actions/actions';
 import { BankActiveCsv } from './BankUpload-ActiveCsv';
 import { getCsv, setCsvManual } from '../../actions/apiActions-new';
 
+import Dialog from '@material-ui/core/Dialog';
+
+
 /*
 csv data in store zetten met filename
 */
@@ -44,12 +47,48 @@ export const ActiveAccount = (props) => {
         }
     }
     const onFileConvert = (filename) => {
-        dispatch(getCsv(bankData.activeAccount.value, filename, accessToken.data));
+        if (admin) {
+            dispatch(getCsv(bankData.activeAccount.value, filename, accessToken.data));
+        } else {
+            maybeConvertCsvData(filename)
+        }
     }
     const maybeConvertCsvData = (filename, data) => {
-        // check if filename is already converted
-        if (fileInList(filename, bankDataFiles)) {
-            setAskConfirm({ ask: true, filename, data });
+        const alreadySentToMoneyBird = isAlreadySent(filename, bankDataFiles);
+        const dialog = admin ?
+            alreadySentToMoneyBird ?
+                {
+                    message: `Bestand ${filename} is al verwerkt in Moneybird. Hoe wil je verwerken?`,
+                    buttons: [
+                        { text: 'Alleen conversie', action: null },
+                        { text: 'Opslaan + conversie', action: null }
+                    ]
+                }
+                : {
+                    message: `Bestand ${filename} wordt opgeslagen. Hoe wil je verwerken?`,
+                    buttons: [
+                        { text: 'Alleen conversie', action: null},
+                        { text: 'Ook doorsturen', action: null }
+                    ]
+                }
+                : alreadySentToMoneyBird?
+                data?
+                {
+                    message: `Bestand ${filename} is al verwerkt in Moneybird. Weet je het zeker?`,
+                    buttons: [
+                        { text: 'Ja, verwerken', action: null }
+                    ]
+                }
+                : {
+                    message: `Bestand ${filename} is al verwerkt in Moneybird. Vervangt dit nieuwe bestand de oude?`,
+                    buttons: [
+                        { text: 'Vervang oude', action: null},
+                        { text: 'Verwerk apart', action: null }
+                    ]
+                }
+                : null;
+        if (dialog) {
+            setAskConfirm({ ask: true, filename, data, ...dialog });
         } else {
             alert('convert invoked');
             // convertCsvData(filename, data);
@@ -101,14 +140,14 @@ export const ActiveAccount = (props) => {
                 message='Drop .csv bestand met transacties hier, of klik.' />
             }
             {admin && hasActiveCsv &&
-                <BankActiveCsv activeCsv={bankData.activeCsv} />
+                <BankActiveCsv activeCsv={bankData.activeCsv} onConvert={maybeConvertCsvData} />
             }
             {admin && hasActiveCsv &&
-                    <BankConfig account={bankData.activeAccount.value}
-                        config={bankDataConfig.data} convertResult={bankDataConvertResult.data}
-                        activeCsv={bankDataActiveCsv.data}
-                        files={bankDataFiles} />
-                }
+                <BankConfig account={bankData.activeAccount.value}
+                    config={bankDataConfig.data} convertResult={bankDataConvertResult.data}
+                    activeCsv={bankDataActiveCsv.data}
+                    files={bankDataFiles} />
+            }
             {/* {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
                 (bankData.convertResult.data.errors || (admin && adminIsOpen))) ?
                 (admin && adminIsOpen) ?
@@ -129,9 +168,8 @@ export const ActiveAccount = (props) => {
                     </div>
                 : <></>
             } */}
-            {(askConfirm.ask) ?
+            {askConfirm.ask &&
                 <Confirmation onClick={onConfirmConvert} filename={askConfirm.filename} />
-                : <></>
             }
             {(bankDataFiles.hasError) ?
                 <p>Er ging iets mis, probeer het later nog eens..</p>
@@ -148,17 +186,7 @@ export const ActiveAccount = (props) => {
     );
 }
 
-const AdminButton = (props) => {
-    const { onClick, adminIsOpen, enabled } = props;
-    const btnClassBasic = 'btn btn-floating btn-small orange admin';
-    const btnClass = (enabled) ? btnClassBasic : btnClassBasic + ' disabled';
-    const icon = (adminIsOpen) ? 'close' : 'settings';
-    return <button className={btnClass} onClick={onClick}>
-        <i className='material-icons'>{icon}</i>
-    </button>
-}
-
-const fileInList = (filename, files) => {
+const isAlreadySent = (filename, files) => {
     const shortFilename = filename.split('.')[0];
     return (files.data && files.data.length > 0 &&
         files.data.filter(f => {

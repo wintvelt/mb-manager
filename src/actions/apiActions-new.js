@@ -231,3 +231,22 @@ export const setCsvManual = (filename, data) => {
         }
     })
 }
+
+export const saveConfig = (active_account, body, access_token) => apiAction({
+    url: base_url_AWS_Bank + '/config/' + active_account,
+    method: 'POST',
+    body,
+    headers: { Authorization: 'Bearer ' + access_token },
+    loadingMsg: 'Bezig met opslaan van conversie-configuratie..',
+    storeAction: (content) => {
+        return setBank({ type: 'setSavedConfig', content})
+    }
+});
+
+export const setConfigManual = (data) => {
+    return setBank({
+        type: 'setConfig',
+        content: apiActionManual({ data })
+    })
+}
+

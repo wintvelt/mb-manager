@@ -1,6 +1,6 @@
 // for csv upload to moneybird
 import { newApiData, api } from '../constants/helpers';
-import { initApiData, apiUpdate, INIT } from '../helpers/apiData/apiData';
+import { initApiData, apiUpdate } from '../helpers/apiData/apiData';
 
 
 const defaultBank = { value: '243233339071268359', label: "KBC 1213" }; // KBC 1213 is default
@@ -8,7 +8,7 @@ const defaultBank = { value: '243233339071268359', label: "KBC 1213" }; // KBC 1
 export const initBankData = {
     activeAccount: defaultBank,
     config: initApiData,
-    savedConfig: newApiData(),
+    savedConfig: initApiData,
     files: initApiData,
     activeCsv: {
         filename: '',
@@ -37,8 +37,8 @@ export const setBank = (state, payload) => {
             return Object.assign({}, oldBankData, { config: newConfig });
 
         case 'setSavedConfig':
-            const savedConfig = api.set(oldBankData.savedConfig, payload.content);
-            return Object.assign({}, oldBankData, { config: savedConfig });
+            const savedConfig = apiUpdate(oldBankData.savedConfig, payload.content);
+            return Object.assign({}, oldBankData, { savedConfig: savedConfig });
 
         case 'setFiles':
             const newFiles = apiUpdate(oldBankData.files, payload.content);

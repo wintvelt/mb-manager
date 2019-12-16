@@ -1,7 +1,8 @@
 // Setting config for bank transactions
-import React, { useState, useReducer } from 'react';
+import React, { useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setBank } from '../../actions/actions';
+import { saveConfig, setConfigManual } from '../../actions/apiActions-new';
 import { FieldsConfig } from './BankUpload-config-fields';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -30,7 +31,8 @@ const useStyles = makeStyles(theme => ({
         },
     },
     details: {
-        flexDirection: 'column'
+        flexDirection: 'column',
+        backgroundColor: '#e1f5fe'
     },
     row: {
         alignItems: 'center'
@@ -53,41 +55,26 @@ const useStyles = makeStyles(theme => ({
     error: {
         color: theme.palette.error.main
     },
+    saveButton: {
+        marginRight: theme.spacing(1)
+    }
 }))
 
 export const BankConfig = ({ account, config, convertResult, activeCsv, files }) => {
     const errors = convertResult && convertResult.errors;
     const rawCsv = (convertResult && convertResult.csv) || activeCsv;
     const csv = parseCsv(rawCsv);
-    const { accessToken, bankData } = useSelector(store => store);
+    const { accessToken } = useSelector(store => store);
     const dispatch = useDispatch();
-    const [confirmed, setConfirmed] = useState(false);
     const [curConfig, setCurConfig] = useReducer(configReducer, config);
     const changed = (JSON.stringify(curConfig) !== JSON.stringify(config));
     const classes = useStyles();
-    const onClear = () => {
-        setConfirmed(true);
-    }
-    const onCancel = () => {
-        dispatch(setBank({ type: 'setCsv', content: { INIT: true } }));
-        dispatch(setBank({ type: 'setConvertResult', content: { INIT: true } }));
-    }
     const onSave = () => {
-        const configSave = {
-            stuff: bankData.config,
-            method: 'POST',
-            body: curConfig,
-            path: '/config/' + account,
-            storeSetFunc: (content) => setBank({ type: 'setSavedConfig', content }),
-            errorMsg: 'Fout bij opslaan config, melding van AWS: ',
-            accessToken,
-            dispatch,
-        }
-        dispatch(setBank({ type: 'setConvertResult', content: { INIT: true } }));
-        // fetchAWSAPI(configSave);
+        dispatch(saveConfig(account, curConfig, accessToken.data));
+        dispatch(setBank({ type: 'setConvertResult', content: { type: 'INIT' } }));
+        dispatch(setConfigManual(curConfig));
     }
     const onSelect = (id, key, selection) => {
-        console.log({ id, selection });
         const newValue = (Array.isArray(selection)) ?
             selection
             : (selection) ?
@@ -100,13 +87,7 @@ export const BankConfig = ({ account, config, convertResult, activeCsv, files })
         }
         setCurConfig({ type: 'SET_FIELD', payload });
     }
-    if (errors && errors.field_errors && files.data && files.data.length > 1 && !confirmed) {
-        return <Confirmation files={files.data.length} errors={errors.field_errors.length}
-            onClear={onClear} onCancel={onCancel} />
-    }
-    if (!config) return <div>Some error</div>
 
-    const saveClass = (changed) ? 'btn' : 'btn disabled';
     return <ExpansionPanel className={classes.root}>
         <ExpansionPanelSummary
             expandIcon={<Icon>expand_more</Icon>}
@@ -133,33 +114,14 @@ export const BankConfig = ({ account, config, convertResult, activeCsv, files })
             <FieldsConfig config={config} curConfig={curConfig} errors={errors} csv={csv} onSelect={onSelect} />
         </ExpansionPanelDetails>
         <ExpansionPanelActions>
-            <Button onClick={onSave}>Opslaan</Button>
+            <Button color='primary' className={classes.saveButton}
+                onClick={onSave}
+                disabled={!changed}
+            >
+                Opslaan
+                </Button>
         </ExpansionPanelActions>
     </ExpansionPanel>
-}
-
-const Confirmation = ({ errors, onCancel, onClear }) => {
-    return (
-        <div className="row">
-            <div className="col s12 m6 offset-m3">
-                <div className="card center">
-                    <span className="card-title">Vraagje</span>
-                    <div className="card-content">
-                        <p>Er zijn {errors} fouten gevonden in dit bestand.
-                        Weet je zeker dat dit bestand bij deze rekening hoort?</p>
-                    </div>
-                    <div className="card-action right-align">
-                        <span className="btn-flat hide-on-large-only red-text text-lighten-3" onClick={onCancel}>
-                            Annuleer</span>
-                        <span className="btn-flat hide-on-large-only teal-text" onClick={onClear}>
-                            OK</span>
-                        <span className="btn-flat hide-on-med-and-down red-text text-lighten-3" onClick={onCancel}>
-                            Nee, Annuleren</span>
-                        <span className="btn-flat hide-on-med-and-down teal-text" onClick={onClear}>Ja, Verwerk</span>
-                    </div>
-                </div>
-            </div>
-        </div>)
 }
 
 const CsvConfig = (props) => {

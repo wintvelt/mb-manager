@@ -58,26 +58,6 @@ export const BankActiveCsv = (props) => {
             type: 'resetCsv'
         }));
     }
-    // const headState = (data) ? 'csv-menu-enabled' : 'csv-menu-disabled';
-    // const btnClass = (data) ? 'btn btn-flat waves-effect waves-light'
-    //     : 'btn btn-flat waves-effect waves-light disabled';
-    // return <div>
-    //     <Header filename={filename} headState={headState} btnClass={btnClass}
-    //         onClick={() => setCvsVisible(true)}
-    //         onClearCsv={onClearCsv} />
-    //     {(data && csvVisible) ?
-    //         <div style={{ width: '100%', height: '0', position: 'relative' }}>
-    //             <div className='csv-card card grey lighten-3'>
-    //                 <Header filename={filename} headState='csv-menu-open'
-    //                     btnClass={btnClass} onClick={() => setCvsVisible(false)} />
-    //                 <div className='csv-scroll-area'>
-    //                     <CsvTable rowData={data} />
-    //                 </div>
-    //             </div>
-    //         </div>
-    //         : <></>
-    //     }
-    // </div>
     return <>
         <Paper className={classes.root}>
             <Typography className={classes.panelTitle}>
@@ -87,7 +67,7 @@ export const BankActiveCsv = (props) => {
                 {filename}
             </Typography>
             <Button color='primary' size='medium' className={classes.button}
-                onClick={onConvert}>
+                onClick={_ => onConvert(filename, csvData)}>
                 Converteer
             </Button>
             <IconButton variant='contained' color='primary' size='medium' className={classes.button}
@@ -132,29 +112,4 @@ const CsvRow = (props) => {
             </TableCell>
         })}
     </TableRow>
-}
-
-const Header = (props) => {
-    const { filename, headState, btnClass, onClick, onClearCsv } = props;
-    const headClass = (headState === 'csv-menu-enabled') ? 'csv-menu card s12 flex'
-        : (headState === 'csv-menu-open') ?
-            'csv-menu csv-menu-open s12 flex'
-            : (filename) ? 'csv-menu s12 flex grey-text'
-                : 'csv-menu s12 flex white-text';
-    const clearFunc = (headState === 'csv-menu-open') ? onClick : onClearCsv;
-    return <div className={headClass}>
-        <span>{filename}</span>
-        <div className='csv-buttons'>
-            {(headState === 'csv-menu-open') ?
-                <></>
-                :
-                <button className={btnClass} onClick={onClick}>
-                    <i className='material-icons'>loupe</i>
-                </button>
-            }
-            <button className={btnClass} onClick={clearFunc}>
-                <i className='material-icons'>clear</i>
-            </button>
-        </div>
-    </div>
 }
