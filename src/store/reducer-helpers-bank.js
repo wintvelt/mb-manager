@@ -1,5 +1,4 @@
 // for csv upload to moneybird
-import { newApiData, api } from '../constants/helpers';
 import { initApiData, apiUpdate } from '../helpers/apiData/apiData';
 
 
@@ -15,7 +14,7 @@ export const initBankData = {
         apiData: initApiData
     },
     convertResult: initApiData,
-    deleteFile: newApiData()
+    deleteFile: initApiData
 }
 
 export const setBank = (state, payload) => {
@@ -74,7 +73,7 @@ export const setBank = (state, payload) => {
         }
 
         case 'deleteFile':
-            const newDeleteFile = api.set(oldBankData.deleteFile, payload.content);
+            const newDeleteFile = apiUpdate(oldBankData.deleteFile, payload.content);
             return Object.assign({}, oldBankData, { deleteFile: newDeleteFile });
 
         default:
@@ -95,6 +94,9 @@ const sortDesc = (key) => {
     }
 }
 
+const combining = /[\u0300-\u036F]/g; 
+const noAccent = str => typeof str === 'string'? str.normalize('NFKD').replace(combining, '') : str;
+
 export const parseCsv = (content) => {
     // need to parse csv string first
     const semiColons = (content.match(/;/g) || []).length;
@@ -110,7 +112,7 @@ export const parseCsv = (content) => {
             row = it.split(separator);
         }
         if (!row[row.length - 1]) row = row.slice(0, -1); // remove last empty fields if needed
-        return row;
+        return row.map(noAccent);
     });
     return parsedContent;
 }

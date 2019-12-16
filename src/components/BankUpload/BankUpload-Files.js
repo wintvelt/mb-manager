@@ -96,7 +96,7 @@ const rowCells = (isAdmin, onFileConvert) => [
 ].filter(it => it)
 
 export const BankFiles = (props) => {
-    const { files, onFileConvert, admin } = props;
+    const { files, onFileConvert, onDeleteFile, admin } = props;
     const [deleting, setDeleting] = useState({ selected: null, pending: null });
     const dispatch = useDispatch();
 
@@ -108,6 +108,7 @@ export const BankFiles = (props) => {
             setDeleting({ selected: filename, pending: deleting.pending });
         } else {
             setDeleting({ selected: null, pending: filename });
+            onDeleteFile(filename);
         }
     }
     const rows = onlyCsv(files).map(makeFileRow);

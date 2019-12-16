@@ -268,3 +268,14 @@ export const resetConvertResult = () => {
     })
 }
 
+export const deleteConvertFile = (active_account, filename, access_token) => apiAction({
+    url: base_url_AWS_Bank + '/convert/' + active_account,
+    method: 'DELETE',
+    body: { csv_filename: filename },
+    headers: { Authorization: 'Bearer ' + access_token },
+    loadingMsg: 'Bezig met verwijderen van csv bestand..',
+    storeAction: (content) => {
+        return setBank({ type: 'deleteFile', content})
+    }
+})
+

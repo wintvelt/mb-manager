@@ -6,7 +6,8 @@ import { BankFiles } from './BankUpload-Files';
 import { BankConfig } from './BankUpload-config';
 import { doSnackError } from '../../actions/actions';
 import { BankActiveCsv } from './BankUpload-ActiveCsv';
-import { getCsv, setCsvManual, convertCsv, resetConvertResult } from '../../actions/apiActions-new';
+import { getCsv, setCsvManual, convertCsv, 
+    resetConvertResult, deleteConvertFile } from '../../actions/apiActions-new';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -107,8 +108,8 @@ export const ActiveAccount = (props) => {
         console.log({ convert_only, data })
         const postBody = {
             csv_filename: filename,
-            csv_content: null,
-            convert_only: true
+            csv_content: data,
+            convert_only
         }
         dispatch(convertCsv(bankData.activeAccount.value, postBody, accessToken.data));
         setAskConfirm({ ask: false });
@@ -139,6 +140,9 @@ export const ActiveAccount = (props) => {
     const onCloseConvertResult = e => {
         dispatch(resetConvertResult());
     }
+    const onDeleteFile = (filename) => {
+        dispatch(deleteConvertFile(bankData.activeAccount.value, filename, accessToken.data));
+    }
     return (
         <div>
             {bankDataConfig.hasData && <FileZone
@@ -154,9 +158,9 @@ export const ActiveAccount = (props) => {
                     activeCsv={bankDataActiveCsv.data}
                     files={bankDataFiles} />
             }
-            <ConvertResult open={bankDataConvertResult.hasData} isAdmin={admin} 
-            onClose={onCloseConvertResult}
-            convertResult={bankDataConvertResult.data} />
+            <ConvertResult open={bankDataConvertResult.hasData} isAdmin={admin}
+                onClose={onCloseConvertResult}
+                convertResult={bankDataConvertResult.data} />
             {/* {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
                 (bankData.convertResult.data.errors || (admin && adminIsOpen))) ?
                 (admin && adminIsOpen) ?
@@ -181,7 +185,8 @@ export const ActiveAccount = (props) => {
             {bankDataFiles.hasError && <p>Er ging iets mis, probeer het later nog eens..</p>}
             {bankDataFiles.hasData &&
                 <BankFiles files={bankDataFiles.data} isLoading={bankDataFiles.isLoading}
-                    onFileConvert={onFileConvert} admin={admin} />
+                    onFileConvert={onFileConvert} admin={admin} 
+                    onDeleteFile={onDeleteFile}/>
             }
         </div>
     );
@@ -217,16 +222,22 @@ const Confirmation = (props) => {
 }
 
 const ConvertResult = props => {
-    const { open, filename, isAdmin, onClose, convertResult } = props;
+    const { open, isAdmin, onClose, convertResult } = props;
     const errors = convertResult && convertResult.errors;
-    const errorCount = errors && errors.field_errors && errors.field_errors.length;
+    const fieldErrorCount = errors && errors.field_errors && errors.field_errors.length;
+    const otherErrorCount = errors && Object.keys(errors).length - (fieldErrorCount > 0 ? 1 : 0);
+    const csv = convertResult && convertResult.csv;
+    const lineCount = csv && csv.length - 1;
     return (
         <Dialog open={open} onClose={onClose}>
             <DialogTitle>Resultaten van conversie</DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    {`Het bestand ${filename} is geconverteerd.`}
-                    {errors && `Er zijn in totaal ${errorCount} fouten gevonden.`}
+                    {`Het bestand met ${lineCount} regel${lineCount !== 1 && 's'} is geconverteerd.`}
+                </DialogContentText>
+                <DialogContentText>
+                    {errors && `Er zijn in totaal ${otherErrorCount} algemene bestandsfouten gevonden, 
+                    en ${fieldErrorCount} fouten in de mapping van velden.`}
                     {!errors && 'YES! Helemaal zonder fouten geconverteerd.'}
                 </DialogContentText>
                 {isAdmin && <pre>{JSON.stringify(errors, null, 2)}</pre>}
