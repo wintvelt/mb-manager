@@ -195,8 +195,8 @@ const ConvertResult = props => {
                     {`Het bestand met ${lineCount} regel${lineCount !== 1 && 's'} is geconverteerd.`}
                 </DialogContentText>
                 <DialogContentText>
-                    {errors && `Er zijn in totaal ${otherErrorCount} algemene bestandsfouten gevonden, 
-                    en ${fieldErrorCount} fouten in de mapping van velden.`}
+                    {errors && `Er zijn in totaal ${otherErrorCount || 0} algemene bestandsfouten gevonden, 
+                    en ${fieldErrorCount || 0} fouten in de mapping van velden.`}
                     {!errors && 'YES! Helemaal zonder fouten geconverteerd.'}
                 </DialogContentText>
                 {isAdmin && <pre>{JSON.stringify(errors, null, 2)}</pre>}
