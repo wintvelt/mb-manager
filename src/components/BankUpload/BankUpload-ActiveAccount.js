@@ -6,7 +6,7 @@ import { BankFiles } from './BankUpload-Files';
 import { BankConfig } from './BankUpload-config';
 import { doSnackError } from '../../actions/actions';
 import { BankActiveCsv } from './BankUpload-ActiveCsv';
-import { getCsv, setCsvManual, convertCsv, 
+import { getCsv, setCsvManual, convertCsv, getBankActiveFiles,
     resetConvertResult, deleteConvertFile } from '../../actions/apiActions-new';
 
 import Dialog from '@material-ui/core/Dialog';
@@ -105,20 +105,22 @@ export const ActiveAccount = (props) => {
         }
     }
     const convertCsvData = (filename, data, convert_only = false) => {
-        console.log({ convert_only, data })
         const postBody = {
             csv_filename: filename,
             csv_content: data,
             convert_only
         }
-        dispatch(convertCsv(bankData.activeAccount.value, postBody, accessToken.data));
+        const doAfterConvert = (data || !convert_only) && 
+            (() => dispatch(getBankActiveFiles(bankData.activeAccount.value, accessToken.data)));
+        dispatch(convertCsv(bankData.activeAccount.value, postBody, accessToken.data, doAfterConvert));
         setAskConfirm({ ask: false });
     }
     const onCloseConvertResult = e => {
         dispatch(resetConvertResult());
     }
     const onDeleteFile = (filename) => {
-        dispatch(deleteConvertFile(bankData.activeAccount.value, filename, accessToken.data));
+        const doAfterDelete = () => dispatch(getBankActiveFiles(bankData.activeAccount.value, accessToken.data));
+        dispatch(deleteConvertFile(bankData.activeAccount.value, filename, accessToken.data, doAfterDelete));
     }
     return (
         <div>

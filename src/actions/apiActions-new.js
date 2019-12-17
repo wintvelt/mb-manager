@@ -250,7 +250,7 @@ export const setConfigManual = (data) => {
     })
 }
 
-export const convertCsv = (active_account, body, access_token) => apiAction({
+export const convertCsv = (active_account, body, access_token, callback) => apiAction({
     url: base_url_AWS_Bank + '/convert/' + active_account,
     method: 'POST',
     body,
@@ -258,7 +258,8 @@ export const convertCsv = (active_account, body, access_token) => apiAction({
     loadingMsg: 'Bezig met converteren van csv bestand..',
     storeAction: (content) => {
         return setBank({ type: 'setConvertResult', content})
-    }
+    },
+    callback
 });
 
 export const resetConvertResult = () => {
@@ -268,7 +269,7 @@ export const resetConvertResult = () => {
     })
 }
 
-export const deleteConvertFile = (active_account, filename, access_token) => apiAction({
+export const deleteConvertFile = (active_account, filename, access_token, callback) => apiAction({
     url: base_url_AWS_Bank + '/convert/' + active_account,
     method: 'DELETE',
     body: { csv_filename: filename },
@@ -276,6 +277,7 @@ export const deleteConvertFile = (active_account, filename, access_token) => api
     loadingMsg: 'Bezig met verwijderen van csv bestand..',
     storeAction: (content) => {
         return setBank({ type: 'deleteFile', content})
-    }
+    },
+    callback
 })
 
