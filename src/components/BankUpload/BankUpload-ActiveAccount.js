@@ -113,29 +113,6 @@ export const ActiveAccount = (props) => {
         }
         dispatch(convertCsv(bankData.activeAccount.value, postBody, accessToken.data));
         setAskConfirm({ ask: false });
-        // const getFilesOptions = {
-        //     stuff: bankData.files,
-        //     path: '/files/' + bankData.activeAccount.value,
-        //     storeSetFunc: (content) => setBank({ type: 'setFiles', content }),
-        //     errorMsg: 'Fout bij ophalen files, melding van AWS: ',
-        //     accessToken,
-        //     loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',
-        //     dispatch
-        // }
-        // const loadingMsg = `bezig met converteren ${filename}`;
-        // const convertCsvOptions = {
-        //     method: 'POST',
-        //     body: postBody,
-        //     stuff: bankData.convertResult,
-        //     path: '/convert/' + bankData.activeAccount.value,
-        //     storeSetFunc: (content) => setBank({ type: 'setConvertResult', content }),
-        //     loadingMsg,
-        //     errorMsg: 'Fout bij conversie: ',
-        //     accessToken,
-        //     dispatch,
-        // callback: () => fetchAWSAPI(getFilesOptions)
-        // }
-        // fetchAWSAPI(convertCsvOptions);
     }
     const onCloseConvertResult = e => {
         dispatch(resetConvertResult());
@@ -161,26 +138,6 @@ export const ActiveAccount = (props) => {
             <ConvertResult open={bankDataConvertResult.hasData} isAdmin={admin}
                 onClose={onCloseConvertResult}
                 convertResult={bankDataConvertResult.data} />
-            {/* {(bankData.config.hasAllData && bankData.convertResult.hasAllData && bankData.convertResult.data &&
-                (bankData.convertResult.data.errors || (admin && adminIsOpen))) ?
-                (admin && adminIsOpen) ?
-                    'temp ding'
-                    : <div className="row">
-                        <div className="col s12 orange lighten-1 card">
-                            <button className="btn-flat btn waves-effect close"
-                                onClick={() => {
-                                    dispatch(setBank({ type: 'setConvertResult', content: { INIT: true } }));
-                                }}>
-                                <i className='material-icons'>close</i></button>
-                            <div className="card-content center">
-                                <p>Dit bestand is niet converteerbaar helaas.
-                                    Misschien hoort het bestand bij een andere bankrekening?</p>
-                                <p>Neem anders contact op met Wouter voor meer hulp.</p>
-                            </div>
-                        </div>
-                    </div>
-                : <></>
-            } */}
             <Confirmation askConfirm={askConfirm} />
             {bankDataFiles.hasError && <p>Er ging iets mis, probeer het later nog eens..</p>}
             {bankDataFiles.hasData &&
