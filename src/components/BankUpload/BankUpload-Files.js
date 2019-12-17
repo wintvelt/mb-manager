@@ -1,7 +1,5 @@
 // component for listing files
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { doSnack } from '../../actions/actions';
 import { base_url_AWS, adminCode } from '../../actions/apiActions-Bank';
 import { onlyCsv } from '../../store/reducer-helpers-bank';
 
@@ -98,13 +96,11 @@ const rowCells = (isAdmin, onFileConvert) => [
 export const BankFiles = (props) => {
     const { files, onFileConvert, onDeleteFile, admin } = props;
     const [deleting, setDeleting] = useState({ selected: null, pending: null });
-    const dispatch = useDispatch();
 
     const onDelete = filename => {
         if (!filename) {
             setDeleting({ selected: null, pending: deleting.pending });
         } else if (filename !== deleting.selected) {
-            dispatch(doSnack(`Klik nog een keer op delete om ${filename} definitief te verwijderen.`));
             setDeleting({ selected: filename, pending: deleting.pending });
         } else {
             setDeleting({ selected: null, pending: filename });
