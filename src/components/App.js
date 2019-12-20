@@ -12,8 +12,11 @@ import Incoming from './Incoming/Incoming';
 import Payments from './Payments/Payments';
 import Export from './Export/Export';
 import BankUpload from './BankUpload/BankUpload';
+import Match from './Match/Match';
 import Secret from './Secret';
 import Home from './Home';
+
+import { DO_SNACK } from '../store/action-types';
 
 import { ThemeProvider } from '@material-ui/styles';
 import Fab from '@material-ui/core/Fab';
@@ -25,13 +28,11 @@ import teal from '@material-ui/core/colors/teal';
 import blue from '@material-ui/core/colors/blue';
 import { SnackbarProvider } from '../../node_modules/notistack/build/index';
 import Notifier from '../helpers/snackbar/Notifier';
-import { DO_SNACK } from '../store/action-types';
-import Match from './Match/Match';
 
 function mapStateToProps(state) {
 	return {
 		newSnack: state.newSnack,
-		isConnected: (state.accessToken) ? true : false
+		isConnected: (state.accessToken.hasData) ? true : false
 	}
 }
 

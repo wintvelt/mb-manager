@@ -142,6 +142,19 @@ const ListItemLink = (props) => {
     </ListItem>
 }
 
+const ListItemLinkDisabled = props => {
+    const { icon, text } = props;
+
+    return <ListItem style={{color: 'grey'}}>
+        <ListItemIcon>
+            <Icon>
+                {icon}
+            </Icon>
+        </ListItemIcon>
+        <ListItemText primary={text} />
+    </ListItem>
+}
+
 const ConnectionLink = (props) => {
     const { iconLogin, link } = props;
 
@@ -165,7 +178,7 @@ const ConnectionLink = (props) => {
 }
 
 export const NavWrapper = (props) => {
-    const { children, menu, activePath, iconLogin } = props;
+    const { children, menu, activePath, iconLogin, isConnected } = props;
     const navTitle = menu.find(it => it.link === activePath).text;
 
     const classes = useStyles();
@@ -226,7 +239,9 @@ export const NavWrapper = (props) => {
             <List dense className={classes.list}>
                 <ListSubHeader className={classes.listTitle}>Navigatie</ListSubHeader>
                 {menu.map((item) => (
+                    (item.public || isConnected)?
                     <ListItemLink key={item.text} activePath={activePath} {...item} />
+                    : <ListItemLinkDisabled key={item.text} activePath={activePath} {...item} />
                 ))}
             </List>
             <Divider className={classes.divider} />

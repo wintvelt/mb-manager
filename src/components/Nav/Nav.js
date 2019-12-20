@@ -10,7 +10,7 @@ const menu = [
     { icon: 'attachment', link: '/betalingen/match', text: 'Betalingen matchen' },
     { icon: 'cloud_upload', link: '/bankupload', text: 'Upload bankfile' },
     { icon: 'sync', link: '/export', text: 'Export Finvision' },
-    { icon: 'account_circle', link: '/connection', text: 'Connectie' }
+    { icon: 'account_circle', link: '/connection', text: 'Connectie', public: true }
 ];
 
 const Nav = (props) => {
@@ -20,7 +20,7 @@ const Nav = (props) => {
     const iconLogin = (accessToken.hasData) ?
         (accessVerified) ? "done_all" : "done" : "do_not_disturb";
 
-    return <NavWrapper menu={menu} activePath={activePath} iconLogin={iconLogin}>
+    return <NavWrapper menu={menu} activePath={activePath} iconLogin={iconLogin} isConnected={accessToken.hasData}>
         {children}
     </NavWrapper>
 }
