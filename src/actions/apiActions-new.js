@@ -269,6 +269,13 @@ export const resetConvertResult = () => {
     })
 }
 
+export const resetCsv = () => {
+    return setBank({
+        type: 'resetCsv',
+        content: null
+    })
+}
+
 export const deleteConvertFile = (active_account, filename, access_token, callback) => apiAction({
     url: base_url_AWS_Bank + '/convert/' + active_account,
     method: 'DELETE',

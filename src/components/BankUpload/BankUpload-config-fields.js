@@ -105,8 +105,9 @@ const FieldConfig = ({ props }) => {
     const headers = csv[0];
     let mapOptions = (options) ? options.map(it => { return { label: it, value: it } })
         : [...headers].map(f => { return { value: f, label: f } });
-    if (!isReq) mapOptions = [{ value: '', label: '(geen)' }, ...mapOptions];
-    const selectedValue = mappedField || '';
+    const mappedFieldInOptions = !!mapOptions.find(it => it.value === mappedField);
+    if (!isReq || !mappedFieldInOptions) mapOptions = [{ value: '', label: '(geen)' }, ...mapOptions];
+    const selectedValue = mappedFieldInOptions? mappedField : '';
     const selectedList = (Array.isArray(selectedValue)) ? selectedValue : (selectedValue) ? [selectedValue] : [];
     return <Grid container spacing={2} className={classes.row}>
         <Grid item xs={2} className={classes.rowTitle}>

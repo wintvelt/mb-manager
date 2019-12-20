@@ -58,27 +58,27 @@ export const makeLoadingApiData = apiDataSources => {
 
 // receives data through props
 export const DataPanel = (props) => {
-    const { apiDataSources = [], apiTitles = [], expanded, onChange, title, loadingText, flat } = props;
+    const { apiDataSources = [], apiTitles = [], expanded, onChange, title, loadingText, 
+        flat, actionsInSummary, noCountTitle } = props;
 
     const loadingApiData = makeLoadingApiData(apiDataSources);
     const dataCount = !apiDataSources[0].toJS().data ? '0'
         : apiDataSources[0].toJS().data.length ?
             apiDataSources[0].toJS().data.length : '';
     const loadingApiText = loadingText || ((loadingApiData.hasAllData) ?
-        `${dataCount} ${title} opgehaald.`
+        `${!noCountTitle? dataCount+' ':''}${title} opgehaald.`
         : loadingApiData.hasError ? 'Fout bij het laden.'
-            : loadingApiData.isLoading ? `...${title} ophalen (${dataCount}).`
-                : '');
+            : loadingApiData.isLoading ? `...${title} ophalen${!noCountTitle? ' ('+dataCount+')':''}.`
+                : `...${title} opvragen.`);
 
     const classes = useStyles();
     const panelClass = flat && classes.flatPanel;
     const hasOneData = apiTitles.length === 1;
-    const hasOneAction = props.children && React.Children.count(props.children) === 1;
 
     return <ExpansionPanel expanded={expanded} onChange={onChange} className={panelClass}>
         <ExpansionPanelSummary
             className={flat && classes.nopointer}
-            expandIcon={!(hasOneData && hasOneAction) && <Icon>expand_more</Icon>}
+            expandIcon={!(hasOneData) && <Icon>expand_more</Icon>}
             aria-controls="panel1bh-content"
             id="panel1bh-header"
         >
@@ -91,7 +91,7 @@ export const DataPanel = (props) => {
             <Typography className={classes.secondaryHeading}>
                 {loadingApiText}
             </Typography>
-            {(hasOneData && hasOneAction) && props.children}
+            {actionsInSummary && props.children}
         </ExpansionPanelSummary>
         {!hasOneData && <ExpansionPanelDetails>
             <List>
@@ -100,7 +100,7 @@ export const DataPanel = (props) => {
                 })}
             </List>
         </ExpansionPanelDetails>}
-        {props.children && <ExpansionPanelActions>
+        {!actionsInSummary && props.children && <ExpansionPanelActions>
             {props.children}
         </ExpansionPanelActions>
         }

@@ -136,8 +136,15 @@ export const apiAction = (params) => {
                 };
             })
             .catch(err => {
-                const fullErrorMsg = (errorMsg || '') + err.toString()
-                console.log({ error: fullErrorMsg });
+                console.log({url});
+                const rawError = err.toString();
+                const isTypeError = rawError === 'TypeError: Failed to fetch';
+                const newError = isTypeError ?
+                    url.includes('moneybird') ? 'Kan geen verbinding maken met Moneybird'
+                        : 'databestanden voor Moblybird helaas niet beschikbaar'
+                    : rawError;
+                const fullErrorMsg = (errorMsg || '') + newError;
+                console.log({ err, error: fullErrorMsg });
                 dispatch(storeAction({ type: SET_ERROR, payload: { errorMsg: fullErrorMsg, id } }));
             })
     }

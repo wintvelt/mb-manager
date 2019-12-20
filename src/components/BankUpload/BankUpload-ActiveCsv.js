@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { setBank } from '../../actions/actions';
 import { parseCsv } from '../../store/reducer-helpers-bank';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -46,18 +44,12 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export const BankActiveCsv = (props) => {
-    const { activeCsv, onConvert } = props;
+    const { activeCsv, onConvert, onClearCsv } = props;
     const { apiData, filename } = activeCsv;
-    const dispatch = useDispatch();
     const classes = useStyles();
     const [csvVisible, setCvsVisible] = useState(false);
     const csvData = parseCsv(apiData.toJS().data);
 
-    const onClearCsv = () => {
-        dispatch(setBank({
-            type: 'resetCsv'
-        }));
-    }
     return <>
         <Paper className={classes.root}>
             <Typography className={classes.panelTitle}>

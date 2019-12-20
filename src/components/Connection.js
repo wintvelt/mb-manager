@@ -7,6 +7,7 @@ import { setAccess, getRequestToken, testAccess } from "../actions/apiActions";
 import { logout } from "../actions/actions";
 import { paramToObj } from "../constants/helpers";
 import moment from 'moment';
+import { deleteCookie } from '../store/cookies';
 
 
 const mapStateToProps = state => {
@@ -43,6 +44,12 @@ class ConnectionInt extends Component {
 		this.setState({ requestToken: e.target.value });
 	}
 
+	onLogout(e) {
+		console.log('got here');
+		deleteCookie();
+		this.props.logout()
+	}
+
 	static getDerivedStateFromProps(props, state) {
 		const code = paramToObj(props.location.search).code;
 		if (state.requestToken === code) return { requestToken : "" };
@@ -65,7 +72,7 @@ class ConnectionInt extends Component {
 						<p>
 							<span className="btn" onClick={this.props.testAccess}>Verifieer Connectie</span>{'\u00A0'}
 							<span className="btn" onClick={getRequestToken}>Log opnieuw in</span>{'\u00A0'}
-							<span className="btn-flat" onClick={this.props.logout}>Uitloggen</span>
+							<span className="btn-flat" onClick={this.onLogout}>Uitloggen</span>
 						</p>
 						{accessVerified ? <p>{IconOK} Login is ook geverifieerd voor deze sessie</p> : <div></div>}
 					</div>

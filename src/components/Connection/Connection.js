@@ -7,6 +7,7 @@ import { setAccess, getRequestToken, testAccess } from "../../actions/apiActions
 import { logout } from "../../actions/actions";
 import { paramToObj } from "../../constants/helpers";
 import ConnectCard from './ConnectCard';
+import { deleteCookie } from '../../store/cookies';
 
 
 const mapStateToProps = state => {
@@ -33,11 +34,17 @@ class ConnectionInt extends Component {
         this.state = { requestToken: "" }
 
         this.onChange = this.onChange.bind(this);
+        this.onLogout = this.onLogout.bind(this);
     }
 
     onChange(e) {
         this.setState({ requestToken: e.target.value });
     }
+
+    onLogout(e) {
+        deleteCookie();
+		this.props.logout();
+	}
 
     static getDerivedStateFromProps(props, state) {
         const code = paramToObj(props.location.search).code;
@@ -54,7 +61,7 @@ class ConnectionInt extends Component {
             [
                 { key: 'verifyConnection', title: 'Verifeer connectie', action: this.props.testAccess },
                 { key: 'login', title: 'Log opnieuw in', action: getRequestToken },
-                { key: 'logout', title: 'Uitloggen', action: this.props.logout },
+                { key: 'logout', title: 'Uitloggen', action: this.onLogout },
             ]
             : hasReqToken ?
                 [

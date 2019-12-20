@@ -1,5 +1,5 @@
 // For converting csv files with bank transactions and uploading to moneybird
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { getAccounts, getBankActiveConfig, getBankActiveFiles, setBank } from '../../actions/apiActions-new';
@@ -43,15 +43,19 @@ const Bankmutations = (props) => {
     const onChangeAccount = (value) => {
         dispatch(setBank({ type: 'setActiveAccount', content: value }))
     }
-
+    const [dataPanelOpen, setDataPanelOpen] = useState(false);
     return <div className={classes.root}>
-        <DataPanel expanded={false} onChange={() => {
-            //
+        <DataPanel expanded={dataPanelOpen} onChange={() => {
+            setDataPanelOpen(!dataPanelOpen)
         }}
             title={`Rekening ${activeAccount && activeAccount.label}`}
-            apiDataSources={[bankData.config]}
-            apiTitles={[`upload-gegevens voor ${activeAccount && activeAccount.label}`]}
-            flat
+            noCountTitle
+            apiDataSources={[accountsNew, bankData.config, bankData.files]}
+            apiTitles={[
+                'beschikbare rekeningen',
+                `upload-gegevens voor ${activeAccount && activeAccount.label}`,
+                `bestanden van ${activeAccount && activeAccount.label}`]}
+            actionsInSummary
         >
             <AccountOptions accounts={accounts} activeValue={active_account} onChange={onChangeAccount} />
         </DataPanel>

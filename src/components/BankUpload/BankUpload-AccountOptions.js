@@ -25,15 +25,18 @@ export const AccountOptions = props => {
     if (!options || options.length === 1) return null;
 
     const handleClick = e => {
+        e.stopPropagation();
         setAnchorEl(e.currentTarget);
     }
 
-    const handleChange = value => {
+    const handleChange = (e, value) => {
+        e.stopPropagation();
         setAnchorEl(null);
         onChange(options && options.find(it => it.value === value))
     }
 
-    const handleClose = () => {
+    const handleClose = (e) => {
+        e.stopPropagation();
         setAnchorEl(null);
     };
 
@@ -52,7 +55,7 @@ export const AccountOptions = props => {
             {options.map(it => (
                 <MenuItem key={it.value} value={it.value}
                     className={it.value === activeValue? classes.activeAccount : ''}
-                    onClick={() => handleChange(it.value)}>
+                    onClick={e => handleChange(e, it.value)}>
                     {it.label}
                 </MenuItem>
             ))}

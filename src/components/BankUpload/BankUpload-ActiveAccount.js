@@ -6,17 +6,27 @@ import { BankFiles } from './BankUpload-Files';
 import { BankConfig } from './BankUpload-config';
 import { doSnackError } from '../../actions/actions';
 import { BankActiveCsv } from './BankUpload-ActiveCsv';
-import { getCsv, setCsvManual, convertCsv, getBankActiveFiles,
-    resetConvertResult, deleteConvertFile } from '../../actions/apiActions-new';
+import {
+    getCsv, setCsvManual, convertCsv, getBankActiveFiles,
+    resetConvertResult, resetCsv, deleteConvertFile
+} from '../../actions/apiActions-new';
 
+import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 
+const useStyles = makeStyles(theme => ({
+    dialog: {
+        overflowY: 'scroll'
+    }
+}))
 /*
 csv data in store zetten met filename
 */
@@ -33,6 +43,7 @@ export const ActiveAccount = (props) => {
     const bankDataActiveCsv = bankData.activeCsv.apiData.toJS();
     const hasActiveCsv = bankDataActiveCsv.hasAllData;
     const [askConfirm, setAskConfirm] = useState({ ask: false });
+    const [hideConvertResult, setHideConvertResult] = useState(false);
     const dispatch = useDispatch();
 
     const fileHandler = (files) => {
@@ -110,13 +121,21 @@ export const ActiveAccount = (props) => {
             csv_content: data,
             convert_only
         }
-        const doAfterConvert = (data || !convert_only) && 
+        const doAfterConvert = (data || !convert_only) &&
             (() => dispatch(getBankActiveFiles(bankData.activeAccount.value, accessToken.data)));
         dispatch(convertCsv(bankData.activeAccount.value, postBody, accessToken.data, doAfterConvert));
         setAskConfirm({ ask: false });
     }
     const onCloseConvertResult = e => {
-        dispatch(resetConvertResult());
+        if (admin) {
+            setHideConvertResult(true)
+        } else {
+            dispatch(resetConvertResult());
+        }
+    }
+    const onClearCsv = e => {
+        dispatch(resetCsv());
+        setHideConvertResult(false);
     }
     const onDeleteFile = (filename) => {
         const doAfterDelete = () => dispatch(getBankActiveFiles(bankData.activeAccount.value, accessToken.data));
@@ -129,7 +148,8 @@ export const ActiveAccount = (props) => {
                 message='Drop .csv bestand met transacties hier, of klik.' />
             }
             {admin && hasActiveCsv &&
-                <BankActiveCsv activeCsv={bankData.activeCsv} onConvert={maybeConvertCsvData} />
+                <BankActiveCsv activeCsv={bankData.activeCsv} onConvert={maybeConvertCsvData}
+                    onClearCsv={onClearCsv} />
             }
             {admin && hasActiveCsv &&
                 <BankConfig account={bankData.activeAccount.value}
@@ -137,15 +157,16 @@ export const ActiveAccount = (props) => {
                     activeCsv={bankDataActiveCsv.data}
                     files={bankDataFiles} />
             }
-            <ConvertResult open={bankDataConvertResult.hasData} isAdmin={admin}
+            <ConvertResult open={!bankDataConvertResult.notAsked && !hideConvertResult}
+                isAdmin={admin}
                 onClose={onCloseConvertResult}
-                convertResult={bankDataConvertResult.data} />
+                convertResult={bankDataConvertResult} />
             <Confirmation askConfirm={askConfirm} />
             {bankDataFiles.hasError && <p>Er ging iets mis, probeer het later nog eens..</p>}
             {bankDataFiles.hasData &&
                 <BankFiles files={bankDataFiles.data} isLoading={bankDataFiles.isLoading}
-                    onFileConvert={onFileConvert} admin={admin} 
-                    onDeleteFile={onDeleteFile}/>
+                    onFileConvert={onFileConvert} admin={admin}
+                    onDeleteFile={onDeleteFile} />
             }
         </div>
     );
@@ -179,28 +200,41 @@ const Confirmation = (props) => {
             </DialogActions>
         </Dialog>)
 }
+const simpleStyle = { padding: '8px', display: 'flex' }
+const errorStyle = { ...simpleStyle, backgroundColor: 'orange' };
 
 const ConvertResult = props => {
     const { open, isAdmin, onClose, convertResult } = props;
-    const errors = convertResult && convertResult.errors;
+    const { data, hasData } = convertResult;
+    const errors = data && data.errors;
     const fieldErrorCount = errors && errors.field_errors && errors.field_errors.length;
     const otherErrorCount = errors && Object.keys(errors).length - (fieldErrorCount > 0 ? 1 : 0);
-    const csv = convertResult && convertResult.csv;
+    const csv = data && data.csv;
     const lineCount = csv && csv.length - 1;
     return (
         <Dialog open={open} onClose={onClose}>
             <DialogTitle>Resultaten van conversie</DialogTitle>
-            <DialogContent>
+            {hasData && <DialogContent style={{ overflowY: 'scroll' }}>
                 <DialogContentText>
-                    {`Het bestand met ${lineCount} regel${lineCount !== 1 && 's'} is geconverteerd.`}
+                    {`Het bestand met ${lineCount} regel${lineCount !== 1 && 's'} is verwerkt.`}
                 </DialogContentText>
-                <DialogContentText>
-                    {errors && `Er zijn in totaal ${otherErrorCount || 0} algemene bestandsfouten gevonden, 
-                    en ${fieldErrorCount || 0} fouten in de mapping van velden.`}
-                    {!errors && 'YES! Helemaal zonder fouten geconverteerd.'}
-                </DialogContentText>
-                {isAdmin && <pre>{JSON.stringify(errors, null, 2)}</pre>}
-            </DialogContent>
+                {errors && <DialogContentText style={otherErrorCount ? errorStyle : simpleStyle}>
+                    <Icon style={{ marginRight: '8px' }}>{otherErrorCount ? 'warning' : 'done'}</Icon>
+                    {`${otherErrorCount || 0} algemene bestandsfouten gevonden.`}
+                </DialogContentText>}
+                {fieldErrorCount > 0 && <DialogContentText style={errorStyle}>
+                    <Icon style={{ marginRight: '8px' }}>warning</Icon>
+                    {`${fieldErrorCount || 0} fouten in de mapping van velden.`}
+                </DialogContentText>}
+                {!errors && <DialogContentText style={errorStyle}>
+                    YES! Helemaal zonder fouten geconverteerd.
+                </DialogContentText>}
+                {isAdmin && <pre style={errorStyle}>{JSON.stringify(errors, null, 2)}</pre>}
+            </DialogContent>}
+            {!hasData && <DialogContent>
+                <LinearProgress />
+                <DialogContentText>Wachten op respons (spannend toch?)</DialogContentText>
+            </DialogContent>}
             <DialogActions>
                 <Button onClick={onClose} color='primary'>Duidelijk</Button>
             </DialogActions>
