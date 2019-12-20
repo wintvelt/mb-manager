@@ -49,7 +49,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Incoming() {
     const classes = useStyles();
-    const accessToken = useSelector(store => store.accessToken);
+    const accessToken = useSelector(store => store.accessToken.toJS());
     const access_token = accessToken.data;
     const receipts = useSelector(store => store.receipts.get('apiData'));
     const receiptsList = receipts.toJS();

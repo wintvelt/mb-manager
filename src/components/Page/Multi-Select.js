@@ -116,7 +116,7 @@ function MultiSelect(props) {
 
     return (
         <Downshift
-            id="downshift-multiple"
+            id={placeholder}
             inputValue={inputValue}
             onChange={handleChange}
             selected={selected}

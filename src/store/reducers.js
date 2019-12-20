@@ -23,7 +23,6 @@ import {
 } from './reducer-helpers';
 import { newApiData, api } from '../constants/helpers';
 import { initBankData, setBank } from './reducer-helpers-bank';
-// import { initialMatch, matchReducer } from "../components/Match-store";
 import { initApiDataMulti, apiUpdateMulti, apiUpdateMultiMulti } from '../helpers/apiData/apiData-multi';
 import { apiUpdate, initApiData } from '../helpers/apiData/apiData';
 import { defaultNotifications, updateSnacks, enqueueSnack } from "../helpers/snackbar/updateSnacks";
@@ -31,8 +30,7 @@ import { defaultNotifications, updateSnacks, enqueueSnack } from "../helpers/sna
 // initial state also exported to root (to set default when initializing)
 export const initialState = {
     newSnack: "",
-    accessToken: newApiData(),
-    accessVerified: false,
+    accessToken: initApiData,
     testOutput: "",
     ledgers: newApiData(),
     accounts: newApiData(),
@@ -53,7 +51,6 @@ export const initialState = {
     optDeleted: [],
     syncPending: false,
     bankData: initBankData,
-    // matchStuff: initialMatch,
     batchMsg: {},
     batchError: false
 };
@@ -63,16 +60,16 @@ function rootReducer(state = initialState, action) {
     switch (type) {
         // payload = accessToken
         case SET_ACCESS_TOKEN: {
-            return Object.assign({}, state, {
-                accessToken: api.set(state.accessToken, action.payload),
-                accessVerified: (!action.payload.ERROR),
-            })
+            return { 
+                ...state, 
+                accessToken: apiUpdate(state.accessToken, action.payload)
+            }
         }
         case DELETE_ACCESS_TOKEN: {
-            return Object.assign({}, state, {
-                accessToken: newApiData(),
-                accessVerified: false
-            })
+            return { 
+                ...state, 
+                accessToken: initApiData
+            }
         }
         case SET_PAYMENTS_NEW: {
             const newPayments = apiUpdateMultiMulti(state.payments, payload);

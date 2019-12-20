@@ -24,7 +24,7 @@ const Bankmutations = (props) => {
         return { accountsNew, bankData, accessToken };
     });
     const accounts = accountsNew.toJS();
-    const access_token = accessToken.data;
+    const access_token = accessToken.toJS().data;
     const activeAccount = bankData && bankData.activeAccount;
     const active_account = activeAccount && activeAccount.value;
     const dispatch = useDispatch();

@@ -15,7 +15,7 @@ const menu = [
 
 const Nav = (props) => {
     const { children, activePath } = props;
-    const accessToken = useSelector(store => store.accessToken);
+    const accessToken = useSelector(store => store.accessToken.toJS());
     const accessVerified = useSelector(store => hasData(store));
     const iconLogin = (accessToken.hasData) ?
         (accessVerified) ? "done_all" : "done" : "do_not_disturb";

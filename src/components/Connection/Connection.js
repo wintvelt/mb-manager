@@ -12,7 +12,7 @@ import { hasData } from '../../store/derived-storestate-helpers';
 
 const Connection = props => {
     const [accessToken, accessVerified] = useSelector(store => (
-        [store.accessToken, hasData(store)]
+        [store.accessToken.toJS(), hasData(store)]
     ));
     const dispatch = useDispatch();
     const onLogout = (e) => {

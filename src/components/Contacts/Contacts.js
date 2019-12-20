@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Contacts() {
     const classes = useStyles();
-    const accessToken = useSelector(store => store.accessToken);
+    const accessToken = useSelector(store => store.accessToken.toJS());
     const access_token = accessToken.data;
     const contacts = useSelector(store => store.contactsNew.get('apiData'));
     const contactsList = contacts.toJS();
