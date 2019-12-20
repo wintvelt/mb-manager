@@ -2,12 +2,14 @@
 import { apiActionPaged, apiActionSync } from '../helpers/apiData/apiData-multi';
 import { apiAction, apiActionManual } from '../helpers/apiData/apiData';
 import { postData, getData } from './apiActions';
+import { deleteCookie, setCookie } from '../store/cookies';
 
 import {
     SET_CONTACTS_NEW, SET_PAYMENTS_NEW, SET_ACCOUNTS_NEW,
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW, SET_CUSTOM_FIELDS_NEW,
     SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_SYNC_PENDING, SET_OPT_DELETED,
-    SET_BANK
+    SET_BANK,
+    SET_ACCESS_TOKEN, DO_SNACK_ERROR, DELETE_ACCESS_TOKEN
 } from '../store/action-types';
 import { doSnack, doSnackError } from './actions';
 
@@ -163,10 +165,10 @@ export function deleteFile(filename, access_token) {
         const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/export';
 
         const body = { filename: filename };
-        dispatch({type: SET_OPT_DELETED, payload: filename});
+        dispatch({ type: SET_OPT_DELETED, payload: filename });
         postData(url, body, "DELETE", access_token)
             .then(res => {
-                dispatch({type: SET_OPT_DELETED, payload: []});
+                dispatch({ type: SET_OPT_DELETED, payload: [] });
                 dispatch({
                     type: SET_INCOMING_SUMS,
                     payload: apiActionManual({
@@ -178,7 +180,7 @@ export function deleteFile(filename, access_token) {
                 });
             })
             .catch(error => {
-                dispatch({type: SET_OPT_DELETED, payload: []});
+                dispatch({ type: SET_OPT_DELETED, payload: [] });
                 const msg = "File deleten helaas mislukt met fout \""
                     + error.message + "\".";
                 dispatch(doSnackError(msg));
@@ -215,10 +217,12 @@ export const getCsv = (active_account, filename, access_token) => apiAction({
     headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'Even geduld terwijl we csv bestand ophalen',
     storeAction: (payload) => {
-        return setBank({ type: 'setCsv', content: {
-            apiAction: payload,
-            filename
-        }})
+        return setBank({
+            type: 'setCsv', content: {
+                apiAction: payload,
+                filename
+            }
+        })
     }
 });
 
@@ -239,7 +243,7 @@ export const saveConfig = (active_account, body, access_token) => apiAction({
     headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'Bezig met opslaan van conversie-configuratie..',
     storeAction: (content) => {
-        return setBank({ type: 'setSavedConfig', content})
+        return setBank({ type: 'setSavedConfig', content })
     }
 });
 
@@ -257,7 +261,7 @@ export const convertCsv = (active_account, body, access_token, callback) => apiA
     headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'Bezig met converteren van csv bestand..',
     storeAction: (content) => {
-        return setBank({ type: 'setConvertResult', content})
+        return setBank({ type: 'setConvertResult', content })
     },
     callback
 });
@@ -283,8 +287,71 @@ export const deleteConvertFile = (active_account, filename, access_token, callba
     headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'Bezig met verwijderen van csv bestand..',
     storeAction: (content) => {
-        return setBank({ type: 'deleteFile', content})
+        return setBank({ type: 'deleteFile', content })
     },
     callback
 })
 
+// for connection
+const clientID = () => {
+    if (process.env.NODE_ENV !== 'production') {
+        return '5da951a273977ed8f70d07b57aa31cc9';
+    }
+    return '2cb04d78d39dae63065ef873a1b909e8';
+}
+
+const redir_url = () => {
+    if (process.env.NODE_ENV !== 'production') {
+        return 'http://localhost:3000/connection';
+    }
+    return 'https://moblybird.com/connection';
+}
+
+const env = () => {
+    if (process.env.NODE_ENV !== 'production') {
+        return 'dev';
+    }
+    return 'prod';
+}
+
+export function getRequestToken() {
+    // remove accessToken from cookie
+    deleteCookie();
+    const url = 'https://moneybird.com/oauth/authorize?'
+        + 'client_id=' + clientID()
+        + '&redirect_uri=' + redir_url()
+        + '&response_type=code'
+        + '&scope=sales_invoices documents estimates bank settings';
+    window.location.href = url;
+}
+
+// fetches Access Object + save in cookie and store
+export function setAccess(reqToken) {
+    return function (dispatch) {
+
+        const url = 'https://60bl9ynygh.execute-api.eu-central-1.amazonaws.com/beta/mbGetAccess?code='
+            + reqToken + '&env=' + env();
+        fetch(url, {
+            credentials: "same-origin"
+        })
+            .then(handleError)
+            .then(res => {
+                setCookie(res);
+                dispatch({ type: SET_ACCESS_TOKEN, payload: res });
+            })
+            .catch(error => {
+                dispatch({ type: DELETE_ACCESS_TOKEN });
+                const msg = "Verificatie van inlog mislukt. Server gaf foutmelding \""
+                    + error.message + "\".";
+                dispatch({ type: DO_SNACK_ERROR, payload: msg });
+            });
+    }
+}
+
+function handleError(res) {
+    if (res.ok && res.status >= 200 && res.status <= 299) {
+        return res.json();
+    } else {
+        throw Error('Request rejected with status: ' + res.status + " " + res.statusText);
+    }
+}

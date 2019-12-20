@@ -136,7 +136,6 @@ export const apiAction = (params) => {
                 };
             })
             .catch(err => {
-                console.log({url});
                 const rawError = err.toString();
                 const isTypeError = rawError === 'TypeError: Failed to fetch';
                 const newError = isTypeError ?

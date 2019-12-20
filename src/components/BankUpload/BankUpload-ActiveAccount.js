@@ -11,7 +11,6 @@ import {
     resetConvertResult, resetCsv, deleteConvertFile
 } from '../../actions/apiActions-new';
 
-import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -20,16 +19,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import LinearProgress from '@material-ui/core/LinearProgress';
-
-
-const useStyles = makeStyles(theme => ({
-    dialog: {
-        overflowY: 'scroll'
-    }
-}))
-/*
-csv data in store zetten met filename
-*/
 
 export const ActiveAccount = (props) => {
     const { accessToken } = useSelector(store => {

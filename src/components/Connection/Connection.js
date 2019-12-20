@@ -1,81 +1,55 @@
 // Connection.js
-// for connecting to Moneybird
+// for connecting to Moneybird - new
 
-import React, { Component } from 'react';
-import { connect } from "react-redux";
-import { setAccess, getRequestToken, testAccess } from "../../actions/apiActions";
-import { logout } from "../../actions/actions";
+import React from 'react';
+import { useSelector, useDispatch } from "react-redux";
+import { setAccess, getRequestToken, getAccounts } from "../../actions/apiActions-new";
+import { LOGOUT } from "../../store/action-types";
 import { paramToObj } from "../../constants/helpers";
 import ConnectCard from './ConnectCard';
 import { deleteCookie } from '../../store/cookies';
+import { hasData } from '../../store/derived-storestate-helpers';
 
-
-const mapStateToProps = state => {
-    return {
-        accessToken: state.accessToken,
-        accessVerified: state.accessVerified,
-        accessTime: state.accessTime,
-        testOutput: state.testOutput
-    };
-};
-
-function mapDispatchToProps(dispatch) {
-    return {
-        setAccess: (reqToken) => dispatch(setAccess(reqToken)),
-        testAccess: () => dispatch(testAccess()),
-        logout: () => dispatch(logout())
-    };
-}
-
-class ConnectionInt extends Component {
-    constructor(props) {
-        super(props);
-
-        this.state = { requestToken: "" }
-
-        this.onChange = this.onChange.bind(this);
-        this.onLogout = this.onLogout.bind(this);
-    }
-
-    onChange(e) {
-        this.setState({ requestToken: e.target.value });
-    }
-
-    onLogout(e) {
+const Connection = props => {
+    const [accessToken, accessVerified] = useSelector(store => (
+        [store.accessToken, hasData(store)]
+    ));
+    const dispatch = useDispatch();
+    const onLogout = (e) => {
         deleteCookie();
-		this.props.logout();
-	}
-
-    static getDerivedStateFromProps(props, state) {
-        const code = paramToObj(props.location.search).code;
-        if (state.requestToken === code) return { requestToken: "" };
-        return { requestToken: code };
+        dispatch({ type: LOGOUT });
+        // window.location.href = props.location.pathname;
+        props.history.replace(props.location.pathname, {});
     }
 
-    render() {
-        const reqToken = this.state.requestToken;
-        const hasAccess = (this.props.accessToken.hasData) ? true : false;
-        const hasReqToken = (reqToken && reqToken.length > 0) ? true : false;
-        const accessVerified = this.props.accessVerified;
-        const buttonList = hasAccess ?
+    const doAction = action => e => {
+        dispatch(action)
+    }
+
+    const tokenFromUrl = paramToObj(props.location.search).code;
+
+    const hasAccess = (accessToken.hasData) ? true : false;
+    const access_token = accessToken.data;
+    const hasReqToken = (tokenFromUrl && tokenFromUrl.length > 0) ? true : false;
+    const buttonList = hasAccess ?
+        [
+            {
+                key: 'verifyConnection', title: 'Verifeer connectie',
+                action: doAction(getAccounts(access_token))
+            },
+            { key: 'login', title: 'Log opnieuw in', action: getRequestToken },
+            { key: 'logout', title: 'Uitloggen', action: onLogout },
+        ]
+        : hasReqToken ?
             [
-                { key: 'verifyConnection', title: 'Verifeer connectie', action: this.props.testAccess },
-                { key: 'login', title: 'Log opnieuw in', action: getRequestToken },
-                { key: 'logout', title: 'Uitloggen', action: this.onLogout },
+                { key: 'verifyLogin', title: 'Verifieer', action: doAction(setAccess(tokenFromUrl)) },
+                { key: 'login', title: 'Log opnieuw in', action: getRequestToken }
             ]
-            : hasReqToken ?
-                [
-                    { key: 'verifyLogin', title: 'Verifieer', action: () => this.props.setAccess(reqToken) },
-                    { key: 'login', title: 'Log opnieuw in', action: getRequestToken }
-                ]
-                : [{ key: 'login', title: 'Log in', action: getRequestToken }];
+            : [{ key: 'login', title: 'Log in', action: getRequestToken }];
 
-        return <ConnectCard
-            hasAccess={hasAccess} hasReqToken={hasReqToken} accessVerified={accessVerified}
-            buttonList={buttonList} />
-    }
+    return <ConnectCard
+        hasAccess={hasAccess} hasReqToken={hasReqToken} accessVerified={accessVerified}
+        buttonList={buttonList} />
 }
-
-const Connection = connect(mapStateToProps, mapDispatchToProps)(ConnectionInt);
 
 export default Connection;
