@@ -2,10 +2,7 @@
 import {
 	setAccessToken, deleteAccessToken,
 	testConnection, doSnackError,
-	setLedgers, setAccounts,
-	addIncoming,
-	addContacts, setCustomFields,
-	addReceived
+	addIncoming
 } from './actions';
 import { setCookie, deleteCookie } from '../store/cookies';
 
@@ -111,36 +108,6 @@ export function testAccess() {
 }
 
 
-export function getLedgers() {
-	const params = {
-		storeField: 'ledgers',
-		path: '/ledger_accounts.json',
-		storeSetFunc: setLedgers,
-		errorMsg: 'Fout bij ophalen rekeningen. Melding van Moneybird: '
-	}
-	return getMBOnce(params);
-}
-
-export function getAccounts() {
-	const params = {
-		storeField: 'accounts',
-		path: '/financial_accounts.json',
-		storeSetFunc: setAccounts,
-		errorMsg: 'Fout bij ophalen bankrekeningen. Melding van Moneybird: '
-	}
-	return getMBOnce(params);
-}
-
-export function getCustomFields() {
-	const params = {
-		storeField: 'customFields',
-		path: '/custom_fields.json',
-		storeSetFunc: setCustomFields,
-		errorMsg: 'Fout bij ophalen custom fields. Melding van Moneybird: '
-	}
-	return getMBOnce(params);
-}
-
 
 // Get paged data from Moneybird
 function getMBMulti(params) {
@@ -171,19 +138,6 @@ function getMBMulti(params) {
 	}
 }
 
-export function getContacts(reload) {
-	const params = {
-		storeField: 'contacts',
-		path: '/contacts',
-		storeSetMultiFunc: addContacts,
-		errorMsg: 'Fout bij ophalen contacten. Melding van Moneybird: ',
-		type: 'contacts',
-		page: 1,
-		reload
-	}
-	return getMBMulti(params);
-}
-
 export function getIncoming(incomingType) {
 	const params = {
 		storeField: 'incoming',
@@ -195,61 +149,6 @@ export function getIncoming(incomingType) {
 		page: 1
 	}
 	return getMBMulti(params);
-}
-
-
-export function getReceived(idList) {
-	return function (dispatch, getState) {
-		const { received, accessToken } = getState();
-		if (received.hasAllData && accessToken.hasData && !idList) {
-			return received;
-		}
-		if (!idList) {
-			// fetch payment ids
-			console.log('fetching payment ids')
-			const url = base_url + '/financial_mutations/synchronization.json?filter=period:this_year';
-			return getData(url, accessToken.data)
-				.then(idListRaw => {
-					const idList = [...new Set(idListRaw.map(it => it.id))];
-					if (idList.length > 0) {
-						dispatch(getReceived(idList));
-					}
-				})
-				.catch(error => {
-					Object.keys(error).forEach(key => {
-						console.log(key, error[key]);
-					});
-					console.log({error});
-	
-					const msg = "Ophalen is helaas mislukt. Server gaf de fout \""
-						+ error.message + "\".";
-					dispatch(doSnackError(msg));
-				});
-		}
-		console.log({idList});
-		// get payments from fetched ids
-		const newIdList = idList.slice(0, PERPAGE);
-		const nextIds = idList.slice(PERPAGE);
-		const newUrl = base_url + '/financial_mutations/synchronization.json';
-		return postData(newUrl, { ids: newIdList }, "POST", accessToken.data)
-			.then(resultList => {
-				dispatch(addReceived({stuff: resultList, type: 'received'}));
-				if (nextIds.length > 0) {
-					dispatch(getReceived(nextIds));
-				} else {
-					dispatch(addReceived({ DONE: true, type: 'received'}));
-				}
-			})
-			.catch(error => {
-				Object.keys(error).forEach(key => {
-					console.log(key, error[key]);
-				});
-				console.log({error});
-				const msg = "Ophalen is helaas mislukt. Server gaf de fout \""
-					+ error.message + "\".";
-				dispatch(doSnackError(msg));
-			});
-	}
 }
 
 // returns promise

@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Match() {
     const classes = useStyles();
-    const accessToken = useSelector(store => store.accessToken);
+    const accessToken = useSelector(store => store.accessToken.toJS());
     const access_token = accessToken.data;
     const payments = useSelector(store => store.payments.get('apiData'));
     const paymentsList = payments.toJS();

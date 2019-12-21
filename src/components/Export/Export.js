@@ -31,7 +31,7 @@ in store:
 export const Export = props => {
     const { accessToken, incomingSums, exportPending, optDeleted, syncPending } = useSelector(store => {
         const { accessToken, incomingSums, exportPending, optDeleted, syncPending } = store;
-        return { accessToken, incomingSums, exportPending, optDeleted, syncPending }
+        return { accessToken: accessToken.toJS(), incomingSums, exportPending, optDeleted, syncPending }
     });
     const dispatch = useDispatch();
     const [selectedYear, setYear] = useState(0);

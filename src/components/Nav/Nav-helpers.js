@@ -179,7 +179,8 @@ const ConnectionLink = (props) => {
 
 export const NavWrapper = (props) => {
     const { children, menu, activePath, iconLogin, isConnected } = props;
-    const navTitle = menu.find(it => it.link === activePath).text;
+    const activeMenu = menu.find(it => it.link === activePath);
+    const navTitle = activeMenu? activeMenu.text : '';
 
     const classes = useStyles();
     const theme = useTheme();

@@ -23,7 +23,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 export const ActiveAccount = (props) => {
     const { accessToken } = useSelector(store => {
         const { accessToken } = store;
-        return { accessToken };
+        return { accessToken: accessToken.toJS() };
     });
     const { bankData, admin } = props;
     const bankDataFiles = bankData.files.toJS();

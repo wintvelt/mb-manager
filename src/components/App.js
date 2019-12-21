@@ -12,8 +12,6 @@ import Payments from './Payments/Payments';
 import Export from './Export/Export';
 import BankUpload from './BankUpload/BankUpload';
 import Match from './Match/Match';
-import Secret from './Secret';
-import Home from './Home';
 
 import { DO_SNACK } from '../store/action-types';
 
@@ -84,68 +82,53 @@ const theme = createMuiTheme({
 	},
 });
 
-const newRoutes = [
-	'/betalingen/lijst',
-	'/betalingen/match',
-	'/inkomend',
-	'/connection',
-	'/contacten',
-	'/export',
-	'/bankupload'
-]
-
 const NavRoute = (props) => {
 	const { isConnected } = props;
 	const dispatch = useDispatch();
 	return <Route render={(routeprops) => {
-		return newRoutes.includes(routeprops.location.pathname) ?
-			<NewNav activePath={routeprops.location.pathname}>
-				<Switch>
-					<PrivateRoute exact path="/betalingen/lijst" component={Payments}
-						isConnected={isConnected} />
-					<PrivateRoute exact path="/betalingen/match" component={Match}
-						isConnected={isConnected} />
-					<PrivateRoute exact path="/inkomend" component={Incoming}
-						isConnected={isConnected} />
-					<PrivateRoute exact path="/contacten" component={Contacts}
-						isConnected={isConnected} />
-					<PrivateRoute path="/export" component={Export}
-						isConnected={isConnected} />
-					<PrivateRoute path="/bankupload" component={BankUpload}
-						isConnected={isConnected} />
-					<Route exact path="/connection" component={Connection} />
-					<Route render={(routeprops) => {
-						const newSnack = "De pagina \"" +
-							routeprops.location.pathname +
-							"\" bestaat helaas (nog) niet. Gelukkig is er al genoeg anders te doen.";
-						dispatch({ type: DO_SNACK, payload: newSnack })
-						return <Redirect to={{
-							pathname: "/", state: {
-								newSnack: newSnack
-							}
-						}} />
+		return <NewNav activePath={routeprops.location.pathname}>
+			<Switch>
+				<PrivateRoute exact path="/betalingen/uitgaven" component={Payments}
+					isConnected={isConnected} />
+				<PrivateRoute exact path="/betalingen/match" component={Match}
+					isConnected={isConnected} />
+				<PrivateRoute exact path="/inkomend" component={Incoming}
+					isConnected={isConnected} />
+				<PrivateRoute exact path="/contacten" component={Contacts}
+					isConnected={isConnected} />
+				<PrivateRoute path="/export" component={Export}
+					isConnected={isConnected} />
+				<PrivateRoute path="/bankupload" component={BankUpload}
+					isConnected={isConnected} />
+				<Route exact path="/connection" component={Connection} />
+				<Route render={(routeprops) => {
+					const newSnack = "De pagina \"" +
+						routeprops.location.pathname +
+						"\" bestaat helaas (nog) niet. Gelukkig is er al genoeg anders te doen.";
+					dispatch({ type: DO_SNACK, payload: newSnack })
+					return <Redirect to={{
+						pathname: "/connection", state: {
+							newSnack: newSnack
+						}
 					}} />
-				</Switch>
-			</NewNav>
-			: <h1>Dit is ff dummy in Nav</h1>
+				}} />
+			</Switch>
+		</NewNav>
 	}} />
 
 }
-
-const Dummy = (props) => <></>
 
 const App = (props) => {
 	const [isConnected] = useSelector(store => [
 		store.accessToken.toJS().hasData
 	])
 	// only goes to /secret path in non-production environments
-	let secretPath = (process.env.NODE_ENV !== 'production') ? '/secret' : '/';
 	return (
 		<ThemeProvider theme={theme}>
 			<SnackbarProvider maxSnack={4}>
 				<Notifier />
 				<Router>
-					<NavRoute {...props} isConnected={isConnected}/>
+					<NavRoute {...props} isConnected={isConnected} />
 				</Router>
 				<ScrollTop>
 					<Fab color="secondary" size="small" aria-label="scroll back to top">
