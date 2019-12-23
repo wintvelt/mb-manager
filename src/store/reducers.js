@@ -4,7 +4,6 @@ import {
     DO_SNACK, DO_SNACK_ERROR,
     SET_ACCESS_TOKEN, DELETE_ACCESS_TOKEN,
     SET_BATCH_ERROR,
-    ADD_INCOMING, 
     SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
     SET_BATCH_MSG, CLEAR_BATCH_MSG,
     SET_BANK, 
@@ -15,7 +14,6 @@ import {
     SET_CUSTOM_FIELDS_NEW,
     SET_PAY_CONNECT
 } from "./action-types";
-import { newApiData, api } from '../constants/helpers';
 import { initBankData, setBank } from './reducer-helpers-bank';
 import { initApiDataMulti, apiUpdateMulti, apiUpdateMultiMulti } from '../helpers/apiData/apiData-multi';
 import { apiUpdate, initApiData } from '../helpers/apiData/apiData';
@@ -26,10 +24,6 @@ export const initialState = {
     newSnack: "",
     accessToken: initApiData,
     testOutput: "",
-    ledgers: newApiData(),
-    accounts: newApiData(),
-    customFields: newApiData(),
-    incoming: newApiData(),
     payments: initApiDataMulti,
     contactsNew: initApiDataMulti,
     customFieldsNew: initApiData,
@@ -38,8 +32,6 @@ export const initialState = {
     purchaseInvoices: initApiDataMulti,
     ledgersNew: initApiData,
     notifications: defaultNotifications,
-    contacts: newApiData(),
-    received: newApiData(),
     incomingSums: initApiData,
     exportPending: 0,
     optDeleted: [],
@@ -217,15 +209,6 @@ function rootReducer(state = initialState, action) {
         case SET_SYNC_PENDING: {
             return Object.assign({}, state, {
                 syncPending: action.payload
-            })
-        }
-
-        // from server
-        case ADD_INCOMING: {
-            const newIncoming = api.set(state.incoming, action.payload);
-            return Object.assign({}, state, {
-                incoming: newIncoming,
-                accessVerified: (!action.payload.ERROR)
             })
         }
 

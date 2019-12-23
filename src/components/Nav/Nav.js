@@ -5,10 +5,10 @@ import { hasData } from '../../store/derived-storestate-helpers';
 
 const menu = [
     { icon: 'import_contacts', link: '/contacten', text: 'Contacten' },
-    { icon: 'receipt', link: '/inkomend', text: 'Bonnetjes en facturen' },
-    { icon: 'remove_shopping_cart', link: '/betalingen/uitgaven', text: 'Uitgaven zonder bon' },
-    { icon: 'attachment', link: '/betalingen/match', text: 'Betalingen matchen' },
     { icon: 'cloud_upload', link: '/bankupload', text: 'Upload bankfile' },
+    { icon: 'remove_shopping_cart', link: '/betalingen/uitgaven', text: 'Uitgaven zonder bon' },
+    { icon: 'receipt', link: '/inkomend', text: 'Bonnetjes en facturen' },
+    { icon: 'attachment', link: '/betalingen/match', text: 'Betalingen matchen' },
     { icon: 'sync', link: '/export', text: 'Export Finvision' },
     { icon: 'account_circle', link: '/connection', text: 'Connectie', public: true }
 ];

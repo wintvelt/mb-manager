@@ -1,7 +1,6 @@
 // apiActions with New apiData lib
 import { apiActionPaged, apiActionSync } from '../helpers/apiData/apiData-multi';
 import { apiAction, apiActionManual } from '../helpers/apiData/apiData';
-import { postData, getData } from './apiActions';
 import { deleteCookie, setCookie } from '../store/cookies';
 
 import {
@@ -12,6 +11,8 @@ import {
     SET_ACCESS_TOKEN, DO_SNACK_ERROR, DELETE_ACCESS_TOKEN
 } from '../store/action-types';
 import { doSnack, doSnackError } from './actions';
+
+export const adminCode = "243231934476453244";
 
 export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
     url: 'https://moneybird.com/api/v2/243231934476453244/contacts?per_page=50&page=',
@@ -346,6 +347,34 @@ export function setAccess(reqToken) {
                 dispatch({ type: DO_SNACK_ERROR, payload: msg });
             });
     }
+}
+
+// initial POST command, returns promise
+export function postData(url = '', data = {}, method = "POST", access_token) {
+	// Default options are marked with *
+	return fetch(url, {
+		method: method, // *GET, POST, PUT, DELETE, etc.
+		mode: "cors", // no-cors, cors, *same-origin
+		cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+		// credentials: "include", // include, *same-origin, omit
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: "Bearer " + access_token // ACCESS_TOKEN
+			// "Content-Type": "application/x-www-form-urlencoded",
+		},
+		body: JSON.stringify(data) // body data type must match "Content-Type" header
+	})
+		.then(handleError)
+}
+// standard authenticated GET request, returns promise
+export function getData(url = '', access_token) {
+	return fetch(url, {
+		// credentials: "include", // include, *same-origin, omit
+		headers: {
+			Authorization: "Bearer " + access_token // ACCESS_TOKEN
+		}
+	})
+		.then(handleError);
 }
 
 function handleError(res) {

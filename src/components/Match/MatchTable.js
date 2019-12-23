@@ -176,10 +176,10 @@ const SuggestionBlock = props => {
 
     const classes = useStyles();
 
-    const handleSelect = (id, openAmount) => e => {
+    const handleSelect = (id, openAmount, openAmountForeign) => e => {
         if (e.target.parentNode && e.target.parentNode.href) return;
         setSelectedSuggestion(id !== selectedSuggestion && id);
-        onSelect(id, openAmount);
+        onSelect(id, openAmount, openAmountForeign);
     }
     const onMore = e => {
         const newScoreShown =
@@ -194,14 +194,15 @@ const SuggestionBlock = props => {
             {relatedToShow.map(r => {
                 const isSelected = r.id === selectedSuggestion;
                 return <SuggestionLine related={r} key={r.id}
-                    selected={isSelected} onSelect={handleSelect(r.id, r.openAmount || r.amount)} />
+                    selected={isSelected}
+                    onSelect={handleSelect(r.id, r.openAmount || r.amount, r.openAmountForeign || r.amountForeign)} />
             }
             )}
             {(hasMore || hasLess) && <ListItem>
                 <Button color='primary' aria-label="suggestions"
                     onClick={onMore}>
                     <Icon>{hasMore ? 'expand_more' : 'expand_less'}</Icon>
-                    {hasMore ? `${shownCount? 'meer' : 'toon'} suggesties (${moreSuggestions})` : 'minder tonen'}
+                    {hasMore ? `${shownCount ? 'meer' : 'toon'} suggesties (${moreSuggestions})` : 'minder tonen'}
                 </Button>
             </ListItem>}
         </List>
@@ -212,8 +213,8 @@ const MatchCard = (props) => {
     const classes = useStyles();
     const { payment, onSelect, selected } = props;
     const relatedCount = payment.related ? payment.related.length : 0;
-    const handleSelect = (invoiceId, openAmount) => {
-        onSelect(payment.id, invoiceId, openAmount);
+    const handleSelect = (invoiceId, openAmount, openAmountForeign) => {
+        onSelect(payment.id, invoiceId, openAmount, openAmountForeign);
     }
 
     return <Card className={classes.matchCard}>
@@ -232,8 +233,13 @@ const MatchCard = (props) => {
 export default function MatchTable(props) {
     const { rows, selected, onSelect } = props;
 
-    const handleSelect = (paymentId, invoiceId, openAmount) => {
-        const newPayment = { paymentId, invoiceId, amount: -openAmount };
+    const handleSelect = (paymentId, invoiceId, openAmount, openAmountForeign) => {
+        const newPayment = {
+            paymentId,
+            invoiceId, 
+            amount: -openAmount, 
+            amountForeign: openAmountForeign && -openAmountForeign 
+        };
         const oldPaymentInSelected = selected && selected.find(s => s.paymentId === paymentId);
         const shouldRemoveOld = oldPaymentInSelected && oldPaymentInSelected.invoiceId === invoiceId;
         const newSelected = oldPaymentInSelected ?

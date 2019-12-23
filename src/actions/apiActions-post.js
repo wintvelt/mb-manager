@@ -160,7 +160,7 @@ export function patchContactKeywords(batchId, contactId, body, access_token) {
 }
 
 // to connect list of payment, invoice combos
-// connectList = [ { paymentId, invoiceId, amount } ]
+// connectList = [ { paymentId, invoiceId, amount, amountForeign } ]
 export function batchMatchPost(batchList, access_token) {
     return function (dispatch) {
         // we have data to process
@@ -179,6 +179,7 @@ export function batchMatchPost(batchList, access_token) {
             const patchBody = {
                 booking_type: 'Document',
                 booking_id: item.invoiceId,
+                price: item.amountForeign || item.amount,
                 price_base: item.amount,
                 description: 'Transactie gekoppeld uit Moblybird ;)'
             };

@@ -26,6 +26,7 @@ id
 type (derived)
 date
 total_price_incl_tax_base
+total_price_incl_tax (in originele currency)
 state
 amount_open (indien payments && state != verwerkt)
 
@@ -44,13 +45,14 @@ ADD related (invoices/ receipts) to payments
 */
 
 // to add open amount for matching
-const getOpenAmount = (incoming) => {
+const getOpenAmount = (incoming, isForCur = false) => {
+    const withBase = isForCur ? '' : '_base';
     const { payments } = incoming;
     if (payments && payments.length > 0) {
-        const amt = -parseFloat(incoming.total_price_incl_tax_base);
+        const amt = -parseFloat(incoming['total_price_incl_tax' + withBase]);
         let openAmt = amt;
         for (const payment of payments) {
-            openAmt += parseFloat(payment.price_base);
+            openAmt += parseFloat(payment['price' + withBase]);
         }
         const roundedOpenAmt = Math.round(openAmt * 100) / 100;
         return roundedOpenAmt !== amt ? roundedOpenAmt : null
@@ -67,13 +69,14 @@ const amtFmt = (amtStr, currency = '€') => {
 
 const getKeywords = contact => {
     const kwObj = contact && contact.custom_fields &&
-            contact.custom_fields.find(cf => (cf.name === 'Keywords'));
+        contact.custom_fields.find(cf => (cf.name === 'Keywords'));
     return (kwObj) ? kwObj.value.split(',').map(word => word.trim().toLowerCase()) : [];
 }
 
 const mapIncoming = type => incoming => {
     const company = incoming.contact && incoming.contact.company_name;
-    const currency = (incoming.currency === 'EUR')? '€' : incoming.currency;
+    const isInEur = (incoming.currency === 'EUR');
+    const currency = isInEur ? '€' : incoming.currency;
     const detailText = incoming.details.map(d => `${d.amount} ${amtFmt(d.price, currency)}`).join(', ')
     return {
         id: incoming.id,
@@ -84,7 +87,9 @@ const mapIncoming = type => incoming => {
         detailText,
         details: incoming.details,
         amount: -parseFloat(incoming.total_price_incl_tax_base),
-        openAmount: getOpenAmount(incoming)
+        amountForeign: !isInEur && -parseFloat(incoming.total_price_incl_tax),
+        openAmount: getOpenAmount(incoming),
+        openAmountForeign: !isInEur && getOpenAmount(incoming, true)
     }
 }
 
@@ -155,7 +160,7 @@ const getRelated = (payment, invoiceData) => {
         const totalScore = dateScore + amountScore + openScore + openInvScore + detailScore + kwScore;
         const percScore = scorePerc(totalScore);
         const isTopper = percScore > THRESHOLD_TOPPER;
-        const scores = [amountScore, openScore, openInvScore, detailScore, kwScore, dateScore ];
+        const scores = [amountScore, openScore, openInvScore, detailScore, kwScore, dateScore];
         return {
             ...inv,
             total_price_incl_tax_base: amt,

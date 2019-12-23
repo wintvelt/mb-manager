@@ -1,12 +1,9 @@
 // voor actions die fetch enzo doen. Met middleware.
 import {
 	setAccessToken, deleteAccessToken,
-	testConnection, doSnackError,
-	addIncoming
+	testConnection, doSnackError
 } from './actions';
 import { setCookie, deleteCookie } from '../store/cookies';
-
-const PERPAGE = 50;
 
 export const adminCode = "243231934476453244";
 const base_url = 'https://moneybird.com/api/v2/' + adminCode;
@@ -109,48 +106,6 @@ export function testAccess() {
 
 
 
-// Get paged data from Moneybird
-function getMBMulti(params) {
-	const { storeField, path, storeSetMultiFunc, filter, errorMsg, type, page, reload } = params;
-	return function (dispatch, getState) {
-		const url = base_url + path;
-		const storeState = getState();
-		const accessToken = storeState.accessToken;
-		const stuff = storeState[storeField];
-		if (!stuff) console.log('DID NOT FIND dataState in Store');
-		if (stuff.hasAllData && accessToken.hasData && !reload) return stuff;
-
-		dispatch(storeSetMultiFunc({ LOADING: true, type, page }));
-		return getPagedList(url, accessToken.data, filter, page)
-			.then(resultList => {
-				dispatch(storeSetMultiFunc({ data: resultList, type, page }));
-				if (resultList.length > 0) {
-					dispatch(getMBMulti({ ...params, page: page + 1 }));
-				} else {
-					dispatch(storeSetMultiFunc({ DONE: true }));
-				}
-			})
-			.catch(err => {
-				dispatch(storeSetMultiFunc({ ERROR: true }));
-				const msg = errorMsg + '"' + err.message + '"';
-				dispatch(doSnackError(msg));
-			})
-	}
-}
-
-export function getIncoming(incomingType) {
-	const params = {
-		storeField: 'incoming',
-		path: '/documents/' + incomingType + 's.json',
-		filter: 'period:201801..201912',
-		storeSetMultiFunc: addIncoming,
-		errorMsg: 'Fout bij ophalen inkomende facturen. Melding van Moneybird: ',
-		type: incomingType,
-		page: 1
-	}
-	return getMBMulti(params);
-}
-
 // returns promise
 export function patchIncomingLedger(batchId, incomingId, body, access_token) {
 	return function (dispatch) {
@@ -216,55 +171,5 @@ export function patchContactField(batchId, contactId, body, access_token) {
 					};
 				})
 		)
-	}
-}
-
-// initial POST command, returns promise
-export function postData(url = '', data = {}, method = "POST", access_token) {
-	// Default options are marked with *
-	return fetch(url, {
-		method: method, // *GET, POST, PUT, DELETE, etc.
-		mode: "cors", // no-cors, cors, *same-origin
-		cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-		// credentials: "include", // include, *same-origin, omit
-		headers: {
-			"Content-Type": "application/json",
-			Authorization: "Bearer " + access_token // ACCESS_TOKEN
-			// "Content-Type": "application/x-www-form-urlencoded",
-		},
-		body: JSON.stringify(data) // body data type must match "Content-Type" header
-	})
-		.then(handleError)
-}
-// standard authenticated GET request, returns promise
-export function getData(url = '', access_token) {
-	return fetch(url, {
-		// credentials: "include", // include, *same-origin, omit
-		headers: {
-			Authorization: "Bearer " + access_token // ACCESS_TOKEN
-		}
-	})
-		.then(handleError);
-}
-
-// recursive (chained) GET, for getting all pages, returns promise
-function getPagedList(url = '', access_token, filter = "", page = 1) {
-	const pagedUrl =
-		(filter) ? url + '?per_page=' + PERPAGE + '&page=' + page + "&filter=" + filter
-			: url + '?per_page=' + PERPAGE + '&page=' + page;
-	return fetch(pagedUrl, {
-		// credentials: "include", // include, *same-origin, omit
-		headers: {
-			Authorization: "Bearer " + access_token // ACCESS_TOKEN
-		}
-	})
-		.then(handleError)
-}
-
-function handleError(res) {
-	if (res.ok && res.status >= 200 && res.status <= 299) {
-		return res.json();
-	} else {
-		throw Error('Request rejected with status: ' + res.status + " " + res.statusText);
 	}
 }

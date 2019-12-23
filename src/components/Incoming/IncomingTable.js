@@ -1,6 +1,6 @@
 import React from 'react';
 import { EnhancedTable } from '../Page/TablePanel';
-import { adminCode } from '../../actions/apiActions';
+import { adminCode } from '../../actions/apiActions-new';
 
 /*
 Datum
