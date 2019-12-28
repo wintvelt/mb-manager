@@ -25,6 +25,7 @@ import teal from '@material-ui/core/colors/teal';
 import blue from '@material-ui/core/colors/blue';
 import { SnackbarProvider } from '../../node_modules/notistack/build/index';
 import Notifier from '../helpers/snackbar/Notifier';
+import Revenues from './Revenues/Revenues';
 
 const theme = createMuiTheme({
 	palette: {
@@ -99,6 +100,8 @@ const NavRoute = (props) => {
 				<PrivateRoute path="/export" component={Export}
 					isConnected={isConnected} />
 				<PrivateRoute path="/bankupload" component={BankUpload}
+					isConnected={isConnected} />
+				<PrivateRoute path="/revenues" component={Revenues}
 					isConnected={isConnected} />
 				<Route exact path="/connection" component={Connection} />
 				<Route render={(routeprops) => {
