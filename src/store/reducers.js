@@ -7,7 +7,7 @@ import {
     SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
     SET_BATCH_MSG, CLEAR_BATCH_MSG,
     SET_BANK,
-    SET_PAYMENTS_NEW, SET_CONTACTS_NEW, SET_ACCOUNTS_NEW,
+    SET_PAYMENTS_NEW, RESET_PAYMENTS_NEW, SET_CONTACTS_NEW, SET_ACCOUNTS_NEW,
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW,
     SET_INCOMING_LEDGER_NEW, NOTIFY,
     SET_CONTACT_KEYWORDS,
@@ -59,6 +59,9 @@ function rootReducer(state = initialState, action) {
                 ...state,
                 accessToken: initApiData
             }
+        }
+        case RESET_PAYMENTS_NEW: {
+            return { ...state, payments: initApiDataMulti}
         }
         case SET_PAYMENTS_NEW: {
             const newPayments = apiUpdateMultiMulti(state.payments, payload);

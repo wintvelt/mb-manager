@@ -38,8 +38,8 @@ export const LoadingIcon = (props) => {
             >
                 <CircularProgress className={classes.progress} disableShrink size='20px' />
             </Fade>
-            : (hasAllData) ? <Icon className={classes.icon}>done</Icon>
-                : <Icon>{defaultIcon}</Icon>
+            : (hasAllData) ? <Icon className={classes.icon} color='secondary'>done</Icon>
+                : <Icon color='secondary'>{defaultIcon}</Icon>
 }
 
 export const LoadingComp = (props) => {

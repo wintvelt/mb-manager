@@ -14,3 +14,13 @@ export const inSameGroup = (ruleA, ruleB) => {
     const dataB = ruleB && ruleB.data;
     return dataA && dataB && dataA.account === dataB.account && dataA.isPositive === dataB.isPositive;
 }
+
+export const ruleSort = (aRule, bRule) => {
+    const a = aRule.data;
+    const b = bRule.data;
+    const aKey = a.account + a.isPositive + a.order;
+    const bKey = b.account + b.isPositive + b.order;
+    return aKey > bKey ? 1
+        : aKey < bKey ? -1
+            : 0;
+}

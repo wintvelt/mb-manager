@@ -8,7 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { inSameGroup } from './BookingRule-helpers';
+import { inSameGroup, ruleSort } from './BookingRule-helpers';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -21,7 +21,8 @@ const useStyles = makeStyles(theme => ({
         width: '100%',
         display: 'flex',
         alignItems: 'center',
-        minHeight: '48px'
+        minHeight: '48px',
+        borderTop: '1px solid #e0e0e0'
     },
     headerRow: {
         width: '100%',
@@ -144,15 +145,7 @@ const BookingRules = props => {
             }
         }
     });
-    const sortedRules = rules.sort((aRule, bRule) => {
-        const a = aRule.data;
-        const b = bRule.data;
-        const aKey = a.account + a.isPositive + a.order;
-        const bKey = b.account + b.isPositive + b.order;
-        return aKey > bKey ? 1
-            : aKey < bKey ? -1
-                : 0;
-    });
+    const sortedRules = rules.sort(ruleSort);
     const sortedRulesExt = sortedRules.map((rule, i) => {
         const prev = i > 0 && inSameGroup(rule, sortedRules[i - 1]) && sortedRules[i - 1].id;
         const next = inSameGroup(rule, sortedRules[i + 1]) && sortedRules[i + 1].id;

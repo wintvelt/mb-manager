@@ -8,16 +8,17 @@ import {
     getAccounts, getLedgers,
     getRevenueConfig, saveRevenueConfig, deleteRevenueConfig
 } from '../../actions/apiActions-new';
-import { SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL } from '../../store/action-types';
+import { SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL, RESET_PAYMENTS_NEW } from '../../store/action-types';
 import BookingRules from './BookingRules';
 import { BookingRuleAdd, BookingRuleAddDialog } from './BookingRuleAdd';
-import { newRuleOrder } from './BookingRule-helpers';
+import { newRuleOrder, ruleSort } from './BookingRule-helpers';
 import RevenuesData from './RevenuesData';
 
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Icon from '@material-ui/core/Icon';
 import Typography from '@material-ui/core/Typography';
+import RevenuesTable from './RevenuesTable';
 
 const Revenues = props => {
     const { accessToken, accountsNew, revenueConfig, ledgersNew, payments } =
@@ -29,13 +30,44 @@ const Revenues = props => {
             payments: store.payments.get('apiData')
         }));
     const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch({ type: RESET_PAYMENTS_NEW })
+    },[dispatch]);
     const accounts = accountsNew.toJS();
     const accountsNotAsked = accounts.notAsked;
     const revenueRules = revenueConfig.toJS();
     const revenueRulesNotAsked = revenueRules.notAsked;
+    const revenueRulesData = revenueRules.data || [];
+    const revenueRulesDataExt = revenueRulesData.map(rule => ({ ...rule, data: JSON.parse(rule.data) }))
+        .sort(ruleSort).map(rule => rule.data);
     const ledgers = ledgersNew.toJS();
     const ledgersNotAsked = ledgers.notAsked;
-    const access_token = accessToken.data
+    const access_token = accessToken.data;
+    const paymentsData = payments.toJS().data;
+    const paymentsDataExt = paymentsData && accounts.data && ledgers.data && revenueRules.hasAllData &&
+        paymentsData.map(payment => {
+            const account = accounts.data.find(it => it.id === payment.financial_account_id);
+            const account_name = account && account.name;
+            const isPositive = (payment.amount.slice(0,1) !== '-');
+            const message = payment.message.toLowerCase();
+            const ruleFound = revenueRulesDataExt.find(rule => {
+                const includes = rule.include && rule.include.toLowerCase().split(',').map(kw => kw.trim())
+                const excludes = rule.exclude && rule.exclude.toLowerCase().split(',').map(kw => kw.trim())
+                return rule.account === payment.financial_account_id &&
+                ((rule.isPositive === 'Af' && !isPositive) || (rule.isPositive === 'Bij' && isPositive)) &&
+                (!includes || includes.reduce((outcome, kw) => outcome || message.includes(kw), false)) &&
+                (!excludes || excludes.reduce((outcome, kw) => outcome && !message.includes(kw), true))
+            });
+            const ledgerId = ruleFound && ruleFound.ledger;
+            const ledger = ledgerId && ledgers.data.find(it => it.id === ledgerId);
+            const ledger_name = ledger && ledger.name;
+            return {
+                ...payment,
+                account_name,
+                ledgerId,
+                ledger_name
+            }
+        });
     useEffect(() => {
         if (accountsNotAsked) dispatch(getAccounts(access_token));
         if (revenueRulesNotAsked) dispatch(getRevenueConfig());
@@ -53,17 +85,17 @@ const Revenues = props => {
         setPanelsOpen(newList);
     }
     const handleSubmit = (id, rule, callback) => {
-        console.log({id, order: rule.order})
-        const newRule = rule.order? rule : {...rule, order: newRuleOrder(rule,revenueRules.data)}
+        const newRule = rule.order ? rule : { ...rule, order: newRuleOrder(rule, revenueRules.data) }
         dispatch(saveRevenueConfig(id, newRule, callback));
-        const newData = { id, data: JSON.stringify(newRule)};
-        dispatch({ type: SET_REVENUE_CONFIG_MANUAL, payload: newData});
+        const newData = { id, data: JSON.stringify(newRule) };
+        dispatch({ type: SET_REVENUE_CONFIG_MANUAL, payload: newData });
         setActiveRule(null);
     }
     const handleDelete = (id) => {
         dispatch(deleteRevenueConfig(id));
-        dispatch({ type: DEL_REVENUE_CONFIG_MANUAL, payload: { id }});
+        dispatch({ type: DEL_REVENUE_CONFIG_MANUAL, payload: { id } });
     }
+    const [selectedPayments, setSelectedPayments] = useState([]);
 
     return <div>
         <RevenuesData access_token={access_token}
@@ -75,6 +107,7 @@ const Revenues = props => {
         <ExpansionPanel expanded={panelIsOpen('config')} onChange={onPanelToggle('config')}>
             <ExpansionPanelSummary
                 expandIcon={<Icon>expand_more</Icon>}>
+                <Icon color='secondary' style={{ marginRight: '1rem' }}>settings</Icon>
                 <Typography>
                     {`Boekingsregels ${revenueRules.data ? '(' + revenueRules.data.length + ')' : ''}`}
                 </Typography>
@@ -85,8 +118,13 @@ const Revenues = props => {
                 onEdit={onClickRule}
                 onSubmit={handleSubmit}
             />
-            <BookingRuleAdd onClick={onClickRule({id:null})} />
+            <BookingRuleAdd onClick={onClickRule({ id: null })} />
         </ExpansionPanel>
+        {paymentsDataExt &&
+            <RevenuesTable rows={paymentsDataExt} selected={selectedPayments} onSelect={setSelectedPayments}
+            />
+        }
+        <pre>{JSON.stringify(paymentsData, null,2)}</pre>
         <BookingRuleAddDialog accounts={accounts} ledgers={ledgers}
             open={!!activeRule} rule={activeRule}
             onAbort={onClickRule(null)} onSubmit={handleSubmit} />
