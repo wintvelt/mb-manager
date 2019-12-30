@@ -1,7 +1,6 @@
 // AWS API actions
 import {
-	setIncomingSums, setExportPending, setSyncPending, setOptDeleted,
-	doSnack, doSnackError
+	setIncomingSums, doSnackError
 } from '../actions/actions';
 
 export function getIncomingSums(access_token) {

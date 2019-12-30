@@ -8,7 +8,8 @@ import {
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW, SET_CUSTOM_FIELDS_NEW,
     SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_SYNC_PENDING, SET_OPT_DELETED,
     SET_BANK,
-    SET_ACCESS_TOKEN, DO_SNACK_ERROR, DELETE_ACCESS_TOKEN
+    SET_ACCESS_TOKEN, DO_SNACK_ERROR, DELETE_ACCESS_TOKEN, 
+    SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE
 } from '../store/action-types';
 import { doSnack, doSnackError } from './actions';
 
@@ -291,6 +292,39 @@ export const deleteConvertFile = (active_account, filename, access_token, callba
         return setBank({ type: 'deleteFile', content })
     },
     callback
+})
+
+const base_url_simple_db = 'https://io02kwpmhl.execute-api.eu-central-1.amazonaws.com/Prod/simpledb/';
+const configFilename = 'revenue-config.json';
+
+// for revenue config
+export const getRevenueConfig = () => apiAction({
+    url: base_url_simple_db+configFilename,
+    loadingMsg: 'Boekingsregels aan het ophalen.',
+    storeAction: (payload) => {
+        return { type: SET_REVENUE_CONFIG, payload }
+    }
+})
+
+export const saveRevenueConfig = (id, data, callback) => apiAction({
+    url: base_url_simple_db+configFilename+'/'+encodeURI(id),
+    method: 'POST',
+    body: data,
+    headers: {},
+    loadingMsg: 'Boekingsregel opslaan..',
+    storeAction: (payload) => {
+        return { type: SET_REVENUE_CONFIG_UPDATE, payload }
+    },
+    callback
+})
+
+export const deleteRevenueConfig = (id) => apiAction({
+    url: base_url_simple_db+configFilename+'/'+encodeURI(id),
+    method: 'DELETE',
+    loadingMsg: 'Boekingsregel verwijderen..',
+    storeAction: (payload) => {
+        return { type: SET_REVENUE_CONFIG_UPDATE, payload }
+    }
 })
 
 // for connection

@@ -6,17 +6,18 @@ import {
     SET_BATCH_ERROR,
     SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
     SET_BATCH_MSG, CLEAR_BATCH_MSG,
-    SET_BANK, 
+    SET_BANK,
     SET_PAYMENTS_NEW, SET_CONTACTS_NEW, SET_ACCOUNTS_NEW,
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW,
     SET_INCOMING_LEDGER_NEW, NOTIFY,
     SET_CONTACT_KEYWORDS,
     SET_CUSTOM_FIELDS_NEW,
-    SET_PAY_CONNECT
+    SET_PAY_CONNECT,
+    SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE, SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL
 } from "./action-types";
 import { initBankData, setBank } from './reducer-helpers-bank';
 import { initApiDataMulti, apiUpdateMulti, apiUpdateMultiMulti } from '../helpers/apiData/apiData-multi';
-import { apiUpdate, initApiData } from '../helpers/apiData/apiData';
+import { apiUpdate, initApiData, apiActionManual } from '../helpers/apiData/apiData';
 import { defaultNotifications, updateSnacks, enqueueSnack } from "../helpers/snackbar/updateSnacks";
 
 // initial state also exported to root (to set default when initializing)
@@ -37,6 +38,8 @@ export const initialState = {
     optDeleted: [],
     syncPending: false,
     bankData: initBankData,
+    revenueConfig: initApiData,
+    revenueConfigUpdate: initApiData,
     batchMsg: {},
     batchError: false
 };
@@ -46,14 +49,14 @@ function rootReducer(state = initialState, action) {
     switch (type) {
         // payload = accessToken
         case SET_ACCESS_TOKEN: {
-            return { 
-                ...state, 
+            return {
+                ...state,
                 accessToken: apiUpdate(state.accessToken, action.payload)
             }
         }
         case DELETE_ACCESS_TOKEN: {
-            return { 
-                ...state, 
+            return {
+                ...state,
                 accessToken: initApiData
             }
         }
@@ -133,7 +136,8 @@ function rootReducer(state = initialState, action) {
             const newPayments = state.payments.updateIn(['apiData', 'data'], data => {
                 return data.filter(item => item.get('id') !== paymentId)
             });
-            return { ...state, 
+            return {
+                ...state,
                 purchaseInvoices: newPurchaseInvoices,
                 receipts: newReceipts,
                 payments: newPayments
@@ -150,6 +154,47 @@ function rootReducer(state = initialState, action) {
             return {
                 ...state,
                 incomingSums: newIncomingSums
+            }
+        }
+        case SET_REVENUE_CONFIG: {
+            const newRevenueConfig = apiUpdate(state.revenueConfig, payload);
+            return {
+                ...state,
+                revenueConfig: newRevenueConfig
+            }
+        }
+
+        case SET_REVENUE_CONFIG_MANUAL: {
+            const oldData = state.revenueConfig.toJS().data || [];
+            const idIsInOld = !!oldData.find(it => it.id === payload.id);
+            const newData = idIsInOld ?
+                oldData.map(it => it.id === payload.id ? payload : it)
+                : [...oldData, payload];
+            const action = apiActionManual({ data: newData });
+            const newUpdate = apiUpdate(state.revenueConfig, action);
+            return {
+                ...state,
+                revenueConfig: newUpdate
+            }
+        }
+
+        case DEL_REVENUE_CONFIG_MANUAL: {
+            const oldData = state.revenueConfig.toJS().data || [];
+            const newData = 
+                oldData.filter(it => it.id !== payload.id);
+            const action = apiActionManual({ data: newData });
+            const newUpdate = apiUpdate(state.revenueConfig, action);
+            return {
+                ...state,
+                revenueConfig: newUpdate
+            }
+        }
+
+        case SET_REVENUE_CONFIG_UPDATE: {
+            const newUpdate = apiUpdate(state.revenueConfigUpdate, payload);
+            return {
+                ...state,
+                revenueConfigUpdate: newUpdate
             }
         }
 

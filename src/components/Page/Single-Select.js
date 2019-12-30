@@ -41,7 +41,7 @@ function renderSuggestion(suggestionProps) {
     return (
         <MenuItem
             {...itemProps}
-            key={suggestion.label}
+            key={suggestion.label+index}
             selected={isHighlighted}
             component="div"
             style={{

@@ -33,8 +33,11 @@ const theme = createMuiTheme({
 			main: teal[500]
 		},
 		secondary: {
-			main: blueGrey[200]
+			main: blueGrey[500]
 		},
+		background: {
+			default: blueGrey[50]
+		}
 	},
 	overrides: {
 		'MuiLink': {

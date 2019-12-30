@@ -9,6 +9,7 @@ const menu = [
     { icon: 'remove_shopping_cart', link: '/betalingen/uitgaven', text: 'Uitgaven zonder bon' },
     { icon: 'receipt', link: '/inkomend', text: 'Bonnetjes en facturen' },
     { icon: 'attachment', link: '/betalingen/match', text: 'Betalingen matchen' },
+    { icon: 'cake', link: '/revenues', text: 'Omzet verwerken', badge: true },
     { icon: 'sync', link: '/export', text: 'Export Finvision' },
     { icon: 'account_circle', link: '/connection', text: 'Connectie', public: true }
 ];
