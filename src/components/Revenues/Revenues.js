@@ -1,7 +1,7 @@
 // Revenues.js
 // to book payments on ledger account
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
 import { useSelector, useDispatch } from "react-redux";
 
 import {
@@ -13,12 +13,41 @@ import BookingRules from './BookingRules';
 import { BookingRuleAdd, BookingRuleAddDialog } from './BookingRuleAdd';
 import { newRuleOrder, ruleSort } from './BookingRule-helpers';
 import RevenuesData from './RevenuesData';
+import { filterConfig } from './Revenue-filters';
+import { FilterPanel } from '../Page/FilterPanel';
+import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
 
+import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Icon from '@material-ui/core/Icon';
+import Chip from '@material-ui/core/Chip';
 import Typography from '@material-ui/core/Typography';
 import RevenuesTable from './RevenuesTable';
+
+const useStyles = makeStyles(theme => ({
+    heading: {
+        fontSize: theme.typography.pxToRem(15),
+        color: theme.palette.text.secondary,
+        flexBasis: '10rem',
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center'
+    },
+    secondaryHeading: {
+        fontSize: theme.typography.pxToRem(15),
+        color: theme.palette.text.primary,
+        alignSelf: 'center'
+    },
+    icon: {
+        marginRight: '1rem',
+        height: '24px;'
+    }
+}))
+
+const updateFilters = makeReducer(filterConfig);
+const initFilters = initialFilters(filterConfig);
+const getFilters = makeFilters(filterConfig);
 
 const Revenues = props => {
     const { accessToken, accountsNew, revenueConfig, ledgersNew, payments } =
@@ -30,9 +59,10 @@ const Revenues = props => {
             payments: store.payments.get('apiData')
         }));
     const dispatch = useDispatch();
+    const classes = useStyles();
     useEffect(() => {
         dispatch({ type: RESET_PAYMENTS_NEW })
-    },[dispatch]);
+    }, [dispatch]);
     const accounts = accountsNew.toJS();
     const accountsNotAsked = accounts.notAsked;
     const revenueRules = revenueConfig.toJS();
@@ -48,15 +78,15 @@ const Revenues = props => {
         paymentsData.map(payment => {
             const account = accounts.data.find(it => it.id === payment.financial_account_id);
             const account_name = account && account.name;
-            const isPositive = (payment.amount.slice(0,1) !== '-');
+            const isPositive = (payment.amount.slice(0, 1) !== '-');
             const message = payment.message.toLowerCase();
             const ruleFound = revenueRulesDataExt.find(rule => {
                 const includes = rule.include && rule.include.toLowerCase().split(',').map(kw => kw.trim())
                 const excludes = rule.exclude && rule.exclude.toLowerCase().split(',').map(kw => kw.trim())
                 return rule.account === payment.financial_account_id &&
-                ((rule.isPositive === 'Af' && !isPositive) || (rule.isPositive === 'Bij' && isPositive)) &&
-                (!includes || includes.reduce((outcome, kw) => outcome || message.includes(kw), false)) &&
-                (!excludes || excludes.reduce((outcome, kw) => outcome && !message.includes(kw), true))
+                    ((rule.isPositive === 'Af' && !isPositive) || (rule.isPositive === 'Bij' && isPositive)) &&
+                    (!includes || includes.reduce((outcome, kw) => outcome || message.includes(kw), false)) &&
+                    (!excludes || excludes.reduce((outcome, kw) => outcome && !message.includes(kw), true))
             });
             const ledgerId = ruleFound && ruleFound.ledger;
             const ledger = ledgerId && ledgers.data.find(it => it.id === ledgerId);
@@ -84,6 +114,30 @@ const Revenues = props => {
             : [...panelsOpen, name]
         setPanelsOpen(newList);
     }
+    const [selectedPayments, setSelectedPayments] = useState([]);
+
+    const [filterState, setFilters] = useReducer(updateFilters, initFilters);
+    const [filters, rows] = getFilters(paymentsDataExt || [], selectedPayments, filterState);
+    const filterObj = filters.map(f => {
+        return {
+            ...f,
+            onChange: selected => {
+                setFilters({ id: f.id, payload: selected })
+            }
+        }
+    });
+    const appliedFilters = filterState.filter(f => {
+        const fConfig = filterConfig.find(fc => fc.id === f.id);
+        return fConfig.type === filterType.BOOLEAN ? f.value
+            : fConfig.type === filterType.SINGLE ? (f.value) ? true : false
+                : f.value && f.value.length > 0
+
+    });
+    const filterCount = appliedFilters.length > 0 ? appliedFilters.length : 'Geen';
+    const filterBadgeTxt = paymentsDataExt && filterCount > 0 ?
+        `${rows.length} van ${paymentsDataExt.length}`
+        : '';
+
     const handleSubmit = (id, rule, callback) => {
         const newRule = rule.order ? rule : { ...rule, order: newRuleOrder(rule, revenueRules.data) }
         dispatch(saveRevenueConfig(id, newRule, callback));
@@ -95,7 +149,6 @@ const Revenues = props => {
         dispatch(deleteRevenueConfig(id));
         dispatch({ type: DEL_REVENUE_CONFIG_MANUAL, payload: { id } });
     }
-    const [selectedPayments, setSelectedPayments] = useState([]);
 
     return <div>
         <RevenuesData access_token={access_token}
@@ -120,11 +173,28 @@ const Revenues = props => {
             />
             <BookingRuleAdd onClick={onClickRule({ id: null })} />
         </ExpansionPanel>
+        {paymentsDataExt && <ExpansionPanel expanded={panelIsOpen('filters')} onChange={onPanelToggle('filters')}>
+            <ExpansionPanelSummary
+                expandIcon={<Icon>expand_more</Icon>}
+                aria-controls="filters-panel-header"
+                id="filters-panel-header"
+            >
+                <Typography className={classes.heading}>
+                    <Icon className={classes.icon}>filter_list</Icon>
+                    Filters
+                        </Typography>
+                <Typography component='div' className={classes.secondaryHeading}>
+                    {`${filterCount} filter${filterCount === 1 ? '' : 's'} toegepast`}
+                    {filterBadgeTxt && <Chip size='small' label={filterBadgeTxt} />}
+                </Typography>
+            </ExpansionPanelSummary>
+            <FilterPanel filterObj={filterObj} />
+        </ExpansionPanel>}     
         {paymentsDataExt &&
-            <RevenuesTable rows={paymentsDataExt} selected={selectedPayments} onSelect={setSelectedPayments}
+            <RevenuesTable rows={rows} selected={selectedPayments} onSelect={setSelectedPayments}
             />
         }
-        <pre>{JSON.stringify(paymentsData, null,2)}</pre>
+        <pre>{JSON.stringify(paymentsData, null, 2)}</pre>
         <BookingRuleAddDialog accounts={accounts} ledgers={ledgers}
             open={!!activeRule} rule={activeRule}
             onAbort={onClickRule(null)} onSubmit={handleSubmit} />

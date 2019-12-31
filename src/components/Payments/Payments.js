@@ -7,8 +7,8 @@ import { derivedPayments } from './Payments-datatable';
 import PaymentsData from './PaymentsData';
 import { filterConfig } from './Payment-filters';
 import { FilterPanel } from '../Page/FilterPanel';
-import { paymentDownload } from './Payment-xls-download';
 import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
+import { paymentDownload } from './Payment-xls-download';
 
 import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
