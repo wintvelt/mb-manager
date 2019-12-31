@@ -194,7 +194,7 @@ const Revenues = props => {
             <RevenuesTable rows={rows} selected={selectedPayments} onSelect={setSelectedPayments}
             />
         }
-        <pre>{JSON.stringify(paymentsData, null, 2)}</pre>
+        {/* <pre>{JSON.stringify(paymentsData, null, 2)}</pre> */}
         <BookingRuleAddDialog accounts={accounts} ledgers={ledgers}
             open={!!activeRule} rule={activeRule}
             onAbort={onClickRule(null)} onSubmit={handleSubmit} />
