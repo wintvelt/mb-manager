@@ -7,7 +7,7 @@ const headCells = [
   { id: 'account_name', label: 'Rekening' },
   { id: 'amount', numeric: true, label: 'Bedrag' },
   { id: 'message', label: 'Omschrijving' },
-  { id: 'ledger_name', label: 'Categorie volgens regels'}
+  { id: 'ledger_name', label: 'Categorie volgens regels' }
 ];
 
 const withThousand = (amtStr) => {
@@ -40,7 +40,8 @@ const rowCells = [
     hrefKey: 'id',
     prettify: (message) => message.replace(/\//g, ' ')
   },
-  { key: 'ledger_name' }
+  { key: 'ledger_name', style: { width: '240px' }
+}
 ]
 
 export default function RevenuesTable(props) {

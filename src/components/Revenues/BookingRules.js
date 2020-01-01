@@ -82,7 +82,7 @@ const RuleRow = ({ rule, isHeader, selForDelete, onClickDel, onEdit, handleSwap 
     const onMove = otherId => e => handleSwap(id, otherId);
     return <div className={isHeader ? classes.headerRow : classes.row}>
         <Typography className={classes.ruleAccount}>{ruleData.account}</Typography>
-        <Typography className={classes.ruleIsPositive}>{ruleData.isPositive}{ruleData.order}</Typography>
+        <Typography className={classes.ruleIsPositive}>{ruleData.isPositive}</Typography>
         <Typography className={classes.ruleKeywords} variant='body2'>{ruleData.include}</Typography>
         <Typography className={classes.ruleKeywords} variant='body2'>{ruleData.exclude}</Typography>
         <Typography className={classes.ruleLedger}>{ruleData.ledger}</Typography>

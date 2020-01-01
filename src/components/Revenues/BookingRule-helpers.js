@@ -24,3 +24,15 @@ export const ruleSort = (aRule, bRule) => {
         : aKey < bKey ? -1
             : 0;
 }
+
+const validParentLedgers = [
+    '243231934638982453', // omzet
+    '258530172846737119', // premie
+    '246465291162223843', // bankrekeningen
+]
+
+export const makeValidLedgerOptions = ledgersDataRaw => {
+    return ledgersDataRaw
+        .filter(ledger => validParentLedgers.includes(ledger.parent_id))
+        .map(ledger => ({ value: ledger.id, label: ledger.name }));
+}

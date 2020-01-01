@@ -5,8 +5,10 @@
 import {
     doSnack
 } from './actions';
-import { SET_INCOMING_LEDGER_NEW, SET_BATCH_MSG, CLEAR_BATCH_MSG, DO_SNACK,
-    SET_CONTACT_KEYWORDS, SET_PAY_CONNECT } from '../store/action-types';
+import {
+    SET_INCOMING_LEDGER_NEW, SET_BATCH_MSG, CLEAR_BATCH_MSG, DO_SNACK,
+    SET_CONTACT_KEYWORDS, SET_PAY_CONNECT, DELETE_PAYMENT_MANUAL
+} from '../store/action-types';
 
 const adminCode = "243231934476453244";
 const base_url = 'https://moneybird.com/api/v2/' + adminCode;
@@ -191,7 +193,8 @@ export function batchMatchPost(batchList, access_token) {
 }
 
 // POST update 1 connection between payment-invoice
-export function patchMatch(batchId, paymentId, body, access_token) {
+export function patchMatch(batchId, paymentId, body, access_token, destination) {
+    const destStr = destination || 'bonnetjes';
     return function (dispatch) {
         const url = base_url + `/financial_mutations/${paymentId}/link_booking.json`;
         return (
@@ -202,7 +205,7 @@ export function patchMatch(batchId, paymentId, body, access_token) {
                         batchId: batchId,
                         fetchId: paymentId,
                         res: true,
-                        msg: "betalingen aan bonnetjes gelinkt"
+                        msg: `betalingen aan ${destStr} gelinkt`
                     };
                 })
                 .catch((err) => {
@@ -214,6 +217,38 @@ export function patchMatch(batchId, paymentId, body, access_token) {
                     };
                 })
         )
+    }
+}
+
+// to process a list of ledger-bookings (book payment to a ledger)
+const invert = numStr => numStr.slice(0, 1) === '-' ? numStr.slice(1) : '-' + numStr;
+
+// connectList = [ { payment, ledgerId } ]
+export function batchBookingPost(batchList, access_token) {
+    return function (dispatch) {
+        // we have data to process
+        batchList.forEach((item) => {
+            // optimistic update of store
+            dispatch({ type: DELETE_PAYMENT_MANUAL, payload: { paymentId: item.payment.id } });
+            // set message
+            const initialPayload = {
+                batchId: "auto_booking",
+                fetchId: item.payment.id,
+                res: false,
+                msg: ""
+            }
+            dispatch(setBatchCheckMsg(initialPayload));
+            // send single update to server + update batchMsg with response
+            const patchBody = {
+                booking_type: 'LedgerAccount',
+                booking_id: item.ledgerId,
+                price_base: invert(item.payment.amount_open),
+                description: 'Transactie gekoppeld uit Moblybird ;)'
+            };
+            dispatch(
+                patchMatch("auto_booking", item.payment.id, patchBody, access_token, 'categorie')
+            ).then(payload => dispatch(setBatchCheckMsg(payload)));
+        });
     }
 }
 

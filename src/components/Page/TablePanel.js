@@ -264,14 +264,15 @@ const Editable = (props) => {
 
 const RowCell = (props) => {
     const { row, cellConfig, edits, onChange, onSelect, isSelected, isDisabled } = props;
-    const { key, padding, align, prettify, hrefBase, hrefKey, editable, render } = cellConfig;
+    const { key, padding, align, prettify, hrefBase, hrefKey, editable, render, style } = cellConfig;
     const initValue = row[key];
     const curValue = typeof edits === 'string' ? edits : initValue;
     const content = prettify ? prettify(initValue, row) : initValue;
     const isJustContent = (!hrefBase && !editable && !render) || (isDisabled && !render);
-    const style = isDisabled? { color: 'grey', backgroundColor: 'lightgrey', textDecoration: 'line-through' } : {}
+    const cellStyle = isDisabled? { color: 'grey', backgroundColor: 'lightgrey', textDecoration: 'line-through' } : 
+        style || {}
     return <TableCell padding={padding || 'default'} align={align || 'inherit'}
-        style={style}>
+        style={cellStyle}>
         {!isDisabled &&
             <TableLink hrefBase={hrefBase} hrefEnd={row[hrefKey]} initValue={initValue} content={content} />}
         {editable && <Editable initValue={initValue} curValue={curValue} onChange={onChange} />}

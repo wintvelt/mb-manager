@@ -8,6 +8,7 @@ import {
     getAccounts, getLedgers,
     getRevenueConfig, saveRevenueConfig, deleteRevenueConfig
 } from '../../actions/apiActions-new';
+import { batchBookingPost } from '../../actions/apiActions-post';
 import { SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL, RESET_PAYMENTS_NEW } from '../../store/action-types';
 import BookingRules from './BookingRules';
 import { BookingRuleAdd, BookingRuleAddDialog } from './BookingRuleAdd';
@@ -15,6 +16,7 @@ import { newRuleOrder, ruleSort } from './BookingRule-helpers';
 import RevenuesData from './RevenuesData';
 import { filterConfig } from './Revenue-filters';
 import { FilterPanel } from '../Page/FilterPanel';
+import Dialog from '../Page/Dialog';
 import { initialFilters, makeReducer, makeFilters, filterType } from '../../helpers/filters/filters';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -23,7 +25,9 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import Icon from '@material-ui/core/Icon';
 import Chip from '@material-ui/core/Chip';
 import Typography from '@material-ui/core/Typography';
+
 import RevenuesTable from './RevenuesTable';
+import { makeValidLedgerOptions } from './BookingRule-helpers';
 
 const useStyles = makeStyles(theme => ({
     heading: {
@@ -63,7 +67,8 @@ const Revenues = props => {
     useEffect(() => {
         dispatch({ type: RESET_PAYMENTS_NEW })
     }, [dispatch]);
-    const accounts = accountsNew.toJS();
+    const accountsRaw = accountsNew.toJS();
+    const accounts = { ...accountsRaw, data: accountsRaw.data && accountsRaw.data.filter(acc => acc.active)}
     const accountsNotAsked = accounts.notAsked;
     const revenueRules = revenueConfig.toJS();
     const revenueRulesNotAsked = revenueRules.notAsked;
@@ -105,8 +110,6 @@ const Revenues = props => {
     }, [dispatch, accountsNotAsked, revenueRulesNotAsked, ledgersNotAsked, access_token]);
     const [panelsOpen, setPanelsOpen] = useState([]);
     const panelIsOpen = name => !!panelsOpen.find(it => it === name);
-    const [activeRule, setActiveRule] = useState(null);
-    const onClickRule = rule => e => setActiveRule(rule);
     const onPanelToggle = name => () => {
         const wasInList = !!panelsOpen.find(it => it === name);
         const newList = wasInList ?
@@ -114,7 +117,36 @@ const Revenues = props => {
             : [...panelsOpen, name]
         setPanelsOpen(newList);
     }
+    const [activeRule, setActiveRule] = useState(null);
+    const onClickRule = rule => e => setActiveRule(rule);
+
     const [selectedPayments, setSelectedPayments] = useState([]);
+    const selectionHasEmpty = paymentsDataExt && !!paymentsDataExt.find(payment => (
+        selectedPayments.includes(payment.id) && !payment.ledgerId
+    ));
+
+    const [actionState, setActionState] = useState({ open: false, selected: {} });
+    const onActionOpen = (newActionOpenState) => {
+        setActionState({
+            open: newActionOpenState,
+            selected: {}
+        });
+    }
+    const onActionSubmit = (access_token) => {
+        setActionState({
+            ...actionState,
+            open: false
+        });
+        const selectedPaymentswithUpdate = paymentsDataExt
+            .filter(payment => selectedPayments.includes(payment.id))
+            .map(payment => { return { 
+                payment, 
+                ledgerId: payment.ledgerId || actionState.selected.value 
+            } });
+        dispatch(batchBookingPost(selectedPaymentswithUpdate, access_token));
+        setSelectedPayments([]);
+    }
+    const ledgerOptions = ledgers.data && makeValidLedgerOptions(ledgers.data);
 
     const [filterState, setFilters] = useReducer(updateFilters, initFilters);
     const [filters, rows] = getFilters(paymentsDataExt || [], selectedPayments, filterState);
@@ -138,7 +170,7 @@ const Revenues = props => {
         `${rows.length} van ${paymentsDataExt.length}`
         : '';
 
-    const handleSubmit = (id, rule, callback) => {
+    const handleSubmitRules = (id, rule, callback) => {
         const newRule = rule.order ? rule : { ...rule, order: newRuleOrder(rule, revenueRules.data) }
         dispatch(saveRevenueConfig(id, newRule, callback));
         const newData = { id, data: JSON.stringify(newRule) };
@@ -169,7 +201,7 @@ const Revenues = props => {
                 accounts={accounts} ledgers={ledgers} revenueRules={revenueRules}
                 onDelete={handleDelete}
                 onEdit={onClickRule}
-                onSubmit={handleSubmit}
+                onSubmit={handleSubmitRules}
             />
             <BookingRuleAdd onClick={onClickRule({ id: null })} />
         </ExpansionPanel>
@@ -189,15 +221,34 @@ const Revenues = props => {
                 </Typography>
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />
-        </ExpansionPanel>}     
+        </ExpansionPanel>}
         {paymentsDataExt &&
             <RevenuesTable rows={rows} selected={selectedPayments} onSelect={setSelectedPayments}
+                onMulti={() => onActionOpen(true)}
             />
         }
-        {/* <pre>{JSON.stringify(paymentsData, null, 2)}</pre> */}
+        {/* <pre>{JSON.stringify({selectionHasEmpty})}</pre> */}
+        {/* <pre>{JSON.stringify(paymentsDataExt, null, 2)}</pre> */}
         <BookingRuleAddDialog accounts={accounts} ledgers={ledgers}
             open={!!activeRule} rule={activeRule}
-            onAbort={onClickRule(null)} onSubmit={handleSubmit} />
+            onAbort={onClickRule(null)} onSubmit={handleSubmitRules} />
+        <Dialog
+            open={actionState.open}
+            dialogTitle={`${selectedPayments.length} betaling${selectedPayments.length === 1 ? '' : 'en'} boeken`}
+            dialogText={selectionHasEmpty? 
+                'Je selectie bevat ook betalingen zonder automatische toewijzing. ' +
+                'Kies een nieuwe categorie voor deze betalingen.'
+                : 'Alle betalingen hebben een automatische toewijzing. ' +
+                'Klik om ze in Moneybird te verwerken.'
+            }
+            options={selectionHasEmpty && ledgerOptions}
+            onChange={selectionHasEmpty && (item => setActionState({ open: true, selected: item }))}
+            placeholder='kies een categorie'
+            label='Categorie'
+            onHandleClose={() => onActionOpen(false)}
+            onSubmit={() => onActionSubmit(access_token)}
+            selected={selectionHasEmpty && actionState.selected}
+        />
     </div>
 }
 

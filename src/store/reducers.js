@@ -13,7 +13,8 @@ import {
     SET_CONTACT_KEYWORDS,
     SET_CUSTOM_FIELDS_NEW,
     SET_PAY_CONNECT,
-    SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE, SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL
+    SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE, SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL,
+    DELETE_PAYMENT_MANUAL
 } from "./action-types";
 import { initBankData, setBank } from './reducer-helpers-bank';
 import { initApiDataMulti, apiUpdateMulti, apiUpdateMultiMulti } from '../helpers/apiData/apiData-multi';
@@ -143,6 +144,16 @@ function rootReducer(state = initialState, action) {
                 ...state,
                 purchaseInvoices: newPurchaseInvoices,
                 receipts: newReceipts,
+                payments: newPayments
+            }
+        }
+        case DELETE_PAYMENT_MANUAL: {
+            const { paymentId } = payload;
+            const newPayments = state.payments.updateIn(['apiData', 'data'], data => {
+                return data.filter(item => item.get('id') !== paymentId)
+            });
+            return {
+                ...state,
                 payments: newPayments
             }
         }

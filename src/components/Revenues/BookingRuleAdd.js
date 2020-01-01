@@ -15,6 +15,8 @@ import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
+import { makeValidLedgerOptions } from './BookingRule-helpers';
+
 const useStyles = makeStyles(theme => ({
     dialogFieldSet: {
         overflowY: 'scroll',
@@ -61,12 +63,6 @@ const FormSelect = props => {
     </FormControl>
 }
 
-const validParentLedgers = [
-    '243231934638982453', // omzet
-    '258530172846737119', // premie
-    '246465291162223843', // bankrekeningen
-]
-
 const defaultData = JSON.stringify({
     account: '',
     ledger: '',
@@ -77,10 +73,10 @@ const defaultData = JSON.stringify({
 
 export const BookingRuleAddDialog = props => {
     const { rule, accounts, ledgers, open, onAbort, onSubmit } = props;
-    const id = (rule && rule.id) || 'id'+Date.now();
+    const id = (rule && rule.id) || 'id' + Date.now();
     const accountsData = (accounts && accounts.data) || [];
     const ledgersDataRaw = (ledgers && ledgers.data) || [];
-    const ledgersData = ledgersDataRaw.filter(ledger => validParentLedgers.includes(ledger.parent_id));
+    const ledgersOptions = makeValidLedgerOptions(ledgersDataRaw);
     const classes = useStyles();
     const data = (rule && rule.data) || defaultData;
     const initRule = JSON.parse(data);
@@ -94,7 +90,7 @@ export const BookingRuleAddDialog = props => {
     const dialogTitle = (rule && rule.data) ? 'bewerken' : 'toevoegen';
     const handleSubmit = e => {
         const newOrderNeeded = currentRule.account !== initRule.account || currentRule.isPositive !== initRule.isPositive;
-        const newRule = newOrderNeeded? { ...currentRule, order: null} : currentRule;
+        const newRule = newOrderNeeded ? { ...currentRule, order: null } : currentRule;
         return onSubmit(id, newRule);
     };
     return <Dialog open={open} >
@@ -139,7 +135,7 @@ export const BookingRuleAddDialog = props => {
                 label='Boek dan op categorie..'
                 value={currentRule.ledger}
                 handleChange={handleChange('ledger')}
-                options={ledgersData.map(ledger => ({ value: ledger.id, label: ledger.name }))}
+                options={ledgersOptions}
             />
         </DialogContent>
         <DialogActions>

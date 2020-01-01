@@ -8,7 +8,6 @@ import { periodOptions } from '../../constants/helpers';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 
-
 // styles
 const useStyles = makeStyles(theme => ({
     listButton: {
