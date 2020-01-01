@@ -25,6 +25,9 @@ export const ruleSort = (aRule, bRule) => {
             : 0;
 }
 
+const validLedgers = [
+    '249402229731100088', // bankkosten
+]
 const validParentLedgers = [
     '243231934638982453', // omzet
     '258530172846737119', // premie
@@ -33,6 +36,9 @@ const validParentLedgers = [
 
 export const makeValidLedgerOptions = ledgersDataRaw => {
     return ledgersDataRaw
-        .filter(ledger => validParentLedgers.includes(ledger.parent_id))
+        .filter(ledger => (
+            validLedgers.includes(ledger.id) ||
+            validParentLedgers.includes(ledger.parent_id)
+        ))
         .map(ledger => ({ value: ledger.id, label: ledger.name }));
 }
