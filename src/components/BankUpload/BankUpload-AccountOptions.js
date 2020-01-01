@@ -3,6 +3,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
+import Icon from '@material-ui/core/Icon';
 import MenuItem from '@material-ui/core/MenuItem';
 
 const useStyles = makeStyles(theme => ({
@@ -42,7 +43,8 @@ export const AccountOptions = props => {
 
     return <div>
         <Button aria-controls="andere rekening" aria-haspopup="true" color='primary' variant='contained'
-            onClick={handleClick}>
+            onClick={handleClick}
+            endIcon={<Icon>arrow_drop_down</Icon>}>
             Andere rekening
         </Button>
         <Menu
