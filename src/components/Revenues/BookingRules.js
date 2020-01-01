@@ -140,7 +140,9 @@ const BookingRules = props => {
             id: rule.id,
             data: {
                 ...data,
-                account: account && account.name,
+                account: data.account === 'ALL' ?
+                    'Alle rekeningen'
+                    : account && account.name,
                 ledger: ledger && ledger.name
             }
         }

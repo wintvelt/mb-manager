@@ -10,6 +10,13 @@ export const filterConfig = [
         itemFilter: (selected, filterState, item) => !filterState || filterState === item.account_name
     },
     {
+        id: 'afBij',
+        label: 'Bij/ afschrijvingen',
+        placeholder: 'Alles',
+        type: filterType.SINGLE,
+        itemFilter: (selected, filterState, item) => !filterState || filterState === item.afBij
+    },
+    {
         id: 'selected',
         label: 'Alleen selectie tonen',
         placeholder: 'Alles',

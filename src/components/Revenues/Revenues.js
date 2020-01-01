@@ -88,7 +88,7 @@ const Revenues = props => {
             const ruleFound = revenueRulesDataExt.find(rule => {
                 const includes = rule.include && rule.include.toLowerCase().split(',').map(kw => kw.trim())
                 const excludes = rule.exclude && rule.exclude.toLowerCase().split(',').map(kw => kw.trim())
-                return rule.account === payment.financial_account_id &&
+                return (rule.account === 'ALL' || rule.account === payment.financial_account_id) &&
                     ((rule.isPositive === 'Af' && !isPositive) || (rule.isPositive === 'Bij' && isPositive)) &&
                     (!includes || includes.reduce((outcome, kw) => outcome || message.includes(kw), false)) &&
                     (!excludes || excludes.reduce((outcome, kw) => outcome && !message.includes(kw), true))
@@ -100,7 +100,8 @@ const Revenues = props => {
                 ...payment,
                 account_name,
                 ledgerId,
-                ledger_name
+                ledger_name,
+                afBij: payment.amount.slice(0,1) === '-'? 'Afschrijvingen' : 'Bijschrijvingen'
             }
         });
     useEffect(() => {

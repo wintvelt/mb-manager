@@ -45,6 +45,7 @@ export const BookingRuleAdd = props => {
 
 const FormSelect = props => {
     const { label, value, handleChange, options } = props;
+    console.log({value})
     const classes = useStyles();
     return <FormControl className={classes.formControl} fullWidth>
         {label && <InputLabel id={label}>{label}</InputLabel>}
@@ -56,7 +57,7 @@ const FormSelect = props => {
         >
             {options.map(item => (
                 <MenuItem value={item.value} key={'menu-' + item.value}>
-                    {item.value || typeof item.value !== 'string' ? item.label : <em>{item.label}</em>}
+                    {!item.label? item.value : item.value !== 'ALL' ? item.label : <em>{item.label}</em>}
                 </MenuItem>
             ))}
         </Select>
@@ -105,6 +106,7 @@ export const BookingRuleAddDialog = props => {
                 value={currentRule.account}
                 handleChange={handleChange('account')}
                 options={[
+                    { value: 'ALL', label: 'Alle rekeningen' },
                     ...accountsData.map(account => ({ value: account.id, label: account.name }))
                 ]}
             />
