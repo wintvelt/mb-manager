@@ -174,7 +174,9 @@ const getRelated = (payment, invoiceData) => {
     return related.sort(scoreSort);
 }
 
-export const derivedMatch = (payments, accounts, ledgers, receipts = [], purchaseInvoices = []) => {
+export const derivedMatch = (payments, accounts, ledgers, maybeReceipts, maybePurchaseInvoices) => {
+    const receipts = maybeReceipts || [];
+    const purchaseInvoices = maybeReceipts || [];
     if (!(payments && accounts && ledgers)) return [];
     const incomingData = makeIncoming(receipts, purchaseInvoices);
     const newPayments = payments.map(p => {
