@@ -22,7 +22,8 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         alignItems: 'center',
         minHeight: '48px',
-        borderTop: '1px solid #e0e0e0'
+        borderTop: '1px solid #e0e0e0',
+        cursor: 'pointer'
     },
     headerRow: {
         width: '100%',
@@ -79,8 +80,11 @@ const RuleRow = ({ rule, isHeader, selForDelete, onClickDel, onEdit, handleSwap 
     const isSelForDelete = id && id === selForDelete;
     const delColor = isSelForDelete ? 'error' : 'primary';
     const delButton = isSelForDelete ? 'delete_forever' : 'delete';
-    const onMove = otherId => e => handleSwap(id, otherId);
-    return <div className={isHeader ? classes.headerRow : classes.row}>
+    const onMove = otherId => e => {
+        e.stopPropagation();
+        handleSwap(id, otherId)
+    };
+    return <div className={isHeader ? classes.headerRow : classes.row} onClick={!isHeader && onEdit(id)}>
         <Typography className={classes.ruleAccount}>{ruleData.account}</Typography>
         <Typography className={classes.ruleIsPositive}>{ruleData.isPositive}</Typography>
         <Typography className={classes.ruleKeywords} variant='body2'>{ruleData.include}</Typography>
@@ -120,6 +124,7 @@ const BookingRules = props => {
     const classes = useStyles();
     const [selForDelete, setSelForDelete] = useState(null);
     const onClickDel = id => e => {
+        e.stopPropagation();
         if (id === selForDelete) {
             onDelete(id)
             setSelForDelete(null);

@@ -119,7 +119,10 @@ const Revenues = props => {
         setPanelsOpen(newList);
     }
     const [activeRule, setActiveRule] = useState(null);
-    const onClickRule = rule => e => setActiveRule(rule);
+    const onClickRule = rule => e => {
+        e.stopPropagation();
+        setActiveRule(rule)
+    };
 
     const [selectedPayments, setSelectedPayments] = useState([]);
     const selectionHasEmpty = paymentsDataExt && !!paymentsDataExt.find(payment => (
