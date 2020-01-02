@@ -84,7 +84,7 @@ const Revenues = props => {
             const account = accounts.data.find(it => it.id === payment.financial_account_id);
             const account_name = account && account.name;
             const isPositive = (payment.amount.slice(0, 1) !== '-');
-            const message = payment.message.toLowerCase();
+            const message = payment.message.toLowerCase().replace(/\d/g,'#');
             const ruleFound = revenueRulesDataExt.find(rule => {
                 const includes = rule.include && rule.include.toLowerCase().split(',').map(kw => kw.trim())
                 const excludes = rule.exclude && rule.exclude.toLowerCase().split(',').map(kw => kw.trim())

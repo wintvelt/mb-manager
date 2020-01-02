@@ -36,7 +36,8 @@ export default (props) => {
 
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(getPayments(access_token, periodOptions[period].value, ',state:unprocessed'));
+        dispatch(getPayments(access_token, periodOptions[period].value, ''));
+        // dispatch(getPayments(access_token, periodOptions[period].value, ',state:unprocessed'));
     }, [dispatch, access_token, period]);
 
     const handleMore = (e) => {
