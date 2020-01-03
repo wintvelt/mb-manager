@@ -24,12 +24,19 @@ export const filterConfig = [
         itemFilter: (selected, filterState, item) => !filterState || (selected.find(s => s === item.id) ? true : false)
     },
     {
-        id: 'noEmptyBookingRule',
-        label: 'Alleen met boekingsregel',
+        id: 'ledger_name',
+        label: 'Boekingsregel',
+        placeholder: 'Alles',
+        type: filterType.SINGLE,
+        itemFilter: (selected, filterState, item) => !filterState || filterState === item.ledger_name
+    },
+    {
+        id: 'onlyEmptyBookingRule',
+        label: 'Alleen lege boekingsregels',
         placeholder: 'Alles tonen',
         type: filterType.BOOLEAN,
         itemFilter: (selected, filterState, item) => {
-            return !filterState || item.ledger_name? true : false
+            return !filterState || item.ledger_name? false : true
         },
         initial: true
     }
