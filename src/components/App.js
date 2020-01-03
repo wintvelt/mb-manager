@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-d
 import '../css/App.css';
 
 import NewNav from './Nav/Nav';
+import Home from './Home/Home';
 import Connection from './Connection/Connection';
 import Contacts from './Contacts/Contacts';
 import Incoming from './Incoming/Incoming';
@@ -92,6 +93,7 @@ const NavRoute = (props) => {
 	return <Route render={(routeprops) => {
 		return <NewNav activePath={routeprops.location.pathname}>
 			<Switch>
+				<Route exact path="/" component={Home} />
 				<PrivateRoute exact path="/betalingen/uitgaven" component={Payments}
 					isConnected={isConnected} />
 				<PrivateRoute exact path="/betalingen/match" component={Match}
