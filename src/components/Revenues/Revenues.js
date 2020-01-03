@@ -9,7 +9,7 @@ import {
     getRevenueConfig, saveRevenueConfig, deleteRevenueConfig
 } from '../../actions/apiActions-new';
 import { batchBookingPost } from '../../actions/apiActions-post';
-import { SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL, RESET_PAYMENTS_NEW } from '../../store/action-types';
+import { SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL } from '../../store/action-types';
 import BookingRules from './BookingRules';
 import { BookingRuleAdd, BookingRuleAddDialog } from './BookingRuleAdd';
 import { newRuleOrder, ruleSort } from './BookingRule-helpers';
@@ -22,9 +22,12 @@ import { initialFilters, makeReducer, makeFilters, filterType } from '../../help
 import { makeStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 import Icon from '@material-ui/core/Icon';
 import Chip from '@material-ui/core/Chip';
 import Typography from '@material-ui/core/Typography';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 
 import RevenuesTable from './RevenuesTable';
 import { makeValidLedgerOptions } from './BookingRule-helpers';
@@ -46,6 +49,9 @@ const useStyles = makeStyles(theme => ({
     icon: {
         marginRight: '1rem',
         height: '24px;'
+    },
+    switchAction: {
+        marginRight: theme.spacing(2)
     }
 }))
 
@@ -64,11 +70,8 @@ const Revenues = props => {
         }));
     const dispatch = useDispatch();
     const classes = useStyles();
-    useEffect(() => {
-        dispatch({ type: RESET_PAYMENTS_NEW })
-    }, [dispatch]);
     const accountsRaw = accountsNew.toJS();
-    const accounts = { ...accountsRaw, data: accountsRaw.data && accountsRaw.data.filter(acc => acc.active)}
+    const accounts = { ...accountsRaw, data: accountsRaw.data && accountsRaw.data.filter(acc => acc.active) }
     const accountsNotAsked = accounts.notAsked;
     const revenueRules = revenueConfig.toJS();
     const revenueRulesNotAsked = revenueRules.notAsked;
@@ -84,7 +87,7 @@ const Revenues = props => {
             const account = accounts.data.find(it => it.id === payment.financial_account_id);
             const account_name = account && account.name;
             const isPositive = (payment.amount.slice(0, 1) !== '-');
-            const message = payment.message.toLowerCase().replace(/\d/g,'#');
+            const message = payment.message.toLowerCase().replace(/\d/g, '#');
             const ruleFound = revenueRulesDataExt.find(rule => {
                 const includes = rule.include && rule.include.toLowerCase().split(',').map(kw => kw.trim())
                 const excludes = rule.exclude && rule.exclude.toLowerCase().split(',').map(kw => kw.trim())
@@ -101,7 +104,7 @@ const Revenues = props => {
                 account_name,
                 ledgerId,
                 ledger_name,
-                afBij: payment.amount.slice(0,1) === '-'? 'Afschrijvingen' : 'Bijschrijvingen'
+                afBij: payment.amount.slice(0, 1) === '-' ? 'Afschrijvingen' : 'Bijschrijvingen'
             }
         });
     useEffect(() => {
@@ -143,17 +146,24 @@ const Revenues = props => {
         });
         const selectedPaymentswithUpdate = paymentsDataExt
             .filter(payment => selectedPayments.includes(payment.id))
-            .map(payment => { return { 
-                payment, 
-                ledgerId: payment.ledgerId || actionState.selected.value 
-            } });
+            .map(payment => {
+                return {
+                    payment,
+                    ledgerId: payment.ledgerId || actionState.selected.value
+                }
+            });
         dispatch(batchBookingPost(selectedPaymentswithUpdate, access_token));
         setSelectedPayments([]);
     }
     const ledgerOptions = ledgers.data && makeValidLedgerOptions(ledgers.data);
 
+    const [simulation, setSimulation] = useState(false);
+
     const [filterState, setFilters] = useReducer(updateFilters, initFilters);
     const [filters, rows] = getFilters(paymentsDataExt || [], selectedPayments, filterState);
+    useEffect(() => {
+        setFilters({ id: 'ledger_name', payload: simulation ? '' : 'FILLED' });
+    }, [simulation])
     const filterObj = filters.map(f => {
         return {
             ...f,
@@ -189,7 +199,7 @@ const Revenues = props => {
     return <div>
         <RevenuesData access_token={access_token}
             payments={payments} revenueConfig={revenueConfig} ledgers={ledgersNew}
-            accounts={accountsNew}
+            accounts={accountsNew} simulation={simulation}
             expanded={panelIsOpen('data')}
             onChange={onPanelToggle('data')}
         />
@@ -207,7 +217,18 @@ const Revenues = props => {
                 onEdit={onClickRule}
                 onSubmit={handleSubmitRules}
             />
-            <BookingRuleAdd onClick={onClickRule({ id: null })} />
+            <ExpansionPanelActions>
+                <FormControlLabel
+                    value="simulatie" className={classes.switchAction}
+                    control={<Switch color="primary"
+                        checked={simulation}
+                        onChange={() => setSimulation(!simulation)}
+                    />}
+                    label="Simulatie"
+                    labelPlacement="start"
+                />
+                <BookingRuleAdd onClick={onClickRule({ id: null })} />
+            </ExpansionPanelActions>
         </ExpansionPanel>
         {paymentsDataExt && <ExpansionPanel expanded={panelIsOpen('filters')} onChange={onPanelToggle('filters')}>
             <ExpansionPanelSummary
@@ -229,6 +250,7 @@ const Revenues = props => {
         {paymentsDataExt &&
             <RevenuesTable rows={rows} selected={selectedPayments} onSelect={setSelectedPayments}
                 onMulti={() => onActionOpen(true)}
+                simulation={simulation}
             />
         }
         {/* <pre>{JSON.stringify({selectionHasEmpty})}</pre> */}
@@ -239,7 +261,7 @@ const Revenues = props => {
         <Dialog
             open={actionState.open}
             dialogTitle={`${selectedPayments.length} betaling${selectedPayments.length === 1 ? '' : 'en'} boeken`}
-            dialogText={selectionHasEmpty? 
+            dialogText={selectionHasEmpty ?
                 'Je selectie bevat ook betalingen zonder automatische toewijzing. ' +
                 'Kies een nieuwe categorie voor deze betalingen.'
                 : 'Alle betalingen hebben een automatische toewijzing. ' +

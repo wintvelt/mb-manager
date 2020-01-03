@@ -40,32 +40,49 @@ export const FilterPanel = (props) => {
     </ExpansionPanelDetails >
 }
 
+const SingleItem = props => {
+    const { id, selected, label, options, placeholder, onChange } = props;
+    const classes = useStyles();
+    const safeSelected = selected || 'NONE';
+    return <ListItem key={id} className={classes.listItem}>
+        <ListItemText className={classes.listItemText}>{label}</ListItemText>
+        <Select
+            className={classes.listItemAction}
+            value={safeSelected}
+            onChange={(e) => {
+                const newValue = (e.target.value === 'NONE') ? '' : e.target.value;
+                onChange(newValue);
+            }}
+            name={id}
+        >
+            {options.map(option => {
+                const safeOption = option || 'NONE';
+                return <MenuItem value={safeOption} key={safeOption}>
+                    {option ?
+                        option === 'EMPTY' ?
+                            <em>Niet gevuld</em>
+                            : option === 'FILLED' ?
+                                <em>Niet leeg</em> :
+                                option
+                        : <em>{placeholder}</em>}
+                </MenuItem>
+            })}
+        </Select>
+    </ListItem>
+}
+
 const FilterComp = (props) => {
     const { id, label, placeholder, type, onChange, options, selected } = props;
     const classes = useStyles();
 
     switch (type) {
         case filterType.SINGLE: {
-            const safeSelected = selected || 'NONE';
-            return <ListItem key={id} className={classes.listItem}>
-                <ListItemText className={classes.listItemText}>{label}</ListItemText>
-                <Select
-                    className={classes.listItemAction}
-                    value={safeSelected}
-                    onChange={(e) => {
-                        const newValue = (e.target.value === 'NONE') ? '' : e.target.value;
-                        onChange(newValue);
-                    }}
-                    name={id}
-                >
-                    {options.map(option => {
-                        const safeOption = option || 'NONE';
-                        return <MenuItem value={safeOption} key={safeOption}>
-                            {option || <em>{placeholder}</em>}
-                        </MenuItem>
-                    })}
-                </Select>
-            </ListItem>
+            return <SingleItem id={id} key={id} selected={selected} label={label}
+                options={options} placeholder={placeholder} onChange={onChange} />
+        }
+        case filterType.SINGLE_WITH_EMPTY: {
+            return <SingleItem id={id} key={id} selected={selected} label={label}
+                options={options} placeholder={placeholder} onChange={onChange} />
         }
         case filterType.BOOLEAN: {
             return <ListItem className={classes.listItem} key={id}>
@@ -82,11 +99,11 @@ const FilterComp = (props) => {
             const multiOptions = options.map(o => { return { value: o, label: o } });
             return <ListItem className={classes.listItem} key={id}>
                 <ListItemText className={classes.listItemText}>{label}</ListItemText>
-                <MultiSelect 
-                    options={multiOptions} 
-                    placeholder={placeholder} 
+                <MultiSelect
+                    options={multiOptions}
+                    placeholder={placeholder}
                     selected={selected}
-                    onChange={newSelected => onChange(newSelected)}/>
+                    onChange={newSelected => onChange(newSelected)} />
             </ListItem>
         }
         default:

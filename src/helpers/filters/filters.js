@@ -2,6 +2,7 @@
 // helpers for filters
 export const filterType = {
     SINGLE: 'SINGLE',
+    SINGLE_WITH_EMPTY: 'SINGLE_WITH_EMPTY',
     MULTI: 'MULTI',
     BOOLEAN: 'BOOLEAN'
 }
@@ -11,11 +12,14 @@ export const initialFilters = filterConfig => filterConfig.map(f => {
         case filterType.SINGLE:
             return { id: f.id, value: f.initial || '' };
 
+        case filterType.SINGLE_WITH_EMPTY:
+            return { id: f.id, value: f.initial || '' };
+
         case filterType.MULTI:
             return { id: f.id, value: f.initial || [] };
 
         case filterType.BOOLEAN:
-            return { id: f.id, value: f.initial? true : false };
+            return { id: f.id, value: f.initial ? true : false };
 
         default:
             return null;
@@ -40,7 +44,9 @@ export const makeFilters = (filterConfig) => (rows, selected, filterState, edite
                 .map(it => it[fConfig.id])])].filter(option => option).sort();
         const options = (fConfig.type === filterType.SINGLE) ?
             ['', ...optionsList]
-            : (fConfig.type === filterType.MULTI) && optionsList;
+            : (fConfig.type === filterType.SINGLE_WITH_EMPTY) ?
+                ['', 'EMPTY', 'FILLED', ...optionsList]
+                : (fConfig.type === filterType.MULTI) && optionsList;
         const fState = filterState.find(f => f.id === fConfig.id);
         return {
             id: fConfig.id,

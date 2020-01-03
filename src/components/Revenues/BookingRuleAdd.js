@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
-import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -34,18 +33,16 @@ const useStyles = makeStyles(theme => ({
 export const BookingRuleAdd = props => {
     const { onClick } = props;
     const classes = useStyles();
-    return <ExpansionPanelActions>
-        <Button className={classes.button} color='primary'
-            startIcon={<Icon>add</Icon>}
-            onClick={onClick}>
-            nieuwe regel
-        </Button>
-    </ExpansionPanelActions>
+    return <Button className={classes.button} color='primary'
+        startIcon={<Icon>add</Icon>}
+        onClick={onClick}>
+        nieuwe regel
+    </Button>
 }
 
 const FormSelect = props => {
     const { label, value, handleChange, options } = props;
-    console.log({value})
+    console.log({ value })
     const classes = useStyles();
     return <FormControl className={classes.formControl} fullWidth>
         {label && <InputLabel id={label}>{label}</InputLabel>}
@@ -57,7 +54,7 @@ const FormSelect = props => {
         >
             {options.map(item => (
                 <MenuItem value={item.value} key={'menu-' + item.value}>
-                    {!item.label? item.value : item.value !== 'ALL' ? item.label : <em>{item.label}</em>}
+                    {!item.label ? item.value : item.value !== 'ALL' ? item.label : <em>{item.label}</em>}
                 </MenuItem>
             ))}
         </Select>

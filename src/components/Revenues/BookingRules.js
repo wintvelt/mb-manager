@@ -84,7 +84,7 @@ const RuleRow = ({ rule, isHeader, selForDelete, onClickDel, onEdit, handleSwap 
         e.stopPropagation();
         handleSwap(id, otherId)
     };
-    return <div className={isHeader ? classes.headerRow : classes.row} onClick={!isHeader && onEdit(id)}>
+    return <div className={isHeader ? classes.headerRow : classes.row} onClick={isHeader? undefined : onEdit(id)}>
         <Typography className={classes.ruleAccount}>{ruleData.account}</Typography>
         <Typography className={classes.ruleIsPositive}>{ruleData.isPositive}</Typography>
         <Typography className={classes.ruleKeywords} variant='body2'>{ruleData.include}</Typography>

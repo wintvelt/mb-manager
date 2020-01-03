@@ -45,11 +45,12 @@ const rowCells = [
 ]
 
 export default function RevenuesTable(props) {
-  const { rows, selected, onSelect, onMulti } = props;
+  const { rows, selected, onSelect, onMulti, simulation } = props;
+  const title = simulation? 'Ontvangsten voor simulatie' : 'Betalingen voor verwerking';
   return <EnhancedTable rows={rows}
     selected={selected} onSelect={onSelect}
-    tableTitle='Betalingen voor verwerking'
-    onMulti={onMulti}
+    tableTitle={title}
+    onMulti={simulation? undefined : onMulti}
     headCells={headCells}
     rowCells={rowCells}
   />

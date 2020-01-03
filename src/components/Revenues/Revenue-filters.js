@@ -27,17 +27,10 @@ export const filterConfig = [
         id: 'ledger_name',
         label: 'Boekingsregel',
         placeholder: 'Alles',
-        type: filterType.SINGLE,
-        itemFilter: (selected, filterState, item) => !filterState || filterState === item.ledger_name
-    },
-    {
-        id: 'onlyEmptyBookingRule',
-        label: 'Alleen lege boekingsregels',
-        placeholder: 'Alles tonen',
-        type: filterType.BOOLEAN,
-        itemFilter: (selected, filterState, item) => {
-            return !filterState || item.ledger_name? false : true
-        },
-        initial: true
+        type: filterType.SINGLE_WITH_EMPTY,
+        itemFilter: (selected, filterState, item) => !filterState || filterState === item.ledger_name ||
+            (filterState === 'EMPTY' && !item.ledger_name) ||
+            (filterState === 'FILLED' && item.ledger_name),
+        initial: 'FILLED'
     }
 ]
