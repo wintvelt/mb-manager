@@ -123,8 +123,8 @@ export default function Payments() {
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />
         </ExpansionPanel>
-        <PaymentsTable rows={rows}
+        {rows.length > 0 && <PaymentsTable rows={rows}
             selected={selected} onSelect={setSelected} onDownload={handleDownload}
-            tableTitle='Banktransacties' />
+            tableTitle='Banktransacties' />}
     </div >
 }
