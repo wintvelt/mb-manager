@@ -87,6 +87,9 @@ export default function Home(props) {
         <Typography variant='h2' align='center' color='secondary' paragraph>
             Moneybird makkelijker voor Mobly
         </Typography>
+        <Typography variant='h4' align='center' color='secondary' paragraph>
+            - handige extra functies -
+        </Typography>
         <Grid container spacing={6} justify='center' className={classes.cardContainer}>
             {menu.filter(item => item.longText)
                 .map(menuItem => <FeatureCard key={menuItem.link} {...menuItem} />)}

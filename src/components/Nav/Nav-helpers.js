@@ -35,6 +35,11 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         alignItems: 'center'
     },
+    avatar: {
+        width: theme.spacing(7),
+        height: theme.spacing(7),
+        backgroundColor: '#b0bec5'
+    },
     help: {
         marginLeft: theme.spacing(1),
         textDecoration: 'none !important'
@@ -74,8 +79,8 @@ const useStyles = makeStyles(theme => ({
     },
     drawerHeader: {
         display: 'flex',
-        alignItems: 'center',
-        padding: theme.spacing(0, 1, 0, 2),
+        alignItems: 'flex-start',
+        padding: theme.spacing(1, 1, 0, 2),
         ...theme.mixins.toolbar,
         justifyContent: 'space-between',
     },
@@ -245,7 +250,8 @@ export const NavWrapper = (props) => {
                 paper: classes.drawerPaper,
             }}>
             <div className={classes.drawerHeader}>
-                <Avatar alt="Mobly" src="/favicon%20300x300.ico" className={classes.avatar} />
+                {/* <Avatar alt="Mobly" src="/favicon%20300x300.ico" className={classes.avatar} /> */}
+                <Avatar alt="Mobly" src="/moblybird.png" className={classes.avatar} />
                 <IconButton onClick={handleDrawerClose}>
                     <Icon className={classes.list}>
                         {theme.direction === 'ltr' ? 'chevron_left' : 'chevron_right'}
