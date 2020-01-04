@@ -13,7 +13,6 @@ import Avatar from '@material-ui/core/Avatar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
@@ -46,36 +45,51 @@ const useStyles = makeStyles(theme => ({
     },
     appBar: {
         backgroundColor: red[300],
-        transition: theme.transitions.create(['margin', 'width'], {
+        zIndex: theme.zIndex.drawer + 1,
+        transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
         }),
     },
     appBarShift: {
-        width: `calc(100% - ${drawerWidth}px)`,
         marginLeft: drawerWidth,
-        transition: theme.transitions.create(['margin', 'width'], {
-            easing: theme.transitions.easing.easeOut,
+        width: `calc(100% - ${drawerWidth}px)`,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
         }),
     },
     menuButton: {
         marginRight: theme.spacing(2),
     },
-    hide: {
-        display: 'none',
-    },
     divider: {
         backgroundColor: 'rgba(255,255,255,0.2)',
     },
     drawer: {
         width: drawerWidth,
+        backgroundColor: '#424242',
+        color: '#ffffff',
         flexShrink: 0,
+        whiteSpace: 'nowrap',
+    },
+    drawerOpen: {
+        width: drawerWidth,
+        transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+    drawerClose: {
+        transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        overflowX: 'hidden',
+        width: theme.spacing(7) + 1
     },
     drawerPaper: {
         backgroundColor: '#424242',
         color: '#ffffff',
-        width: drawerWidth,
     },
     drawerHeader: {
         display: 'flex',
@@ -90,11 +104,29 @@ const useStyles = makeStyles(theme => ({
     activePath: {
         color: teal['A200']
     },
+    mainTitle: {
+        padding: theme.spacing(2),
+        height: '5rem',
+        transition: theme.transitions.create(['height', 'padding'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+    mainTitleHide: {
+        height: '0px',
+        padding: 0,
+        overflowY: 'hidden'
+    },
     listTitle: {
         color: '#ffffff',
         fontSize: '1.1rem',
         fontWeight: 'bold',
+        height: '3rem',
         paddingBottom: theme.spacing(1),
+        transition: theme.transitions.create('height', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
     },
     textNew: {
         display: 'flex',
@@ -108,24 +140,21 @@ const useStyles = makeStyles(theme => ({
         color: '#ffffff',
         textAlign: 'center',
         padding: theme.spacing(2),
-        fontSize: '0.8rem'
+        fontSize: '0.8rem',
+        whiteSpace: 'normal',
+        width: drawerWidth
     },
     content: {
         flexGrow: 1,
         padding: theme.spacing(3),
-        transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
-        marginLeft: -drawerWidth,
     },
-    contentShift: {
-        transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-        marginLeft: 0,
+    textHide: {
+        height: '0px',
+        overflowY: 'hidden'
     },
+    hide: {
+        display: 'none'
+    }
 }));
 
 const ListItemLink = (props) => {
@@ -242,12 +271,18 @@ export const NavWrapper = (props) => {
             </Toolbar>
         </AppBar>
         <Drawer
-            className={classes.drawer}
-            variant="persistent"
+            variant="permanent"
             anchor="left"
             open={open}
+            className={clsx(classes.drawer, {
+                [classes.drawerOpen]: open,
+                [classes.drawerClose]: !open,
+            })}
             classes={{
-                paper: classes.drawerPaper,
+                paper: clsx(classes.drawerPaper, {
+                    [classes.drawerOpen]: open,
+                    [classes.drawerClose]: !open,
+                }),
             }}>
             <div className={classes.drawerHeader}>
                 {/* <Avatar alt="Mobly" src="/favicon%20300x300.ico" className={classes.avatar} /> */}
@@ -258,12 +293,14 @@ export const NavWrapper = (props) => {
                     </Icon>
                 </IconButton>
             </div>
-            <Box p={2} my={0}>
-                <Typography variant='h4'>MoblyBird</Typography>
-            </Box>
+            <Typography variant='h4' className={clsx(classes.mainTitle, { [classes.mainTitleHide]: !open })}>
+                MoblyBird
+            </Typography>
             <Divider className={classes.divider} />
             <List dense className={classes.list}>
-                <ListSubHeader className={classes.listTitle}>Navigatie</ListSubHeader>
+                <ListSubHeader className={clsx(classes.listTitle, { [classes.textHide]: !open })}>
+                    Navigatie
+                </ListSubHeader>
                 {menu.map((item) => (
                     (item.public || isConnected) ?
                         <ListItemLink key={item.text} activePath={activePath} {...item} />
@@ -271,14 +308,12 @@ export const NavWrapper = (props) => {
                 ))}
             </List>
             <Divider className={classes.divider} />
-            <Typography className={classes.listFooter}>
+            <Typography className={clsx(classes.listFooter, { [classes.hide]: !open })} variant='body2'>
                 Met liefde, passie gemaakt voor Mobly, door Wouter, in de nachtelijke uurtjes, in de trein, of allebei.
             </Typography>
         </Drawer>
         <main
-            className={clsx(classes.content, {
-                [classes.contentShift]: open,
-            })}>
+            className={clsx(classes.content)}>
             <div className={classes.drawerHeader} id='back-to-top-anchor' />
             {children}
         </main>
