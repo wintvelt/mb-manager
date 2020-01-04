@@ -1,7 +1,7 @@
 // Revenues.js
 // to book payments on ledger account
 
-import React, { useEffect, useState, useReducer } from 'react';
+import React, { useEffect, useState, useReducer, useMemo } from 'react';
 import { useSelector, useDispatch } from "react-redux";
 
 import {
@@ -92,38 +92,40 @@ const Revenues = props => {
     const ledgersNotAsked = ledgers.notAsked;
     const access_token = accessToken.data;
     const paymentsData = payments.toJS().data;
-    const paymentsDataExt = paymentsData && accounts.data && ledgers.data && revenueRules.hasAllData &&
-        paymentsData.map(payment => {
-            const account = accounts.data.find(it => it.id === payment.financial_account_id);
-            const account_name = account && account.name;
-            const isPositive = (payment.amount.slice(0, 1) !== '-');
-            const message = payment.message;
-            const ruleFound = revenueRulesDataExt.find(rule => {
-                const includes = rule.include && rule.include.toLowerCase().split(',').map(kw => kw.trim())
-                const excludes = rule.exclude && rule.exclude.toLowerCase().split(',').map(kw => kw.trim())
-                return (rule.account === 'ALL' || rule.account === payment.financial_account_id) &&
-                    ((rule.isPositive === 'Af' && !isPositive) || (rule.isPositive === 'Bij' && isPositive)) &&
-                    (!includes || includes.reduce((outcome, kw) => outcome || formatTest(kw, message), false)) &&
-                    (!excludes || excludes.reduce((outcome, kw) => outcome && !formatTest(kw, message), true))
+    const paymentsDataExt = useMemo(() => {
+        return paymentsData && accounts.data && ledgers.data && revenueRules.hasAllData &&
+            paymentsData.map(payment => {
+                const account = accounts.data.find(it => it.id === payment.financial_account_id);
+                const account_name = account && account.name;
+                const isPositive = (payment.amount.slice(0, 1) !== '-');
+                const message = payment.message;
+                const ruleFound = revenueRulesDataExt.find(rule => {
+                    const includes = rule.include && rule.include.toLowerCase().split(',').map(kw => kw.trim())
+                    const excludes = rule.exclude && rule.exclude.toLowerCase().split(',').map(kw => kw.trim())
+                    return (rule.account === 'ALL' || rule.account === payment.financial_account_id) &&
+                        ((rule.isPositive === 'Af' && !isPositive) || (rule.isPositive === 'Bij' && isPositive)) &&
+                        (!includes || includes.reduce((outcome, kw) => outcome || formatTest(kw, message), false)) &&
+                        (!excludes || excludes.reduce((outcome, kw) => outcome && !formatTest(kw, message), true))
+                });
+                const ledgerId = ruleFound && ruleFound.ledger;
+                const ledger = ledgerId && ledgers.data.find(it => it.id === ledgerId);
+                const ledger_name = ledger && ledger.name;
+                const bookedLedgers = payment.ledger_account_bookings;
+                const booked = bookedLedgers && bookedLedgers[0];
+                const booked_id = booked && booked.ledger_account_id;
+                const booked_ledger = booked_id && ledgers.data.find(it => it.id === booked_id);
+                const booked_name = booked_ledger && booked_ledger.name;
+                // const booked_name = JSON.stringify(booked);
+                return {
+                    ...payment,
+                    account_name,
+                    ledgerId,
+                    ledger_name,
+                    afBij: payment.amount.slice(0, 1) === '-' ? 'Afschrijvingen' : 'Bijschrijvingen',
+                    booked_name
+                }
             });
-            const ledgerId = ruleFound && ruleFound.ledger;
-            const ledger = ledgerId && ledgers.data.find(it => it.id === ledgerId);
-            const ledger_name = ledger && ledger.name;
-            const bookedLedgers = payment.ledger_account_bookings;
-            const booked = bookedLedgers && bookedLedgers[0];
-            const booked_id = booked && booked.ledger_account_id;
-            const booked_ledger = booked_id && ledgers.data.find(it => it.id === booked_id);
-            const booked_name = booked_ledger && booked_ledger.name;
-            // const booked_name = JSON.stringify(booked);
-            return {
-                ...payment,
-                account_name,
-                ledgerId,
-                ledger_name,
-                afBij: payment.amount.slice(0, 1) === '-' ? 'Afschrijvingen' : 'Bijschrijvingen',
-                booked_name
-            }
-        });
+    }, [paymentsData, accounts.data, ledgers.data, revenueRules.hasAllData, revenueRulesDataExt]);
     useEffect(() => {
         if (accountsNotAsked) dispatch(getAccounts(access_token));
         if (revenueRulesNotAsked) dispatch(getRevenueConfig());
