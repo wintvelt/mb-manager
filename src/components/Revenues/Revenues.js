@@ -62,9 +62,9 @@ const getFilters = makeFilters(filterConfig);
 const formatTest = (format, str) => {
     const formatStr = format
         .replace(/\*/g, '.*')
-        .replace(/\?/g, '.')
+        .replace(/\?/g, '.?')
+        .replace(/%/g, '.')
         .replace(/#/g, '\\d');
-    console.log(formatStr);
     const re = new RegExp(`^.*${formatStr}.*$`, 'i');
     return re.test(str);
 }

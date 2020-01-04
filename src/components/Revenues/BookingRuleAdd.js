@@ -13,6 +13,8 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
+import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 
 import { makeValidLedgerOptions } from './BookingRule-helpers';
 
@@ -27,6 +29,9 @@ const useStyles = makeStyles(theme => ({
     },
     button: {
         marginRight: theme.spacing(2)
+    },
+    tooltip: {
+        maxWidth: 500
     }
 }))
 
@@ -42,7 +47,6 @@ export const BookingRuleAdd = props => {
 
 const FormSelect = props => {
     const { label, value, handleChange, options } = props;
-    console.log({ value })
     const classes = useStyles();
     return <FormControl className={classes.formControl} fullWidth>
         {label && <InputLabel id={label}>{label}</InputLabel>}
@@ -68,6 +72,35 @@ const defaultData = JSON.stringify({
     exclude: '',
     isPositive: 'Bij'
 });
+
+const TipLine = props => {
+    const { char, line } = props;
+    return <Typography>
+        <span style={{
+            marginLeft: '8px', marginRight: '8px', fontSize: '1rem', fontWeight: 'bold',
+            width: '24px', display: 'inline-block', textAlign: 'center'
+        }}>
+            {char}
+        </span>
+        {line}
+    </Typography>
+}
+
+const KeywordTip = ({ title }) => {
+    const classes = useStyles();
+    const tooltipTitle = <>
+        <Typography>{`Betalingen die ${title} keywords hebben tellen mee.`}</Typography>
+        <Typography variant='body1'>Bijzondere karakters die je kunt gebruiken:</Typography>
+        <TipLine char='#' line='Elk willekeurig cijfer 0-9.' />
+        <TipLine char='%' line='Elk willekeurig teken.' />
+        <TipLine char='?' line='Elk willekeurig teken of geen teken.' />
+        <TipLine char='*' line='Geen of meer willekeurige tekens.' />
+    </>
+    return <Tooltip title={tooltipTitle} placement='left-start' classes={{ tooltip: classes.tooltip }}>
+        <Icon style={{ marginLeft: '8px' }}>info_outline</Icon>
+    </Tooltip>
+
+}
 
 export const BookingRuleAddDialog = props => {
     const { rule, accounts, ledgers, open, onAbort, onSubmit } = props;
@@ -121,6 +154,9 @@ export const BookingRuleAddDialog = props => {
                 label="met 1 of meer van de keywords in omschrijving.."
                 value={currentRule.include}
                 onChange={handleChange('include')}
+                InputProps={{
+                    endAdornment: <KeywordTip title='1 of meer van de' />
+                }}
                 fullWidth
             />
             <TextField
@@ -128,6 +164,9 @@ export const BookingRuleAddDialog = props => {
                 label="maar exclusief de keywords.."
                 value={currentRule.exclude}
                 onChange={handleChange('exclude')}
+                InputProps={{
+                    endAdornment: <KeywordTip title='geen van de' />
+                }}
                 fullWidth
             />
             <FormSelect
