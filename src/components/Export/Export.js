@@ -132,16 +132,9 @@ export const Export = props => {
                 <ExportAction filters={filters} selStats={selStats} 
                     exportPending={exportPending} onExport={() => onExport(selection, accessToken.data)}/>
             </Grid>}
-            <ExportTable rows={rows}
+            {rows.length > 0 && <ExportTable rows={rows}
                 selected={selectedForDelete ? [selectedForDelete] : []}
-                onSelect={onDelete} />
-            {/* <div className="row">
-                <div className="section">
-                    <SortableTable headers={headers} rows={rows}
-                        onSelect={() => { }} hideKey={false}
-                        sortValue='Bestand' sortDirection='down' />
-                </div>
-            </div> */}
+                onSelect={onDelete} />}
         </Grid>
     );
 }

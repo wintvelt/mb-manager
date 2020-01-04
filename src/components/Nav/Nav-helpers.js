@@ -35,9 +35,21 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center'
     },
     avatar: {
-        width: theme.spacing(7),
-        height: theme.spacing(7),
-        backgroundColor: '#b0bec5'
+        width: theme.spacing(15),
+        height: theme.spacing(15),
+        opacity: 0.5,
+        transition: theme.transitions.create(['width', 'height'], {
+            easing: theme.transitions.easing.sharp,
+            duration: '400ms',
+        }),
+    },
+    avatarHidden: {
+        width: '48px',
+        height: '48px',
+        transition: theme.transitions.create(['width', 'height'], {
+            easing: theme.transitions.easing.sharp,
+            duration: '100ms',
+        }),
     },
     help: {
         marginLeft: theme.spacing(1),
@@ -111,6 +123,7 @@ const useStyles = makeStyles(theme => ({
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
         }),
+        zIndex: 1
     },
     mainTitleHide: {
         height: '0px',
@@ -175,16 +188,19 @@ const ListItemLink = (props) => {
         : text;
 
     return <ListItem button component={RenderLink}>
-        <ListItemIcon>
-            {!open && <Tooltip title={<Typography>{text}</Typography>} placement='right'>
+        {!open && <ListItemIcon>
+            <Tooltip title={<Typography>{text}</Typography>} placement='right'>
                 <Icon className={clsx(classes.list, (link === activePath) && classes.activePath)}>
                     {icon}
                 </Icon>
-            </Tooltip>}
-            {open && <Icon className={clsx(classes.list, (link === activePath) && classes.activePath)}>
+
+            </Tooltip>
+        </ListItemIcon>}
+        {open && <ListItemIcon>
+            <Icon className={clsx(classes.list, (link === activePath) && classes.activePath)}>
                 {icon}
-            </Icon>}
-        </ListItemIcon>
+            </Icon>
+        </ListItemIcon>}
         <ListItemText className={(link === activePath) ? classes.activePath : ''} primary={textComp} />
     </ListItem>
 }
@@ -291,7 +307,8 @@ export const NavWrapper = (props) => {
             }}>
             <div className={classes.drawerHeader}>
                 {/* <Avatar alt="Mobly" src="/favicon%20300x300.ico" className={classes.avatar} /> */}
-                <Avatar alt="Mobly" src="/moblybird.png" className={classes.avatar} />
+                <Avatar alt="Mobly" src="/moblybird.png"
+                    className={clsx(classes.avatar, { [classes.avatarHidden]: !open })} />
                 <IconButton onClick={handleDrawerClose}>
                     <Icon className={classes.list}>
                         {theme.direction === 'ltr' ? 'chevron_left' : 'chevron_right'}
@@ -315,6 +332,9 @@ export const NavWrapper = (props) => {
             <Divider className={classes.divider} />
             <Typography className={clsx(classes.listFooter, { [classes.hide]: !open })} variant='body2'>
                 Met liefde, passie gemaakt voor Mobly, door Wouter, in de nachtelijke uurtjes, in de trein, of allebei.
+            </Typography>
+            <Typography className={clsx(classes.listFooter, { [classes.hide]: !open })} variant='body2'>
+                <span role='img' aria-label='cheers'>🍻</span> 2019, 2020
             </Typography>
         </Drawer>
         <main

@@ -147,12 +147,12 @@ export default function Contacts() {
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />
         </ExpansionPanel>
-        <ContactsTable rows={rows}
+        {rows.length > 0 && <ContactsTable rows={rows}
             selected={selected} onSelect={setSelected}
             edited={edited} onEdit={setEdited}
             onSaveEdit={edited.ids.length > 0 && (() => setActionOpen(true))}
             onDownload={handleDownload}
-            tableTitle='Contacten' />
+            tableTitle='Contacten' />}
         <Dialog
             open={actionOpen}
             dialogTitle={`${edited.ids.length} ${edited.ids.length === 1 ? 'contact' : 'contacten'} met bewerking opslaan.`}

@@ -152,11 +152,11 @@ export default function Incoming() {
             </ExpansionPanelSummary>
             <FilterPanel filterObj={filterObj} />
         </ExpansionPanel>
-        <IncomingTable rows={rows}
+        {rows.length > 0 && <IncomingTable rows={rows}
             selected={selected} onSelect={setSelected}
             onDownload={handleDownload}
             onMulti={() => onActionOpen(true)}
-            tableTitle='Bonnetjes en facturen' />
+            tableTitle='Bonnetjes en facturen' />}
         <Dialog
             open={actionState.open}
             dialogTitle={`${numSelected} ${numSelected === 1 ? 'bonnetje of factuur' : 'bonnetjes en facturen'} bewerken`}
