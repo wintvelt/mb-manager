@@ -22,11 +22,12 @@ import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 import { TableLink } from './helpers';
 
-function desc(a, b, orderBy) {
-    if (!a[orderBy] || b[orderBy] < a[orderBy]) {
+function desc(a, b, orderByState) {
+    const getVal = x => orderByState.numeric ? parseFloat(x[orderByState.orderBy]) : x[orderByState.orderBy];
+    if (!getVal(a) || getVal(b) < getVal(a)) {
         return -1;
     }
-    if (!b[orderBy] || b[orderBy] > a[orderBy]) {
+    if (!getVal(b) || getVal(b) > getVal(a)) {
         return 1;
     }
     return 0;
@@ -42,15 +43,15 @@ function stableSort(array, cmp) {
     return stabilizedThis.map(el => el[0]);
 }
 
-function getSorting(order, orderBy) {
-    return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
+function getSorting(order, orderByState) {
+    return order === 'desc' ? (a, b) => desc(a, b, orderByState) : (a, b) => -desc(a, b, orderByState);
 }
 
 function EnhancedTableHead(props) {
     const { classes, onSelectAllClick, order, orderBy, selectable,
         numSelected, rowCount, onRequestSort, headCells } = props;
-    const createSortHandler = property => event => {
-        onRequestSort(event, property);
+    const createSortHandler = (property, numeric) => event => {
+        onRequestSort(event, property, numeric);
     };
 
     return (
@@ -79,7 +80,7 @@ function EnhancedTableHead(props) {
                         {!headCell.disableSort && <TableSortLabel
                             active={orderBy === headCell.id}
                             direction={order}
-                            onClick={createSortHandler(headCell.id)}
+                            onClick={createSortHandler(headCell.id, headCell.numeric)}
                         >
                             {headCell.label}
                             {orderBy === headCell.id ? (
@@ -269,7 +270,7 @@ const RowCell = (props) => {
     const curValue = typeof edits === 'string' ? edits : initValue;
     const content = prettify ? prettify(initValue, row) : initValue;
     const isJustContent = (!hrefBase && !editable && !render) || (isDisabled && !render);
-    const cellStyle = isDisabled? { color: 'grey', backgroundColor: 'lightgrey', textDecoration: 'line-through' } : 
+    const cellStyle = isDisabled ? { color: 'grey', backgroundColor: 'lightgrey', textDecoration: 'line-through' } :
         style || {}
     return <TableCell padding={padding || 'default'} align={align || 'inherit'}
         style={cellStyle}>
@@ -288,14 +289,16 @@ export function EnhancedTable(props) {
     const { initOrder = 'desc', initOrderBy = 'date' } = props;
     const classes = useStyles();
     const [order, setOrder] = React.useState(initOrder);
-    const [orderBy, setOrderBy] = React.useState(initOrderBy);
+    const setNumeric = id => headCells.find(it => it.id === initOrderBy) &&
+        headCells.find(it => it.id === initOrderBy).numeric;
+    const [orderByState, setOrderByState] = React.useState({ orderBy: initOrderBy, numeric: setNumeric(initOrderBy) });
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(25);
 
-    const handleRequestSort = (event, property) => {
-        const isDesc = orderBy === property && order === 'desc';
+    const handleRequestSort = (event, property, numeric) => {
+        const isDesc = orderByState.orderBy === property && order === 'desc';
         setOrder(isDesc ? 'asc' : 'desc');
-        setOrderBy(property);
+        setOrderByState({ orderBy: property, numeric: setNumeric(property) });
     };
 
     const handleSelectAllClick = event => {
@@ -407,14 +410,14 @@ export function EnhancedTable(props) {
                             classes={classes}
                             numSelected={selected.length}
                             order={order}
-                            orderBy={orderBy}
+                            orderBy={orderByState.orderBy}
                             onSelectAllClick={handleSelectAllClick}
                             onRequestSort={handleRequestSort}
                             rowCount={rows.length}
                             headCells={headCells}
                         />
                         <TableBody>
-                            {stableSort(rows, getSorting(order, orderBy))
+                            {stableSort(rows, getSorting(order, orderByState))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
                                     const isItemSelected = isSelected(row.id);
