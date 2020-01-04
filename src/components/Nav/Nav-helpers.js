@@ -158,7 +158,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const ListItemLink = (props) => {
-    const { icon, text, link, badge, activePath } = props;
+    const { icon, text, link, badge, activePath, open } = props;
     const classes = useStyles();
 
     // weird mojo needed to use react-router with MUI
@@ -176,9 +176,14 @@ const ListItemLink = (props) => {
 
     return <ListItem button component={RenderLink}>
         <ListItemIcon>
-            <Icon className={clsx(classes.list, (link === activePath) && classes.activePath)}>
+            {!open && <Tooltip title={<Typography>{text}</Typography>} placement='right'>
+                <Icon className={clsx(classes.list, (link === activePath) && classes.activePath)}>
+                    {icon}
+                </Icon>
+            </Tooltip>}
+            {open && <Icon className={clsx(classes.list, (link === activePath) && classes.activePath)}>
                 {icon}
-            </Icon>
+            </Icon>}
         </ListItemIcon>
         <ListItemText className={(link === activePath) ? classes.activePath : ''} primary={textComp} />
     </ListItem>
@@ -303,7 +308,7 @@ export const NavWrapper = (props) => {
                 </ListSubHeader>
                 {menu.map((item) => (
                     (item.public || isConnected) ?
-                        <ListItemLink key={item.text} activePath={activePath} {...item} />
+                        <ListItemLink key={item.text} activePath={activePath} {...item} open={open} />
                         : <ListItemLinkDisabled key={item.text} activePath={activePath} {...item} />
                 ))}
             </List>
