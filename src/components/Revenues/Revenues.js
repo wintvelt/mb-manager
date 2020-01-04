@@ -59,6 +59,16 @@ const updateFilters = makeReducer(filterConfig);
 const initFilters = initialFilters(filterConfig);
 const getFilters = makeFilters(filterConfig);
 
+const formatTest = (format, str) => {
+    const formatStr = format
+        .replace(/\*/g, '.*')
+        .replace(/\?/g, '.')
+        .replace(/#/g, '\\d');
+    console.log(formatStr);
+    const re = new RegExp(`^.*${formatStr}.*$`, 'i');
+    return re.test(str);
+}
+
 const Revenues = props => {
     const { accessToken, accountsNew, revenueConfig, ledgersNew, payments } =
         useSelector(store => ({
@@ -87,14 +97,14 @@ const Revenues = props => {
             const account = accounts.data.find(it => it.id === payment.financial_account_id);
             const account_name = account && account.name;
             const isPositive = (payment.amount.slice(0, 1) !== '-');
-            const message = payment.message.toLowerCase().replace(/\d/g, '#');
+            const message = payment.message;
             const ruleFound = revenueRulesDataExt.find(rule => {
                 const includes = rule.include && rule.include.toLowerCase().split(',').map(kw => kw.trim())
                 const excludes = rule.exclude && rule.exclude.toLowerCase().split(',').map(kw => kw.trim())
                 return (rule.account === 'ALL' || rule.account === payment.financial_account_id) &&
                     ((rule.isPositive === 'Af' && !isPositive) || (rule.isPositive === 'Bij' && isPositive)) &&
-                    (!includes || includes.reduce((outcome, kw) => outcome || message.includes(kw), false)) &&
-                    (!excludes || excludes.reduce((outcome, kw) => outcome && !message.includes(kw), true))
+                    (!includes || includes.reduce((outcome, kw) => outcome || formatTest(kw, message), false)) &&
+                    (!excludes || excludes.reduce((outcome, kw) => outcome && !formatTest(kw, message), true))
             });
             const ledgerId = ruleFound && ruleFound.ledger;
             const ledger = ledgerId && ledgers.data.find(it => it.id === ledgerId);
