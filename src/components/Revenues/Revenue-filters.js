@@ -32,5 +32,14 @@ export const filterConfig = [
             (filterState === 'EMPTY' && !item.ledger_name) ||
             (filterState === 'FILLED' && item.ledger_name),
         initial: 'FILLED'
+    },
+    {
+        id: 'deltaBooked',
+        label: 'Alleen geboekt op afwijkend',
+        placeholder: 'Alles',
+        type: filterType.BOOLEAN,
+        itemFilter: (selected, filterState, item) => (
+            !filterState || (item.booked_name && item.booked_name !== item.ledger_name)
+        )
     }
 ]

@@ -99,12 +99,19 @@ const Revenues = props => {
             const ledgerId = ruleFound && ruleFound.ledger;
             const ledger = ledgerId && ledgers.data.find(it => it.id === ledgerId);
             const ledger_name = ledger && ledger.name;
+            const bookedLedgers = payment.ledger_account_bookings;
+            const booked = bookedLedgers && bookedLedgers[0];
+            const booked_id = booked && booked.ledger_account_id;
+            const booked_ledger = booked_id && ledgers.data.find(it => it.id === booked_id);
+            const booked_name = booked_ledger && booked_ledger.name;
+            // const booked_name = JSON.stringify(booked);
             return {
                 ...payment,
                 account_name,
                 ledgerId,
                 ledger_name,
-                afBij: payment.amount.slice(0, 1) === '-' ? 'Afschrijvingen' : 'Bijschrijvingen'
+                afBij: payment.amount.slice(0, 1) === '-' ? 'Afschrijvingen' : 'Bijschrijvingen',
+                booked_name
             }
         });
     useEffect(() => {
@@ -163,7 +170,7 @@ const Revenues = props => {
     const [filters, rows] = getFilters(paymentsDataExt || [], selectedPayments, filterState);
     useEffect(() => {
         setFilters({ id: 'ledger_name', payload: simulation ? '' : 'FILLED' });
-    }, [simulation])
+    }, [simulation]);
     const filterObj = filters.map(f => {
         return {
             ...f,
@@ -172,6 +179,7 @@ const Revenues = props => {
             }
         }
     });
+    const filterObjForSim = simulation ? filterObj : filterObj.slice(0, -1);
     const appliedFilters = filterState.filter(f => {
         const fConfig = filterConfig.find(fc => fc.id === f.id);
         return fConfig.type === filterType.BOOLEAN ? f.value
@@ -230,24 +238,25 @@ const Revenues = props => {
                 <BookingRuleAdd onClick={onClickRule({ id: null })} />
             </ExpansionPanelActions>
         </ExpansionPanel>
-        {paymentsDataExt && <ExpansionPanel expanded={panelIsOpen('filters')} onChange={onPanelToggle('filters')}>
-            <ExpansionPanelSummary
-                expandIcon={<Icon>expand_more</Icon>}
-                aria-controls="filters-panel-header"
-                id="filters-panel-header"
-            >
-                <Typography className={classes.heading}>
-                    <Icon className={classes.icon}>filter_list</Icon>
-                    Filters
+        {paymentsDataExt && paymentsDataExt.length > 0 &&
+            <ExpansionPanel expanded={panelIsOpen('filters')} onChange={onPanelToggle('filters')}>
+                <ExpansionPanelSummary
+                    expandIcon={<Icon>expand_more</Icon>}
+                    aria-controls="filters-panel-header"
+                    id="filters-panel-header"
+                >
+                    <Typography className={classes.heading}>
+                        <Icon className={classes.icon}>filter_list</Icon>
+                        Filters
                         </Typography>
-                <Typography component='div' className={classes.secondaryHeading}>
-                    {`${filterCount} filter${filterCount === 1 ? '' : 's'} toegepast`}
-                    {filterBadgeTxt && <Chip size='small' label={filterBadgeTxt} />}
-                </Typography>
-            </ExpansionPanelSummary>
-            <FilterPanel filterObj={filterObj} />
-        </ExpansionPanel>}
-        {paymentsDataExt &&
+                    <Typography component='div' className={classes.secondaryHeading}>
+                        {`${filterCount} filter${filterCount === 1 ? '' : 's'} toegepast`}
+                        {filterBadgeTxt && <Chip size='small' label={filterBadgeTxt} />}
+                    </Typography>
+                </ExpansionPanelSummary>
+                <FilterPanel filterObj={filterObjForSim} />
+            </ExpansionPanel>}
+        {paymentsDataExt && rows.length > 0 &&
             <RevenuesTable rows={rows} selected={selectedPayments} onSelect={setSelectedPayments}
                 onMulti={() => onActionOpen(true)}
                 simulation={simulation}

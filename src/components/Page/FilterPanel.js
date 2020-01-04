@@ -35,7 +35,7 @@ export const FilterPanel = (props) => {
     const classes = useStyles();
     return <ExpansionPanelDetails>
         <List className={classes.list}>
-            {filterObj.map(FilterComp)}
+            {filterObj.map(it => <FilterComp key={it.id} {...it} />)}
         </List>
     </ExpansionPanelDetails >
 }
