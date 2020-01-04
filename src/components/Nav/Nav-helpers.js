@@ -21,6 +21,8 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubHeader from '@material-ui/core/ListSubHeader';
+import Link from '@material-ui/core/Link';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const drawerWidth = 240;
 
@@ -29,7 +31,13 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
     },
     navTitle: {
-        flexGrow: 1
+        flexGrow: 1,
+        display: 'flex',
+        alignItems: 'center'
+    },
+    help: {
+        marginLeft: theme.spacing(1),
+        textDecoration: 'none !important'
     },
     appBar: {
         backgroundColor: red[300],
@@ -145,7 +153,7 @@ const ListItemLink = (props) => {
 const ListItemLinkDisabled = props => {
     const { icon, text } = props;
 
-    return <ListItem style={{color: 'grey'}}>
+    return <ListItem style={{ color: 'grey' }}>
         <ListItemIcon>
             <Icon>
                 {icon}
@@ -171,16 +179,17 @@ const ConnectionLink = (props) => {
         aria-label="connectie-status"
         aria-controls="menu-appbar"
         color="inherit"
-        >
-        <Icon style={{marginRight: '8px'}}>{iconLogin}</Icon>
-        <span style={{height: '1.3rem'}}>Connectie</span>
+    >
+        <Icon style={{ marginRight: '8px' }}>{iconLogin}</Icon>
+        <span style={{ height: '1.3rem' }}>Connectie</span>
     </Button>
 }
 
 export const NavWrapper = (props) => {
     const { children, menu, activePath, iconLogin, isConnected } = props;
     const activeMenu = menu.find(it => it.link === activePath);
-    const navTitle = activeMenu? activeMenu.text : '';
+    const navTitle = activeMenu ? activeMenu.text : '';
+    const navHelpLink = activeMenu && activeMenu.helpLink;
 
     const classes = useStyles();
     const theme = useTheme();
@@ -213,6 +222,16 @@ export const NavWrapper = (props) => {
                 </IconButton>
                 <Typography variant="h6" noWrap className={classes.navTitle}>
                     {navTitle}
+                    {navHelpLink &&
+                        <Tooltip title='link naar uitleg' placement='bottom' arrow>
+                            <Link href={navHelpLink} className={classes.help}
+                                target='_blank' rel='noopener noreferrer'>
+                                <IconButton>
+                                    <Icon>info_outline</Icon>
+                                </IconButton>
+                            </Link>
+                        </Tooltip>
+                    }
                 </Typography>
                 <ConnectionLink iconLogin={iconLogin} link='/connection' />
             </Toolbar>
@@ -240,9 +259,9 @@ export const NavWrapper = (props) => {
             <List dense className={classes.list}>
                 <ListSubHeader className={classes.listTitle}>Navigatie</ListSubHeader>
                 {menu.map((item) => (
-                    (item.public || isConnected)?
-                    <ListItemLink key={item.text} activePath={activePath} {...item} />
-                    : <ListItemLinkDisabled key={item.text} activePath={activePath} {...item} />
+                    (item.public || isConnected) ?
+                        <ListItemLink key={item.text} activePath={activePath} {...item} />
+                        : <ListItemLinkDisabled key={item.text} activePath={activePath} {...item} />
                 ))}
             </List>
             <Divider className={classes.divider} />

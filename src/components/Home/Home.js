@@ -9,6 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Icon from '@material-ui/core/Icon';
 import Badge from '@material-ui/core/Badge';
+import Link from '@material-ui/core/Link';
 
 import { menu } from '../Nav/Nav';
 
@@ -34,15 +35,17 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'column',
         alignItems: 'center'
     },
-    bullet: {
-        display: 'inline-block',
-        margin: '0 2px',
-        transform: 'scale(0.6)',
+    docLinkText: {
+        display: 'flex',
+        alignItems: 'center'
+    },
+    icon: {
+        marginLeft: theme.spacing(1)
     }
 }));
 
 const FeatureCard = props => {
-    const { icon, link, text, longText, badge } = props;
+    const { icon, link, text, longText, badge, helpLink } = props;
     const classes = useStyles();
 
     // weird mojo needed to use react-router with MUI
@@ -63,17 +66,26 @@ const FeatureCard = props => {
             </Badge>
             <Typography variant='h5' align='center' gutterBottom>{text}</Typography>
         </RenderLink>
-        <Typography variant='body1'>{longText}</Typography>
+        <Typography variant='body1' gutterBottom>
+            {longText}
+        </Typography>
+        {helpLink &&
+            <Link href={helpLink} style={{textDecoration: 'none'}}
+                target='_blank' rel='noopener noreferrer'>
+                <Typography variant='button' className={classes.docLinkText}>
+                    handleiding
+                    <Icon className={classes.icon}>info_outline</Icon>
+                </Typography>
+            </Link>
+        }
     </Grid>
 }
 
 export default function Home(props) {
     const classes = useStyles();
-    const bull = <span className={classes.bullet}>•</span>;
     return <Container>
-        {/* <Typography variant='h2' align='center' color='primary' paragraph>Moblybird</Typography> */}
         <Typography variant='h2' align='center' color='secondary' paragraph>
-            {bull} Moneybird makkelijker voor Mobly {bull}
+            Moneybird makkelijker voor Mobly
         </Typography>
         <Grid container spacing={6} justify='center' className={classes.cardContainer}>
             {menu.filter(item => item.longText)
