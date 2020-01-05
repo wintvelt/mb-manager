@@ -176,7 +176,7 @@ const getRelated = (payment, invoiceData) => {
 
 export const derivedMatch = (payments, accounts, ledgers, maybeReceipts, maybePurchaseInvoices) => {
     const receipts = maybeReceipts || [];
-    const purchaseInvoices = maybeReceipts || [];
+    const purchaseInvoices = maybePurchaseInvoices || [];
     if (!(payments && accounts && ledgers)) return [];
     const incomingData = makeIncoming(receipts, purchaseInvoices);
     const newPayments = payments.map(p => {

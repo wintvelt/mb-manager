@@ -68,7 +68,7 @@ export default function Match() {
         return derivedMatch(paymentsList.data, accountsList.data,
             ledgersList.data, receiptsList.data, purchaseInvoicesList.data)
     }, [paymentsList.data, accountsList.data, ledgersList.data,
-    receiptsList.data, purchaseInvoicesList.data])
+    receiptsList.data, purchaseInvoicesList.data]);
     const dispatch = useDispatch();
     const [expanded, setExpanded] = useState([]);
     const [selected, setSelected] = useState([]);
