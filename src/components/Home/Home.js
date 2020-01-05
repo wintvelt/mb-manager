@@ -90,7 +90,8 @@ export default function Home(props) {
         </Typography>
         <Typography variant='h4' align='center' color='secondary' paragraph>
             - handige extra functies -
-            <Link href='#'>
+            <Link href='https://drive.google.com/open?id=1JVLMXty8dA5CxUgLFI_jOztBIBSQTSJ8oYCKfgr5z_Q'
+                target='_blank' rel='noopener noreferrer'>
                 <Icon fontSize='large' style={{ marginBottom: '-8px', marginLeft: '1rem' }}>new_releases</Icon>
                 <span style={{ padding: '8px', verticalAlign: 'middle', fontSize: '1rem' }}>
                     wat is nieuw?
