@@ -41,8 +41,9 @@ const useStyles = makeStyles(theme => ({
     },
     icon: {
         marginLeft: theme.spacing(1)
-    }
+    },
 }));
+
 
 const FeatureCard = props => {
     const { icon, link, text, longText, badge, helpLink } = props;
@@ -70,7 +71,7 @@ const FeatureCard = props => {
             {longText}
         </Typography>
         {helpLink &&
-            <Link href={helpLink} style={{textDecoration: 'none'}}
+            <Link href={helpLink} style={{ textDecoration: 'none' }}
                 target='_blank' rel='noopener noreferrer'>
                 <Typography variant='button' className={classes.docLinkText}>
                     handleiding
@@ -89,6 +90,12 @@ export default function Home(props) {
         </Typography>
         <Typography variant='h4' align='center' color='secondary' paragraph>
             - handige extra functies -
+            <Link href='#'>
+                <Icon fontSize='large' style={{ marginBottom: '-8px', marginLeft: '1rem' }}>new_releases</Icon>
+                <span style={{ padding: '8px', verticalAlign: 'middle', fontSize: '1rem' }}>
+                    wat is nieuw?
+                </span>
+            </Link>
         </Typography>
         <Grid container spacing={6} justify='center' className={classes.cardContainer}>
             {menu.filter(item => item.longText)

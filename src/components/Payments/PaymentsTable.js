@@ -3,13 +3,13 @@ import { EnhancedTable } from '../Page/TablePanel';
 import { adminCode } from '../../actions/apiActions-new';
 
 const headCells = [
-  { id: 'date', numeric: true, disablePadding: true, wider: '2rem', label: 'Datum' },
-  { id: 'account_name', numeric: true, disablePadding: false, label: 'Rekening' },
+  { id: 'date', align: 'right', disablePadding: true, wider: '2rem', label: 'Datum' },
+  { id: 'account_name', align: 'right', disablePadding: false, label: 'Rekening' },
   { id: 'name', numeric: false, disablePadding: false, label: 'Contact' },
   { id: 'amount', numeric: true, disablePadding: false, label: 'Bedrag' },
-  { id: 'owner', numeric: true, disablePadding: false, label: 'Owner' },
-  { id: 'state', numeric: false, disablePadding: false, label: 'Status' },
-  { id: 'message', numeric: false, disablePadding: false, label: 'Omschrijving' },
+  { id: 'owner', align: 'right', disablePadding: false, label: 'Owner' },
+  { id: 'state', disablePadding: false, label: 'Status' },
+  { id: 'message', disablePadding: false, label: 'Omschrijving' },
 ];
 
 const withThousand = (amtStr) => {

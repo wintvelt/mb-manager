@@ -69,11 +69,13 @@ function EnhancedTableHead(props) {
                 {headCells.map(headCell => (
                     <TableCell
                         key={headCell.id}
-                        align={headCell.numeric ? 'right' : headCell.center ? 'center' : 'left'}
+                        align={(headCell.numeric || headCell.align === 'right') ?
+                            'right' : headCell.center ? 'center' : 'left'}
                         padding={headCell.disablePadding ? 'none' : 'default'}
                         sortDirection={orderBy === headCell.id ? order : false}
                         style={{
-                            [headCell.numeric ? 'paddingLeft' : 'paddingRight']: headCell.wider,
+                            [(headCell.numeric || headCell.align === 'right') ?
+                                'paddingLeft' : 'paddingRight']: headCell.wider,
                             width: headCell.width || 'inherit'
                         }}
                     >

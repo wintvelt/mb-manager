@@ -14,7 +14,7 @@ Categorie
 
 
 const headCells = [
-    { id: 'date', numeric: true, disablePadding: true, wider: '2rem', label: 'Datum' },
+    { id: 'date', align: 'right', disablePadding: true, wider: '2rem', label: 'Datum' },
     { id: 'contact_name', numeric: false, disablePadding: false, label: 'Leverancier' },
     { id: 'reference', numeric: false, disablePadding: false, label: 'Factuur-referentie' },
     { id: 'amount', numeric: true, disablePadding: false, label: 'Bedrag' },
