@@ -24,6 +24,7 @@ import Link from '@material-ui/core/Link';
 import Tooltip from '@material-ui/core/Tooltip';
 
 const drawerWidth = 240;
+const version = 'versie 2.0.11';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -153,6 +154,7 @@ const useStyles = makeStyles(theme => ({
         color: '#ffffff',
         textAlign: 'center',
         padding: theme.spacing(2),
+        paddingBottom: theme.spacing(1),
         fontSize: '0.8rem',
         whiteSpace: 'normal',
         width: drawerWidth
@@ -331,7 +333,10 @@ export const NavWrapper = (props) => {
             </List>
             <Divider className={classes.divider} />
             <Typography className={clsx(classes.listFooter, { [classes.hide]: !open })} variant='body2'>
-                Met liefde, passie gemaakt voor Mobly, door Wouter, in de nachtelijke uurtjes, in de trein, of allebei.
+                Met liefde, passie gemaakt voor Mobly. Door Wouter, in de nachtelijke uurtjes, in de trein, of allebei.
+            </Typography>
+            <Typography className={clsx(classes.listFooter, { [classes.hide]: !open })} variant='body2'>
+                {version}
             </Typography>
             <Typography className={clsx(classes.listFooter, { [classes.hide]: !open })} variant='body2'>
                 <span role='img' aria-label='cheers'>🍻</span> 2019, 2020
