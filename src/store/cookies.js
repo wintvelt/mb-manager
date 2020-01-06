@@ -19,6 +19,6 @@ export function setCookie(object) {
     document.cookie = cookieTime + "=" + Date.now() + ";path=/;expires=" + d.toGMTString();
 }
 
-export function deleteCookie() { 
+export function deleteCookie() {
     document.cookie = cookieName + "= ;path=/;expires=0";
 }

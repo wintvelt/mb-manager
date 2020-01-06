@@ -4,7 +4,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from "react-redux";
 import { setAccess, getRequestToken, getAccounts } from "../../actions/apiActions-new";
-import { LOGOUT } from "../../store/action-types";
+import { DELETE_ACCESS_TOKEN } from "../../store/action-types";
 import { paramToObj } from "../../constants/helpers";
 import ConnectCard from './ConnectCard';
 import { deleteCookie } from '../../store/cookies';
@@ -17,7 +17,7 @@ const Connection = props => {
     const dispatch = useDispatch();
     const onLogout = (e) => {
         deleteCookie();
-        dispatch({ type: LOGOUT });
+        dispatch({ type: DELETE_ACCESS_TOKEN });
         // window.location.href = props.location.pathname;
         props.history.replace(props.location.pathname, {});
     }

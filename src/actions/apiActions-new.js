@@ -8,7 +8,7 @@ import {
     SET_RECEIPTS, SET_PURCHASE_INVOICES, SET_LEDGERS_NEW, SET_CUSTOM_FIELDS_NEW,
     SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_SYNC_PENDING, SET_OPT_DELETED,
     SET_BANK,
-    SET_ACCESS_TOKEN, DO_SNACK_ERROR, DELETE_ACCESS_TOKEN, 
+    SET_ACCESS_TOKEN, DO_SNACK_ERROR, DELETE_ACCESS_TOKEN,
     SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE
 } from '../store/action-types';
 import { doSnack, doSnackError } from './actions';
@@ -299,7 +299,7 @@ const configFilename = 'revenue-config.json';
 
 // for revenue config
 export const getRevenueConfig = () => apiAction({
-    url: base_url_simple_db+configFilename,
+    url: base_url_simple_db + configFilename,
     loadingMsg: 'Boekingsregels aan het ophalen.',
     storeAction: (payload) => {
         return { type: SET_REVENUE_CONFIG, payload }
@@ -307,7 +307,7 @@ export const getRevenueConfig = () => apiAction({
 })
 
 export const saveRevenueConfig = (id, data, callback) => apiAction({
-    url: base_url_simple_db+configFilename+'/'+encodeURI(id),
+    url: base_url_simple_db + configFilename + '/' + encodeURI(id),
     method: 'POST',
     body: data,
     headers: {},
@@ -319,7 +319,7 @@ export const saveRevenueConfig = (id, data, callback) => apiAction({
 })
 
 export const deleteRevenueConfig = (id) => apiAction({
-    url: base_url_simple_db+configFilename+'/'+encodeURI(id),
+    url: base_url_simple_db + configFilename + '/' + encodeURI(id),
     method: 'DELETE',
     loadingMsg: 'Boekingsregel verwijderen..',
     storeAction: (payload) => {
@@ -372,7 +372,8 @@ export function setAccess(reqToken) {
             .then(handleError)
             .then(res => {
                 setCookie(res);
-                dispatch({ type: SET_ACCESS_TOKEN, payload: apiActionManual(res) });
+                dispatch({ type: SET_ACCESS_TOKEN, payload: apiActionManual({ data: res }) });
+                dispatch(getAccounts(res));
             })
             .catch(error => {
                 dispatch({ type: DELETE_ACCESS_TOKEN });
@@ -385,30 +386,30 @@ export function setAccess(reqToken) {
 
 // initial POST command, returns promise
 export function postData(url = '', data = {}, method = "POST", access_token) {
-	// Default options are marked with *
-	return fetch(url, {
-		method: method, // *GET, POST, PUT, DELETE, etc.
-		mode: "cors", // no-cors, cors, *same-origin
-		cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-		// credentials: "include", // include, *same-origin, omit
-		headers: {
-			"Content-Type": "application/json",
-			Authorization: "Bearer " + access_token // ACCESS_TOKEN
-			// "Content-Type": "application/x-www-form-urlencoded",
-		},
-		body: JSON.stringify(data) // body data type must match "Content-Type" header
-	})
-		.then(handleError)
+    // Default options are marked with *
+    return fetch(url, {
+        method: method, // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, cors, *same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        // credentials: "include", // include, *same-origin, omit
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access_token // ACCESS_TOKEN
+            // "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+    })
+        .then(handleError)
 }
 // standard authenticated GET request, returns promise
 export function getData(url = '', access_token) {
-	return fetch(url, {
-		// credentials: "include", // include, *same-origin, omit
-		headers: {
-			Authorization: "Bearer " + access_token // ACCESS_TOKEN
-		}
-	})
-		.then(handleError);
+    return fetch(url, {
+        // credentials: "include", // include, *same-origin, omit
+        headers: {
+            Authorization: "Bearer " + access_token // ACCESS_TOKEN
+        }
+    })
+        .then(handleError);
 }
 
 function handleError(res) {

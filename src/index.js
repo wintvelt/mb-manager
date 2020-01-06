@@ -13,7 +13,6 @@ import { apiActionManual, apiUpdate } from './helpers/apiData/apiData';
 const initFromCookie = () => {
 	const accessFromCookie = getCookie('MB_access');
 	// const timeFromCookie = getCookie('MB_time');
-	console.log({ accessFromCookie });
 	return accessFromCookie ?
 		{
 			...initialState,

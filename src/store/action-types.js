@@ -7,7 +7,6 @@ export const DO_SNACK_ERROR = "DO_SNACK_ERROR"
 export const SET_ACCESS_TOKEN = "SET_ACCESS_TOKEN";
 export const DELETE_ACCESS_TOKEN = "DELETE_ACCESS_TOKEN";
 export const TEST_CONNECTION = "TEST_CONNECTION";
-export const LOGOUT = 'LOGOUT';
 export const SET_BATCH_ERROR = "SET_BATCH_ERROR";
 
 export const SET_BANK = 'SET_BANK';
