@@ -9,14 +9,14 @@ const makeXls = (columns, rows) => {
     workbook.created = new Date();
     workbook.modified = new Date();
     workbook.lastPrinted = new Date();
-    let sheet = workbook.addWorksheet('Banktransacties');
+    let sheet = workbook.addWorksheet('Contacten');
 
     sheet.columns = columns;
     sheet.addRows(rows);
     return workbook;
 }
 
-const integerToStr = (num, size) => {
+const integerToStr = (num, size = 2) => {
     const str = num.toString();
     const strLength = str.length;
     return (size > strLength) ?
@@ -39,7 +39,7 @@ export const contactDownload = (selectedRows) => {
         { header: 'Contact', key: 'company_name', width: 20 },
         { header: 'Owner', key: 'owner', width: 10 },
         { header: 'Std categorie', key: 'std_ledger_name', width: 20 },
-        { header: 'Keywords', key: 'keywords_current', width: 60, style: { alignment: { wrapText: true } } }
+        { header: 'Keywords', key: 'keywords', width: 60, style: { alignment: { wrapText: true } } }
     ], selectedRows);
     const filename = `moblybird contacten ${timestamp()}.xlsx`;
 
