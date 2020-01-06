@@ -35,7 +35,9 @@ const Connection = props => {
         [
             {
                 key: 'verifyConnection', title: 'Verifeer connectie',
-                action: doAction(getAccounts(access_token))
+                action: e => {
+                    doAction(getAccounts(access_token))(e)
+                }
             },
             { key: 'login', title: 'Log opnieuw in', action: getRequestToken },
             { key: 'logout', title: 'Uitloggen', action: onLogout },

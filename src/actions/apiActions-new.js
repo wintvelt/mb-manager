@@ -372,7 +372,7 @@ export function setAccess(reqToken) {
             .then(handleError)
             .then(res => {
                 setCookie(res);
-                dispatch({ type: SET_ACCESS_TOKEN, payload: res });
+                dispatch({ type: SET_ACCESS_TOKEN, payload: apiActionManual(res) });
             })
             .catch(error => {
                 dispatch({ type: DELETE_ACCESS_TOKEN });

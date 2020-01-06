@@ -13,16 +13,19 @@ import { apiActionManual, apiUpdate } from './helpers/apiData/apiData';
 const initFromCookie = () => {
 	const accessFromCookie = getCookie('MB_access');
 	// const timeFromCookie = getCookie('MB_time');
-	return Object.assign({}, initialState, 
-		{ 
-			accessToken : apiUpdate(initialState.accessToken, apiActionManual({ data: accessFromCookie }))
-		})
+	console.log({ accessFromCookie });
+	return accessFromCookie ?
+		{
+			...initialState,
+			accessToken: apiUpdate(initialState.accessToken, apiActionManual({ data: accessFromCookie }))
+		}
+		: initialState;
 }
 
 ReactDOM.render(
 	<Provider store={storeWithInit(initFromCookie())}>
 		<App />
-	</Provider>, 
+	</Provider>,
 	document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
