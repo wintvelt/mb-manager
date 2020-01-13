@@ -109,15 +109,16 @@ export const Export = props => {
     return (
         <Grid>
             <DataPanel expanded={false} onChange={() => {
-                if (olderYear) setYear(olderYear)
+                if (olderYear) setYear(selectedYear + 1)
             }}
                 title={`inkomende facturen en statistieken${activeYear}`}
                 apiDataSources={[incomingSums]}
                 apiTitles={['statistieken']}
                 flat
+                actionsInSummary
             >
                 {olderYear ?
-                    <Button color='primary'>
+                    <Button color='primary' variant='contained'>
                         Data uit {olderYear} ophalen
                 </Button>
                     : <></>}
