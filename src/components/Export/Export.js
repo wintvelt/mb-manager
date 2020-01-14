@@ -79,10 +79,7 @@ export const Export = props => {
                 body.noLog = true;
                 break;
         }
-        console.log(
-            encodeURI(JSON.stringify(body))
-        );
-        // dispatch(exportDocs(body, access_token));
+        dispatch(exportDocs(body, access_token));
     }
     const onSync = access_token => {
         dispatch(syncFiles(access_token));
