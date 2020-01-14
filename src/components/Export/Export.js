@@ -62,7 +62,7 @@ export const Export = props => {
         }
     }
     const onExport = (selection, access_token) => {
-        var body = {
+        let body = {
             ids: selection,
         }
         switch (filters.mutSelected) {
@@ -79,7 +79,10 @@ export const Export = props => {
                 body.noLog = true;
                 break;
         }
-        dispatch(exportDocs(body, access_token));
+        console.log(
+            encodeURI(JSON.stringify(body))
+        );
+        // dispatch(exportDocs(body, access_token));
     }
     const onSync = access_token => {
         dispatch(syncFiles(access_token));
