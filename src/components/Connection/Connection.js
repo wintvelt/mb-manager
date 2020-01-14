@@ -1,10 +1,10 @@
 // Connection.js
 // for connecting to Moneybird - new
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from "react-redux";
 import { setAccess, getRequestToken, getAccounts } from "../../actions/apiActions-new";
-import { DELETE_ACCESS_TOKEN } from "../../store/action-types";
+import { DELETE_ACCESS_TOKEN, DO_SNACK } from "../../store/action-types";
 import { paramToObj } from "../../constants/helpers";
 import ConnectCard from './ConnectCard';
 import { deleteCookie } from '../../store/cookies';
@@ -15,6 +15,12 @@ const Connection = props => {
         [store.accessToken.toJS(), hasData(store)]
     ));
     const dispatch = useDispatch();
+    useEffect(() => {
+        if (props.location && props.location.state && props.location.state.referrer) {
+            console.log(props.location.state.referrer);
+            dispatch({ type: DO_SNACK, payload: 'Oh, je moet eerst inloggen' })
+        }
+    }, [dispatch, props.location])
     const onLogout = (e) => {
         deleteCookie();
         dispatch({ type: DELETE_ACCESS_TOKEN });

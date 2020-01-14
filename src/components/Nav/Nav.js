@@ -4,7 +4,7 @@ import { NavWrapper } from './Nav-helpers';
 import { hasData } from '../../store/derived-storestate-helpers';
 
 export const menu = [
-    { icon: 'home', link: '/', text: 'Home' },
+    { icon: 'home', link: '/', text: 'Home', public: true },
     {
         icon: 'cloud_upload', link: '/bankupload', text: 'Upload bankfile',
         helpLink: 'https://drive.google.com/open?id=1QdOWgoR2iVNtEirSc5--zElL7qW-tKJEM7GahppQrcY',

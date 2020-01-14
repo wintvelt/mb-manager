@@ -148,7 +148,7 @@ const App = (props) => {
 	);
 }
 
-function PrivateRoute({ isConnected, component: Component, ...rest }) {
+function PrivateRoute({ isConnected, component: Component, path , ...rest }) {
 	return (
 		<Route
 			{...rest}
@@ -158,8 +158,11 @@ function PrivateRoute({ isConnected, component: Component, ...rest }) {
 				) : (
 						<Redirect
 							to={{
-								pathname: "/connection",
-								state: { newSnack: "Sorry, je moet eerst connectie maken." }
+								pathname: '/connection',
+								state: { 
+									referrer: path,
+									newSnack: "Sorry, je moet eerst connectie maken." 
+								}
 							}}
 						/>
 					)
