@@ -221,7 +221,7 @@ export function patchMatch(batchId, paymentId, body, access_token, destination) 
 }
 
 // to process a list of ledger-bookings (book payment to a ledger)
-const invert = numStr => numStr.slice(0, 1) === '-' ? numStr.slice(1) : '-' + numStr;
+// const invert = numStr => numStr.slice(0, 1) === '-' ? numStr.slice(1) : '-' + numStr;
 
 // connectList = [ { payment, ledgerId } ]
 export function batchBookingPost(batchList, access_token) {
@@ -242,7 +242,7 @@ export function batchBookingPost(batchList, access_token) {
             const patchBody = {
                 booking_type: 'LedgerAccount',
                 booking_id: item.ledgerId,
-                price_base: invert(item.payment.amount_open),
+                price_base: item.payment.amount_open,
                 description: 'Transactie gekoppeld uit Moblybird ;)'
             };
             dispatch(
