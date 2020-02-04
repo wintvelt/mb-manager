@@ -24,7 +24,7 @@ import Link from '@material-ui/core/Link';
 import Tooltip from '@material-ui/core/Tooltip';
 
 const drawerWidth = 240;
-const version = 'versie 2.0.14';
+const version = 'versie 2.0.15';
 
 const useStyles = makeStyles(theme => ({
     root: {
