@@ -202,13 +202,10 @@ export function patchContactKeywords(batchId, contactId, body, access_token) {
 
 // to connect list of payment, invoice combos
 // connectList = [ { paymentId, invoiceId, amount, amountForeign } ]
-// TODO: Throttle API calls
 export function batchMatchPost(batchList, access_token) {
     return function (dispatch) {
         // we have data to process
         batchList.forEach((item) => {
-            // optimistic update of store
-            dispatch({ type: SET_PAY_CONNECT, payload: item });
             // set message
             const initialPayload = {
                 batchId: "connections",
@@ -217,19 +214,47 @@ export function batchMatchPost(batchList, access_token) {
                 msg: ""
             }
             dispatch(setBatchCheckMsg(initialPayload));
-            // send single update to server + update batchMsg with response
-            const patchBody = {
-                booking_type: 'Document',
-                booking_id: item.invoiceId,
-                price: item.amountForeign || item.amount,
-                price_base: item.amount,
-                description: 'Transactie gekoppeld uit Moblybird ;)'
-            };
-            dispatch(
-                patchMatch("connections", item.paymentId, patchBody, access_token)
-            ).then(payload => dispatch(setBatchCheckMsg(payload)));
         });
     }
+}
+
+const singleMatchUpdate = (itemList, access_token, dispatch) => {
+    const item = itemList[0];
+    // optimistic update of store
+    dispatch({ type: SET_PAY_CONNECT, payload: item });
+    // still data to process
+    const itemsToProcessCount = itemList.length;
+    const duration = itemsToProcessCount * 2;
+    if (duration % 60 === 0) {
+        const message = `Nog ${itemsToProcessCount} boeking${itemsToProcessCount === 1 ? '' : 'en'} verwerken.`;
+        console.log(message);
+        const timerAction = {
+            type: DO_TIMER,
+            payload: {
+                timeLeft: duration,
+                message
+            }
+        }
+        dispatch(timerAction);
+    }
+    // send single update to server + update batchMsg with response
+    const patchBody = {
+        booking_type: 'Document',
+        booking_id: item.invoiceId,
+        price: item.amountForeign || item.amount,
+        price_base: item.amount,
+        description: 'Transactie gekoppeld uit Moblybird ;)'
+    };
+    dispatch(
+        patchMatch("connections", item.paymentId, patchBody, access_token)
+    ).then(payload => {
+        dispatch(setBatchCheckMsg(payload));
+        if (itemList.length > 1) {
+            setTimeout(() => {
+                singleMatchUpdate(itemList.slice(1), access_token, dispatch)
+            }, apiThrottle);
+        }
+    });
 }
 
 // POST update 1 connection between payment-invoice
