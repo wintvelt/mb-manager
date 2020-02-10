@@ -215,6 +215,7 @@ export function batchMatchPost(batchList, access_token) {
             }
             dispatch(setBatchCheckMsg(initialPayload));
         });
+        singleMatchUpdate(batchList, access_token, dispatch);
     }
 }
 
