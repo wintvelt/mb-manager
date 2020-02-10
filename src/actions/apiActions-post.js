@@ -6,12 +6,13 @@ import {
     doSnack
 } from './actions';
 import {
-    SET_INCOMING_LEDGER_NEW, SET_BATCH_MSG, CLEAR_BATCH_MSG, DO_SNACK,
+    SET_INCOMING_LEDGER_NEW, SET_BATCH_MSG, CLEAR_BATCH_MSG, DO_SNACK, DO_TIMER,
     SET_CONTACT_KEYWORDS, SET_PAY_CONNECT, DELETE_PAYMENT_MANUAL
 } from '../store/action-types';
 
 const adminCode = "243231934476453244";
 const base_url = 'https://moneybird.com/api/v2/' + adminCode;
+const apiThrottle = 1800;
 
 // to process a list of ledger-changes (change ledger in invoice for all details to new ledger)
 // batchList = [ { incoming, newLedgerId } ]
@@ -19,31 +20,53 @@ export function batchLedgerPost(batchList, access_token) {
     return function (dispatch) {
         // we have data to process
         const batchListClean = batchList.filter(item => (item.newLedgerId));
+        const itemsToProcessCount = batchListClean.length;
+        const duration = itemsToProcessCount * 2;
+        const message = `${itemsToProcessCount} boekingen verwerken.`;
+        const timerAction = {
+            type: DO_TIMER,
+            payload: {
+                key: 'ledger_processing',
+                timeLeft: duration,
+                message
+            }
+        }
+        dispatch(timerAction);
         // removes invalid or missing ledgers
-        const invalidLedgers = (batchList.length - batchListClean.length);
+        const invalidLedgers = (batchList.length - itemsToProcessCount);
         if (invalidLedgers > 0) {
             const msg = invalidLedgers + " met incorrecte standaard cat";
             dispatch(doSnack(msg));
         }
-        // loop over cleaned list
-        batchListClean.forEach((item) => {
-            // optimistic update of store
-            dispatch({ type: SET_INCOMING_LEDGER_NEW, payload: item });
-            // set message
-            const initialPayload = {
-                batchId: "incoming",
-                fetchId: item.incoming.id,
-                res: false,
-                msg: ""
-            }
-            dispatch(setBatchCheckMsg(initialPayload));
-            // send single update to server + update batchMsg with response
-            const patchBody = patchFrom(item.incoming, item.newLedgerId);
-            dispatch(
-                patchIncomingLedger("incoming", item.incoming.id, patchBody, access_token)
-            ).then(payload => dispatch(setBatchCheckMsg(payload)));
-        });
+        // make recursive call to update items
+        singleBatchUpdate(batchListClean, access_token, dispatch);
     }
+}
+
+const singleBatchUpdate = (itemList, access_token, dispatch) => {
+    const item = itemList[0];
+    // optimistic update of store
+    dispatch({ type: SET_INCOMING_LEDGER_NEW, payload: item });
+    // set message
+    const initialPayload = {
+        batchId: "incoming",
+        fetchId: item.incoming.id,
+        res: false,
+        msg: ""
+    }
+    dispatch(setBatchCheckMsg(initialPayload));
+    // send single update to server + update batchMsg with response
+    const patchBody = patchFrom(item.incoming, item.newLedgerId);
+    dispatch(
+        patchIncomingLedger("incoming", item.incoming.id, patchBody, access_token)
+    ).then((payload) => {
+        dispatch(setBatchCheckMsg(payload));
+        if (itemList.length > 1) {
+            setTimeout(() => {
+                singleBatchUpdate(itemList.slice(1), access_token, dispatch)
+            }, apiThrottle);
+        }
+    });
 }
 
 // POST update to Moneybird - to update details of 1 receipt or purchase invoice
@@ -226,10 +249,8 @@ export function patchMatch(batchId, paymentId, body, access_token, destination) 
 // connectList = [ { payment, ledgerId } ]
 export function batchBookingPost(batchList, access_token) {
     return function (dispatch) {
-        // we have data to process
-        batchList.forEach((item) => {
-            // optimistic update of store
-            dispatch({ type: DELETE_PAYMENT_MANUAL, payload: { paymentId: item.payment.id } });
+        // Ready batchmessages for snackbar
+        batchList.forEach(item => {
             // set message
             const initialPayload = {
                 batchId: "auto_booking",
@@ -238,18 +259,61 @@ export function batchBookingPost(batchList, access_token) {
                 msg: ""
             }
             dispatch(setBatchCheckMsg(initialPayload));
-            // send single update to server + update batchMsg with response
-            const patchBody = {
-                booking_type: 'LedgerAccount',
-                booking_id: item.ledgerId,
-                price_base: item.payment.amount_open,
-                description: 'Transactie gekoppeld uit Moblybird ;)'
-            };
-            dispatch(
-                patchMatch("auto_booking", item.payment.id, patchBody, access_token, 'categorie')
-            ).then(payload => dispatch(setBatchCheckMsg(payload)));
         });
+        // still data to process
+        const itemsToProcessCount = batchList.length;
+        const duration = itemsToProcessCount * 2;
+        const message = `Totaal ${itemsToProcessCount} boeking${itemsToProcessCount === 1 ? '' : 'en'} te verwerken.`;
+        const timerAction = {
+            type: DO_TIMER,
+            payload: {
+                timeLeft: duration,
+                message,
+                initial: true
+            }
+        }
+        dispatch(timerAction);
+        // make recursive call to update items
+        singleBookingUpdate(batchList, access_token, dispatch);
     }
+}
+
+const singleBookingUpdate = (itemList, access_token, dispatch) => {
+    const item = itemList[0];
+    // optimistic update of store
+    dispatch({ type: DELETE_PAYMENT_MANUAL, payload: { paymentId: item.payment.id } });
+    // still data to process
+    const itemsToProcessCount = itemList.length;
+    const duration = itemsToProcessCount * 2;
+    if (duration % 60 === 0) {
+        const message = `Nog ${itemsToProcessCount} boeking${itemsToProcessCount === 1 ? '' : 'en'} verwerken.`;
+        console.log(message);
+        const timerAction = {
+            type: DO_TIMER,
+            payload: {
+                timeLeft: duration,
+                message
+            }
+        }
+        dispatch(timerAction);
+    }
+    // send single update to server + update batchMsg with response
+    const patchBody = {
+        booking_type: 'LedgerAccount',
+        booking_id: item.ledgerId,
+        price_base: item.payment.amount_open,
+        description: 'Transactie gekoppeld uit Moblybird ;)'
+    };
+    dispatch(
+        patchMatch("auto_booking", item.payment.id, patchBody, access_token, 'categorie')
+    ).then((payload) => {
+        dispatch(setBatchCheckMsg(payload));
+        if (itemList.length > 1) {
+            setTimeout(() => {
+                singleBookingUpdate(itemList.slice(1), access_token, dispatch)
+            }, apiThrottle);
+        }
+    });
 }
 
 // for single batch message setting + check to do snack and clear if needed

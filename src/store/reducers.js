@@ -1,7 +1,7 @@
 // reducers.js
 
 import {
-    DO_SNACK, DO_SNACK_ERROR,
+    DO_SNACK, DO_SNACK_ERROR, DO_TIMER,
     SET_ACCESS_TOKEN, DELETE_ACCESS_TOKEN,
     SET_BATCH_ERROR,
     SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_OPT_DELETED, SET_SYNC_PENDING,
@@ -236,6 +236,25 @@ function rootReducer(state = initialState, action) {
                     variant: 'warning'
                 },
                 hasClose: true
+            });
+            return {
+                ...state,
+                notifications: updateSnacks(state.notifications, newSnackAction)
+            }
+        }
+
+        // payload: { key, timeLeft(sec), message }
+        case DO_TIMER: {
+            const { timeLeft, message } = action.payload;
+            const minutesLeft = Math.ceil(timeLeft/60);
+            const secondsLeft = timeLeft % 60;
+            const timedMsg = `${message}. Nog circa ${minutesLeft} min.`;
+            const newSnackAction = enqueueSnack({
+                message: timedMsg,
+                options: {
+                    variant: 'info',
+                    autoHideDuration: (secondsLeft === 0)? 59000 : secondsLeft * 1000
+                }
             });
             return {
                 ...state,

@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React,   { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withSnackbar } from 'notistack';
 import { removeSnackbar, closeSnack } from './updateSnacks';
@@ -41,7 +41,7 @@ export const Notifier = (props) => {
                 action: hasClose ?
                     key => (
                         <Button onClick={() => updateSnacks(closeSnack(key))}><Icon>close</Icon></Button>
-                    ): null,
+                    ) : null,
 
                 onClose: (event, reason, key) => {
                     if (options.onClose) {

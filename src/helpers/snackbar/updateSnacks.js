@@ -32,14 +32,17 @@ export const defaultNotifications = [];
 
 export const updateSnacks = (notifications = defaultNotifications, action) => {
     switch (action.type) {
-        case ENQUEUE_SNACKBAR:
+        case ENQUEUE_SNACKBAR: {
+            const key = action.notification && action.notification.key;
             return [
                 ...notifications,
                 {
-                    key: action.key,
+                    key,
                     ...action.notification,
                 },
-            ];
+            ]
+        }
+
 
         case CLOSE_SNACKBAR:
             return notifications.map(notification => (
@@ -50,8 +53,8 @@ export const updateSnacks = (notifications = defaultNotifications, action) => {
 
         case REMOVE_SNACKBAR:
             return notifications.filter(
-                    notification => notification.key !== action.key,
-                );
+                notification => notification.key !== action.key,
+            );
 
         default:
             return notifications;

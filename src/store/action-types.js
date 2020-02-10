@@ -2,7 +2,8 @@
 
 // messages in snackbar
 export const DO_SNACK = "DO_SNACK";
-export const DO_SNACK_ERROR = "DO_SNACK_ERROR"
+export const DO_SNACK_ERROR = "DO_SNACK_ERROR";
+export const DO_TIMER = "DO_TIMER";
 
 export const SET_ACCESS_TOKEN = "SET_ACCESS_TOKEN";
 export const DELETE_ACCESS_TOKEN = "DELETE_ACCESS_TOKEN";
