@@ -26,12 +26,21 @@ export function batchLedgerPost(batchList, access_token) {
         const timerAction = {
             type: DO_TIMER,
             payload: {
-                key: 'ledger_processing',
                 timeLeft: duration,
                 message
             }
         }
         dispatch(timerAction);
+        // set initial batch messages
+        batchListClean.forEach(item => {
+            const initialPayload = {
+                batchId: "incoming",
+                fetchId: item.incoming.id,
+                res: false,
+                msg: ""
+            }
+            dispatch(setBatchCheckMsg(initialPayload));
+        })
         // removes invalid or missing ledgers
         const invalidLedgers = (batchList.length - itemsToProcessCount);
         if (invalidLedgers > 0) {
@@ -47,14 +56,21 @@ const singleBatchUpdate = (itemList, access_token, dispatch) => {
     const item = itemList[0];
     // optimistic update of store
     dispatch({ type: SET_INCOMING_LEDGER_NEW, payload: item });
-    // set message
-    const initialPayload = {
-        batchId: "incoming",
-        fetchId: item.incoming.id,
-        res: false,
-        msg: ""
+    // still data to process
+    const itemsToProcessCount = itemList.length;
+    const duration = itemsToProcessCount * 2;
+    if (duration % 60 === 0) {
+        const message = `Nog ${itemsToProcessCount} boeking${itemsToProcessCount === 1 ? '' : 'en'} verwerken.`;
+        console.log(message);
+        const timerAction = {
+            type: DO_TIMER,
+            payload: {
+                timeLeft: duration,
+                message
+            }
+        }
+        dispatch(timerAction);
     }
-    dispatch(setBatchCheckMsg(initialPayload));
     // send single update to server + update batchMsg with response
     const patchBody = patchFrom(item.incoming, item.newLedgerId);
     dispatch(
@@ -186,6 +202,7 @@ export function patchContactKeywords(batchId, contactId, body, access_token) {
 
 // to connect list of payment, invoice combos
 // connectList = [ { paymentId, invoiceId, amount, amountForeign } ]
+// TODO: Throttle API calls
 export function batchMatchPost(batchList, access_token) {
     return function (dispatch) {
         // we have data to process
