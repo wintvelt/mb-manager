@@ -24,7 +24,9 @@ export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
     storeAction: (payload) => {
         return { type: SET_CONTACTS_NEW, payload }
     }
-})
+});
+
+const baseUrlAwsExport = 'https://uh211h81ig.execute-api.eu-central-1.amazonaws.com/Prod/export';
 
 export const getPayments = (access_token, periodFilter = 'this_quarter', extraFilters = '') => {
     return apiActionSync({
@@ -90,7 +92,7 @@ export const getCustomFields = (access_token) => apiAction({
 })
 
 export const getIncomingSums = () => apiAction({
-    url: 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/export?filename=incoming-summary-list.json',
+    url: baseUrlAwsExport+'?filename=incoming-summary-list.json',
     loadingMsg: 'statistieken van export aan het ophalen.',
     storeAction: (payload) => {
         return { type: SET_INCOMING_SUMS, payload }
@@ -102,7 +104,7 @@ export function exportDocs(body, access_token) {
         // const url = (process.env.NODE_ENV === 'development') ?
         // 	'http://localhost:3030/export'
         // 	: 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export/';
-        const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/export';
+        const url = baseUrlAwsExport;
         dispatch({ type: SET_EXPORT_PENDING, payload: body.ids.length });
         dispatch(doSnack('Export wordt gemaakt voor ' + body.ids.length + ' document(en)'));
         postData(url, body, "POST", access_token)
@@ -164,7 +166,7 @@ export function deleteFile(filename, access_token) {
         // const url = (process.env.NODE_ENV === 'development') ?
         // 	'http://localhost:3030/export'
         // 	: 'https://';
-        const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/export';
+        const url = baseUrlAwsExport;
 
         const body = { filename: filename };
         dispatch({ type: SET_OPT_DELETED, payload: filename });
