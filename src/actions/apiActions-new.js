@@ -27,6 +27,7 @@ export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
 });
 
 const baseUrlAwsExport = 'https://uh211h81ig.execute-api.eu-central-1.amazonaws.com/Prod/export';
+const baseUrlAwsSimpleDb = 'https://ocankaagm4.execute-api.eu-central-1.amazonaws.com/Prod/simpledb';
 
 export const getPayments = (access_token, periodFilter = 'this_quarter', extraFilters = '') => {
     return apiActionSync({
@@ -92,7 +93,7 @@ export const getCustomFields = (access_token) => apiAction({
 })
 
 export const getIncomingSums = () => apiAction({
-    url: baseUrlAwsExport+'?filename=incoming-summary-list.json',
+    url: baseUrlAwsExport + '?filename=incoming-summary-list.json',
     loadingMsg: 'statistieken van export aan het ophalen.',
     storeAction: (payload) => {
         return { type: SET_INCOMING_SUMS, payload }
@@ -296,12 +297,11 @@ export const deleteConvertFile = (active_account, filename, access_token, callba
     callback
 })
 
-const base_url_simple_db = 'https://io02kwpmhl.execute-api.eu-central-1.amazonaws.com/Prod/simpledb/';
 const configFilename = 'revenue-config.json';
 
 // for revenue config
 export const getRevenueConfig = () => apiAction({
-    url: base_url_simple_db + configFilename,
+    url: baseUrlAwsSimpleDb + '/' + configFilename,
     loadingMsg: 'Boekingsregels aan het ophalen.',
     storeAction: (payload) => {
         return { type: SET_REVENUE_CONFIG, payload }
@@ -309,7 +309,7 @@ export const getRevenueConfig = () => apiAction({
 })
 
 export const saveRevenueConfig = (id, data, callback) => apiAction({
-    url: base_url_simple_db + configFilename + '/' + encodeURI(id),
+    url: baseUrlAwsSimpleDb + '/' + configFilename + '/' + encodeURI(id),
     method: 'POST',
     body: data,
     headers: {},
@@ -321,7 +321,7 @@ export const saveRevenueConfig = (id, data, callback) => apiAction({
 })
 
 export const deleteRevenueConfig = (id) => apiAction({
-    url: base_url_simple_db + configFilename + '/' + encodeURI(id),
+    url: baseUrlAwsSimpleDb + '/' + configFilename + '/' + encodeURI(id),
     method: 'DELETE',
     loadingMsg: 'Boekingsregel verwijderen..',
     storeAction: (payload) => {
