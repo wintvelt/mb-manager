@@ -26,8 +26,10 @@ export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
     }
 });
 
-const baseUrlAwsExport = 'https://uh211h81ig.execute-api.eu-central-1.amazonaws.com/Prod/export';
+const baseUrlAwsFinvisionExport = 'https://uh211h81ig.execute-api.eu-central-1.amazonaws.com/Prod/export';
+const baseUrlAwsFinvisionSync = 'https://uh211h81ig.execute-api.eu-central-1.amazonaws.com/Prod/sync';
 const baseUrlAwsSimpleDb = 'https://ocankaagm4.execute-api.eu-central-1.amazonaws.com/Prod/simpledb';
+const baseUrlAwsBankmutations = 'https://3pfhatqis6.execute-api.eu-central-1.amazonaws.com/Prod';
 
 export const getPayments = (access_token, periodFilter = 'this_quarter', extraFilters = '') => {
     return apiActionSync({
@@ -93,7 +95,7 @@ export const getCustomFields = (access_token) => apiAction({
 })
 
 export const getIncomingSums = () => apiAction({
-    url: baseUrlAwsExport + '?filename=incoming-summary-list.json',
+    url: baseUrlAwsFinvisionExport + '?filename=incoming-summary-list.json',
     loadingMsg: 'statistieken van export aan het ophalen.',
     storeAction: (payload) => {
         return { type: SET_INCOMING_SUMS, payload }
@@ -105,7 +107,7 @@ export function exportDocs(body, access_token) {
         // const url = (process.env.NODE_ENV === 'development') ?
         // 	'http://localhost:3030/export'
         // 	: 'https://5ndk6t6lw4.execute-api.eu-central-1.amazonaws.com/Prod/export/';
-        const url = baseUrlAwsExport;
+        const url = baseUrlAwsFinvisionExport;
         dispatch({ type: SET_EXPORT_PENDING, payload: body.ids.length });
         dispatch(doSnack('Export wordt gemaakt voor ' + body.ids.length + ' document(en)'));
         postData(url, body, "POST", access_token)
@@ -136,11 +138,9 @@ export function syncFiles(access_token) {
         // const url = (process.env.NODE_ENV === 'development') ?
         // 	'http://localhost:3030/sync'
         // 	: 'https://';
-        const url = 'https://pkvewvsg52.execute-api.eu-central-1.amazonaws.com/Prod/sync';
-
         dispatch({ type: SET_SYNC_PENDING, payload: true });
         dispatch(doSnack('Laatste stand van zaken van Moneybird ophalen'));
-        getData(url, access_token)
+        getData(baseUrlAwsFinvisionSync, access_token)
             .then(res => {
                 dispatch({ type: SET_SYNC_PENDING, payload: false });
                 dispatch({
@@ -167,7 +167,7 @@ export function deleteFile(filename, access_token) {
         // const url = (process.env.NODE_ENV === 'development') ?
         // 	'http://localhost:3030/export'
         // 	: 'https://';
-        const url = baseUrlAwsExport;
+        const url = baseUrlAwsFinvisionExport;
 
         const body = { filename: filename };
         dispatch({ type: SET_OPT_DELETED, payload: filename });
@@ -193,14 +193,12 @@ export function deleteFile(filename, access_token) {
     }
 }
 
-const base_url_AWS_Bank = 'https://87xzyymsji.execute-api.eu-central-1.amazonaws.com/Prod';
-
 export const setBank = payload => {
     return { type: SET_BANK, payload };
 }
 
 export const getBankActiveConfig = (active_account, access_token) => apiAction({
-    url: base_url_AWS_Bank + '/config/' + active_account,
+    url: baseUrlAwsBankmutations + '/config/' + active_account,
     headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'Csv-conversie-instellingen voor deze rekening ophalen.',
     storeAction: (payload) => {
@@ -209,7 +207,7 @@ export const getBankActiveConfig = (active_account, access_token) => apiAction({
 });
 
 export const getBankActiveFiles = (active_account, access_token) => apiAction({
-    url: base_url_AWS_Bank + '/files/' + active_account,
+    url: baseUrlAwsBankmutations + '/files/' + active_account,
     headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'Even geduld terwijl we folderinhoud ophalen',
     storeAction: (payload) => {
@@ -218,7 +216,7 @@ export const getBankActiveFiles = (active_account, access_token) => apiAction({
 });
 
 export const getCsv = (active_account, filename, access_token) => apiAction({
-    url: base_url_AWS_Bank + '/files/' + active_account + '/' + filename,
+    url: baseUrlAwsBankmutations + '/files/' + active_account + '/' + filename,
     headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'Even geduld terwijl we csv bestand ophalen',
     storeAction: (payload) => {
@@ -242,7 +240,7 @@ export const setCsvManual = (filename, data) => {
 }
 
 export const saveConfig = (active_account, body, access_token) => apiAction({
-    url: base_url_AWS_Bank + '/config/' + active_account,
+    url: baseUrlAwsBankmutations + '/config/' + active_account,
     method: 'POST',
     body,
     headers: { Authorization: 'Bearer ' + access_token },
@@ -260,7 +258,7 @@ export const setConfigManual = (data) => {
 }
 
 export const convertCsv = (active_account, body, access_token, callback) => apiAction({
-    url: base_url_AWS_Bank + '/convert/' + active_account,
+    url: baseUrlAwsBankmutations + '/convert/' + active_account,
     method: 'POST',
     body,
     headers: { Authorization: 'Bearer ' + access_token },
@@ -286,7 +284,7 @@ export const resetCsv = () => {
 }
 
 export const deleteConvertFile = (active_account, filename, access_token, callback) => apiAction({
-    url: base_url_AWS_Bank + '/convert/' + active_account,
+    url: baseUrlAwsBankmutations + '/convert/' + active_account,
     method: 'DELETE',
     body: { csv_filename: filename },
     headers: { Authorization: 'Bearer ' + access_token },
