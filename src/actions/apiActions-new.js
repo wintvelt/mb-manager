@@ -26,8 +26,8 @@ export const getContacts = (access_token, pageFrom, pageTo) => apiActionPaged({
     }
 });
 
-const baseUrlAwsFinvisionExport = 'https://uh211h81ig.execute-api.eu-central-1.amazonaws.com/Prod/export';
-const baseUrlAwsFinvisionSync = 'https://uh211h81ig.execute-api.eu-central-1.amazonaws.com/Prod/sync';
+const baseUrlAwsFinvisionExport = 'https://auhidn35t6.execute-api.eu-central-1.amazonaws.com/Prod/export';
+const baseUrlAwsFinvisionSync = 'https://auhidn35t6.execute-api.eu-central-1.amazonaws.com/Prod/sync';
 const baseUrlAwsSimpleDb = 'https://ocankaagm4.execute-api.eu-central-1.amazonaws.com/Prod/simpledb';
 const baseUrlAwsBankmutations = 'https://3pfhatqis6.execute-api.eu-central-1.amazonaws.com/Prod';
 

@@ -4,7 +4,6 @@ import { Link as RouterLink } from 'react-router-dom';
 
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
-import red from '@material-ui/core/colors/red';
 import teal from '@material-ui/core/colors/teal';
 import Toolbar from '@material-ui/core/Toolbar';
 import Icon from '@material-ui/core/Icon';
@@ -24,7 +23,7 @@ import Link from '@material-ui/core/Link';
 import Tooltip from '@material-ui/core/Tooltip';
 
 const drawerWidth = 240;
-const version = 'versie 2.0.16';
+const version = 'versie 2.1.0';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -57,7 +56,8 @@ const useStyles = makeStyles(theme => ({
         textDecoration: 'none !important'
     },
     appBar: {
-        backgroundColor: red[300],
+        // backgroundColor: deepPurple[300],
+        background: 'linear-gradient(90deg, rgba(229,115,115,1) 50%, rgba(239,108,0,1) 100%)',
         zIndex: theme.zIndex.drawer + 1,
         transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
