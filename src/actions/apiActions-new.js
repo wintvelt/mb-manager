@@ -2,6 +2,7 @@
 import { apiActionPaged, apiActionSync } from '../helpers/apiData/apiData-multi';
 import { apiAction, apiActionManual } from '../helpers/apiData/apiData';
 import { deleteCookie, setCookie } from '../store/cookies';
+import { clientID, redir_url, accessViaAwsUrl } from './SECRETS';
 
 import {
     SET_CONTACTS_NEW, SET_PAYMENTS_NEW, SET_ACCOUNTS_NEW,
@@ -327,21 +328,6 @@ export const deleteRevenueConfig = (id) => apiAction({
     }
 })
 
-// for connection
-const clientID = () => {
-    if (process.env.NODE_ENV !== 'production') {
-        return '5da951a273977ed8f70d07b57aa31cc9';
-    }
-    return '2cb04d78d39dae63065ef873a1b909e8';
-}
-
-const redir_url = () => {
-    if (process.env.NODE_ENV !== 'production') {
-        return 'http://localhost:3000/connection';
-    }
-    return 'https://moblybird.com/connection';
-}
-
 const env = () => {
     if (process.env.NODE_ENV !== 'production') {
         return 'dev';
@@ -364,7 +350,7 @@ export function getRequestToken() {
 export function setAccess(reqToken) {
     return function (dispatch) {
 
-        const url = 'https://60bl9ynygh.execute-api.eu-central-1.amazonaws.com/beta/mbGetAccess?code='
+        const url = accessViaAwsUrl + '?code='
             + reqToken + '&env=' + env();
         fetch(url, {
             credentials: "same-origin"
