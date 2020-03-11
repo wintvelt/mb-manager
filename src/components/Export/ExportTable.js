@@ -41,7 +41,7 @@ const deleteIconRender = (row, isSelected, onSelect) => {
 const rowCells = [
     {
         key: 'filename',
-        hrefBase: 'https://moblybird-export-files.s3.eu-central-1.amazonaws.com/',
+        hrefBase: 'https://moblybird-folders.s3.eu-central-1.amazonaws.com/public/',
         hrefKey: 'filename'
     },
     { key: 'docCount', align: 'right' },
