@@ -11,6 +11,7 @@ import Contacts from './Contacts/Contacts';
 import Incoming from './Incoming/Incoming';
 import Payments from './Payments/Payments';
 import Export from './Export/Export';
+import VatExport from './VatExport/VatExport';
 import BankUpload from './BankUpload/BankUpload';
 import Match from './Match/Match';
 
@@ -103,6 +104,8 @@ const NavRoute = (props) => {
 				<PrivateRoute exact path="/contacten" component={Contacts}
 					isConnected={isConnected} />
 				<PrivateRoute path="/export" component={Export}
+					isConnected={isConnected} />
+				<PrivateRoute path="/vat-export" component={VatExport}
 					isConnected={isConnected} />
 				<PrivateRoute path="/bankupload" component={BankUpload}
 					isConnected={isConnected} />

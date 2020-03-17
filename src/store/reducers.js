@@ -14,7 +14,8 @@ import {
     SET_CUSTOM_FIELDS_NEW,
     SET_PAY_CONNECT,
     SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE, SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL,
-    DELETE_PAYMENT_MANUAL
+    DELETE_PAYMENT_MANUAL,
+    SET_VAT_EXPORT_LIST
 } from "./action-types";
 import { initBankData, setBank } from './reducer-helpers-bank';
 import { initApiDataMulti, apiUpdateMulti, apiUpdateMultiMulti } from '../helpers/apiData/apiData-multi';
@@ -42,7 +43,8 @@ export const initialState = {
     revenueConfig: initApiData,
     revenueConfigUpdate: initApiData,
     batchMsg: {},
-    batchError: false
+    batchError: false,
+    vatExportListNew: initApiData
 };
 
 function rootReducer(state = initialState, action) {
@@ -305,6 +307,10 @@ function rootReducer(state = initialState, action) {
             const newBatchMsg = Object.assign({}, state.batchMsg);
             delete newBatchMsg[action.payload];
             return Object.assign({}, state, { batchMsg: newBatchMsg });
+        }
+        case SET_VAT_EXPORT_LIST: {
+            const newVatExportList = apiUpdate(state.vatExportListNew, payload);
+            return { ...state, vatExportListNew: newVatExportList }
         }
 
         default:

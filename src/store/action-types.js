@@ -41,3 +41,4 @@ export const CLEAR_BATCH_MSG = "CLEAR_BATCH_MSG";
 
 export const SET_COUNT = "SET_COUNT";
 
+export const SET_VAT_EXPORT_LIST = "SET_VAT_EXPORT_LIST";

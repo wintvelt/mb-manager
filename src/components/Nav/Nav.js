@@ -29,14 +29,19 @@ export const menu = [
         longText: 'Betalingen (uitgaand) matchen met (openstaande) bonnetjes en facturen.'
     },
     {
-        icon: 'cake', link: '/revenues', text: 'Omzet verwerken', badge: true,
+        icon: 'cake', link: '/revenues', text: 'Omzet verwerken',
         helpLink: 'https://docs.google.com/document/d/1GGuChkVYiVbKlFWHGlx2wYlWFeYfoEUdZOqnIfV5NAQ/edit?usp=sharing',
         longText: 'Omzet (ontvangen betalingen), en interbank-betalingen automatisch aan een categorie toewijzen.'
     },
     {
+        icon: 'local_pizza', link: '/vat-export', text: 'Export voor BTW', badge: true,
+        helpLink: '',
+        longText: 'Exports maken van alle btw-boekingen en kosten naar excel. Voor de (maandelijkse) aangifte aan de fiscus.'
+    },
+    {
         icon: 'sync', link: '/export', text: 'Export Finvision',
         helpLink: 'https://drive.google.com/open?id=1ztY5_jXGgFWT-gpPUeAJ5h6ykwTUl6h_b-Prbq6kv9E',
-        longText: 'Facturen exporteren voor synchronisatie met Exactonline (nieuwe facturen en mutaties sinds laatste export)'
+        longText: 'Facturen exporteren voor synchronisatie met Exactonline (nieuwe facturen en mutaties sinds laatste export).'
     },
     { icon: 'account_circle', link: '/connection', text: 'Connectie', public: true }
 ];

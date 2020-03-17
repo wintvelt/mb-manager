@@ -10,7 +10,7 @@ import {
     SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_SYNC_PENDING, SET_OPT_DELETED,
     SET_BANK,
     SET_ACCESS_TOKEN, DO_SNACK_ERROR, DELETE_ACCESS_TOKEN,
-    SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE
+    SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE, SET_VAT_EXPORT_LIST
 } from '../store/action-types';
 import { doSnack, doSnackError } from './actions';
 
@@ -31,6 +31,7 @@ const baseUrlAwsFinvisionExport = 'https://auhidn35t6.execute-api.eu-central-1.a
 const baseUrlAwsFinvisionSync = 'https://auhidn35t6.execute-api.eu-central-1.amazonaws.com/Prod/sync';
 const baseUrlAwsSimpleDb = 'https://ocankaagm4.execute-api.eu-central-1.amazonaws.com/Prod/simpledb';
 const baseUrlAwsBankmutations = 'https://3pfhatqis6.execute-api.eu-central-1.amazonaws.com/Prod';
+const baseUrlAwsVatExport = 'https://nt74qhnjbh.execute-api.eu-central-1.amazonaws.com/dev/btw-export';
 
 export const getPayments = (access_token, periodFilter = 'this_quarter', extraFilters = '') => {
     return apiActionSync({
@@ -405,3 +406,12 @@ function handleError(res) {
         throw Error('Request rejected with status: ' + res.status + " " + res.statusText);
     }
 }
+
+export const getVatExportList = (adminCode, access_token) => apiAction({
+    url: `${baseUrlAwsVatExport}/${adminCode}`,
+    headers: { Authorization: 'Bearer ' + access_token },
+    loadingMsg: 'export statistieken aan het ophalen.',
+    storeAction: (payload) => {
+        return { type: SET_VAT_EXPORT_LIST, payload }
+    }
+})
