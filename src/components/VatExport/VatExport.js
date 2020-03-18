@@ -4,69 +4,101 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        width: '100%'
-    }
-}));
-
+import { getVatExportData, exportVat, deleteVatFile } from '../../actions/apiActions-new';
+import { DO_SNACK } from '../../store/action-types';
+import { DataPanel } from '../Page/DataPanel';
+import { VatStats } from './VatStats';
+import { VatFilters } from './VatFilters';
+import { VatAction } from './VatAction';
+import { VatTable } from './VatTable';
 
 const VatExport = (props) => {
-    // const admin = (props.location && props.location.search && props.location.search === '?admin=true');
-    // const { accountsNew, bankData, accessToken } = useSelector(store => {
-    //     const { accountsNew, bankData, accessToken } = store;
-    //     return { accountsNew, bankData, accessToken };
-    // });
-    // const accounts = accountsNew.toJS();
-    // const access_token = accessToken.toJS().data;
-    // const activeAccount = bankData && bankData.activeAccount;
-    // const active_account = activeAccount && activeAccount.value;
-    // const dispatch = useDispatch();
+    const { vatExportListNew, vatExportPending, optDeleted, accessToken } = useSelector(store => {
+        const { vatExportListNew, vatExportPending, optDeleted, accessToken } = store;
+        return { vatExportListNew, vatExportPending, optDeleted, accessToken };
+    });
+    const vatExport = vatExportListNew.toJS();
+    const vatExportData = vatExport && vatExport.data;
+    const docCount = vatExportData && vatExportData.unexported.doc_count;
+    const latestExportName = vatExportData && vatExportData.unexported.latest_export_name;
+    const hasOlder = vatExportData && vatExportData.hasOlder;
+    const hasFiles = vatExportData && vatExportData.files.length > 0;
+    const [year, setYear] = useState(new Date().getFullYear());
 
-    const classes = useStyles();
+    const access_token = accessToken.toJS().data;
 
-    // useEffect(() => {
-    //     if (accounts.notAsked) dispatch(getAccounts(access_token))
-    // }, [accounts, access_token, dispatch]);
-    // useEffect(() => {
-    //     if (active_account && access_token) {
-    //         dispatch(getBankActiveConfig(active_account, access_token));
-    //         dispatch(getBankActiveFiles(active_account, access_token));
-    //     }
-    // }, [active_account, access_token, dispatch])
-    // const onChangeAccount = (value) => {
-    //     dispatch(setBank({ type: 'setActiveAccount', content: value }))
-    // }
-    // const [dataPanelOpen, setDataPanelOpen] = useState(false);
+    const dispatch = useDispatch();
+    useEffect(() => {
+        if (access_token) dispatch(getVatExportData(access_token, year))
+    }, [access_token, year, dispatch]);
+
+    const [selection, setSelection] = useState({
+        invoiceFrom: "",
+        invoiceTo: "",
+    });
+    const onChangeInput = (field, value) => {
+        setSelection({ ...selection, [field]: value });
+    }
+
+    const [selectedForDelete, setSelectedForDelete] = useState('');
+    const onDelete = (filename) => {
+        if (selectedForDelete && filename === selectedForDelete) {
+            dispatch({
+                type: DO_SNACK,
+                payload: 'exportbestand "' + filename + '" verwijderd.'
+            });
+            dispatch(deleteVatFile(filename, year, access_token));
+            setSelectedForDelete('');
+        } else {
+            setSelectedForDelete(filename)
+        }
+    }
+
+    const onExport = (selection, access_token) => {
+        let body = {
+            start_date: selection.invoiceFrom,
+            end_date: selection.invoiceTo
+        }
+        dispatch(exportVat(body, year, access_token));
+    }
+
+    const rows = vatExportData && vatExportData.files
+        .filter(file => !optDeleted.includes(file.filename))
+        .map(file => ({ 
+            id: file.filename, 
+            noDelete: file.filename !== latestExportName,
+            ...file }))
+
     return <Grid>
-        <DataPanel expanded={false} onChange={() => { }}
-            title={`BTW exports vanaf ${activeYear}`}
-            apiDataSources={[incomingSums]}
-            apiTitles={['statistieken']}
+        <DataPanel expanded={false} onChange={() => {
+            if (hasOlder) setYear(year - 1)
+        }}
+            title={`BTW exports vanaf ${year}`}
+            apiDataSources={[vatExportListNew]}
+            apiTitles={['BTW export statistieken']}
             flat
             actionsInSummary
         >
-            {olderYear ?
+            {hasOlder ?
                 <Button color='primary' variant='contained'>
-                    Exports vanaf {olderYear} ophalen
+                    Exports vanaf {year - 1} ophalen
                 </Button>
                 : <></>}
         </DataPanel>
-        {hasData && <ExportStats lastSync={lastSyncDate} accessToken={accessToken}
-            onSync={onSync} syncPending={syncPending}
-            invoiceFromTo={invoiceFromTo} createFromTo={createFromTo}
-            docCount={docCount} unexportedCount={unexportedCount} mutatedCount={mutatedCount} />}
-        {hasData && <Grid container spacing={2} style={{ alignItems: 'stretch', paddingTop: '24px' }}>
-            <ExportFilters unexportedCount={unexportedCount} docCount={docCount} mutatedCount={mutatedCount}
-                filters={filters} onChangeInput={onChangeInput} />
-            <ExportAction filters={filters} selStats={selStats}
-                exportPending={exportPending} onExport={() => onExport(selection, accessToken.data)} />
+        {vatExport.hasData && <VatStats unexported={vatExportData.unexported} />}
+        {vatExport.hasData && <Grid container spacing={2} style={{ alignItems: 'stretch', paddingTop: '24px' }}>
+            <VatFilters selection={selection} onChangeInput={onChangeInput} />
+            <VatAction vatExportPending={vatExportPending} docCount={docCount}
+                onExport={() => onExport(selection, access_token)} />
         </Grid>}
-        {rows.length > 0 && <ExportTable rows={rows}
+        {hasFiles && <VatTable rows={rows}
+            latestExportName={latestExportName}
             selected={selectedForDelete ? [selectedForDelete] : []}
             onSelect={onDelete} />}
+        <pre>{JSON.stringify(vatExportData, null, 2)}</pre>
     </Grid>
 }
 

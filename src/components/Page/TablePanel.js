@@ -271,7 +271,7 @@ const RowCell = (props) => {
     const initValue = row[key];
     const curValue = typeof edits === 'string' ? edits : initValue;
     const content = prettify ? prettify(initValue, row) : initValue;
-    const isJustContent = (!hrefBase && !editable && !render) || (isDisabled && !render);
+    const isJustContent = (!hrefBase && !hrefKey && !editable && !render) || (isDisabled && !render);
     const cellStyle = isDisabled ? { color: 'grey', backgroundColor: 'lightgrey', textDecoration: 'line-through' } :
         style || {}
     return <TableCell padding={padding || 'default'} align={align || 'inherit'}

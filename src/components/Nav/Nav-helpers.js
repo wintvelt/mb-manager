@@ -135,7 +135,9 @@ const useStyles = makeStyles(theme => ({
         color: '#ffffff',
         fontSize: '1.1rem',
         fontWeight: 'bold',
-        height: '3rem',
+        backgroundColor: '#424242',
+        height: '64px',
+        paddingTop: theme.spacing(1),
         paddingBottom: theme.spacing(1),
         transition: theme.transitions.create('height', {
             easing: theme.transitions.easing.sharp,

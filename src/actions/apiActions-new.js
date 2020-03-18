@@ -10,7 +10,8 @@ import {
     SET_INCOMING_SUMS, SET_EXPORT_PENDING, SET_SYNC_PENDING, SET_OPT_DELETED,
     SET_BANK,
     SET_ACCESS_TOKEN, DO_SNACK_ERROR, DELETE_ACCESS_TOKEN,
-    SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE, SET_VAT_EXPORT_LIST
+    SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE,
+    SET_VAT_EXPORT_LIST, SET_VAT_EXPORT_PENDING
 } from '../store/action-types';
 import { doSnack, doSnackError } from './actions';
 
@@ -372,7 +373,7 @@ export function setAccess(reqToken) {
 }
 
 // initial POST command, returns promise
-export function postData(url = '', data = {}, method = "POST", access_token) {
+export function postData(url = '', data, method = "POST", access_token) {
     // Default options are marked with *
     return fetch(url, {
         method: method, // *GET, POST, PUT, DELETE, etc.
@@ -384,7 +385,7 @@ export function postData(url = '', data = {}, method = "POST", access_token) {
             Authorization: "Bearer " + access_token // ACCESS_TOKEN
             // "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify(data) // body data type must match "Content-Type" header
+        body: (data) ? JSON.stringify(data) : null // body data type must match "Content-Type" header
     })
         .then(handleError)
 }
@@ -407,11 +408,58 @@ function handleError(res) {
     }
 }
 
-export const getVatExportList = (adminCode, access_token) => apiAction({
-    url: `${baseUrlAwsVatExport}/${adminCode}`,
+export const getVatExportData = (access_token, year) => apiAction({
+    url: `${baseUrlAwsVatExport}/${adminCode}?year=${year}`,
     headers: { Authorization: 'Bearer ' + access_token },
     loadingMsg: 'export statistieken aan het ophalen.',
     storeAction: (payload) => {
         return { type: SET_VAT_EXPORT_LIST, payload }
     }
 })
+
+export function exportVat(body, year, access_token) {
+    return function (dispatch) {
+        const url = `${baseUrlAwsVatExport}/${adminCode}/export`;
+        const periodStr =
+            ((body.start_date) ? 'vanaf ' + body.start_date : '') +
+            ((body.start_date && body.end_date) ? ' ' : '') +
+            ((body.end_date) ? 'tot en met ' + body.end_date : '');
+        dispatch({ type: SET_VAT_EXPORT_PENDING, payload: periodStr });
+        dispatch(doSnack('Export wordt gemaakt voor periode ' + periodStr));
+        postData(url, body, "POST", access_token)
+            .then(res => {
+                dispatch({ type: SET_VAT_EXPORT_PENDING, payload: '' });
+                dispatch(doSnack('Export voor periode ' + periodStr + ' documenten klaar voor download'));
+                dispatch(getVatExportData(access_token, year));
+            })
+            .catch(error => {
+                const msg = "Export helaas mislukt met fout \""
+                    + error.message + "\".";
+                dispatch({ type: SET_VAT_EXPORT_PENDING, payload: '' });
+                dispatch(doSnackError(msg));
+            })
+    }
+}
+
+export function deleteVatFile(filename, year, access_token) {
+    return function (dispatch) {
+        const url = `${baseUrlAwsVatExport}/${adminCode}/export/${encodeURI(filename)}`;
+        const body = '';
+
+        dispatch({ type: SET_OPT_DELETED, payload: filename });
+        postData(url, body, "DELETE", access_token)
+            .then(res => {
+                setTimeout(() => {
+                    dispatch(getVatExportData(access_token, year))
+                    dispatch({ type: SET_OPT_DELETED, payload: [] });
+                }, 30);
+
+            })
+            .catch(error => {
+                dispatch({ type: SET_OPT_DELETED, payload: [] });
+                const msg = "File deleten helaas mislukt met fout \""
+                    + error.message + "\".";
+                dispatch(doSnackError(msg));
+            })
+    }
+}

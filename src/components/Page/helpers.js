@@ -5,7 +5,7 @@ import Icon from '@material-ui/core/Icon';
 
 export const TableLink = (props) => {
     const { hrefBase, hrefEnd, initValue, content } = props;
-    return (hrefBase && initValue) ?
+    return ((hrefBase || hrefEnd) && initValue) ?
         <Link href={hrefBase + hrefEnd}
             target='_blank' rel='noopener noreferrer'>
                 <span>{content || initValue}</span>
