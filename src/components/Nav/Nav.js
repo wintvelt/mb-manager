@@ -33,6 +33,7 @@ export const menu = [
         helpLink: 'https://docs.google.com/document/d/1GGuChkVYiVbKlFWHGlx2wYlWFeYfoEUdZOqnIfV5NAQ/edit?usp=sharing',
         longText: 'Omzet (ontvangen betalingen), en interbank-betalingen automatisch aan een categorie toewijzen.'
     },
+    { isBar: true},
     {
         icon: 'local_pizza', link: '/vat-export', text: 'Export voor BTW', badge: true,
         helpLink: '',
@@ -43,6 +44,7 @@ export const menu = [
         helpLink: 'https://drive.google.com/open?id=1ztY5_jXGgFWT-gpPUeAJ5h6ykwTUl6h_b-Prbq6kv9E',
         longText: 'Facturen exporteren voor synchronisatie met Exactonline (nieuwe facturen en mutaties sinds laatste export).'
     },
+    { isBar: true},
     { icon: 'account_circle', link: '/connection', text: 'Connectie', public: true }
 ];
 

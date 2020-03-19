@@ -39,7 +39,7 @@ export const VatStats = (props) => {
                 { title: latestExportDate, text: 'Laatste export gemaakt' },
                 {
                     title: `${addedDocsCount}${hasBeforeDocs ? ` (${new_docs_before_export_count})` : ''}`,
-                    text: 'Nieuwe docs toegevoegd' + (hasBeforeDocs ? ' (met datum eerder dan export)' : '')
+                    text: 'Docs toegevoegd' + (hasBeforeDocs ? ' (met datum eerder dan export)' : '')
                 },
                 { title: changed_docs, text: 'Documenten aangepast' },
                 { title: deleted_docs, text: 'Documenten verwijderd' },

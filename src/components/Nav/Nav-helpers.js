@@ -175,7 +175,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const ListItemLink = (props) => {
-    const { icon, text, link, badge, activePath, open } = props;
+    const { icon, text, link, badge, activePath, open, isBar } = props;
     const classes = useStyles();
 
     // weird mojo needed to use react-router with MUI
@@ -190,6 +190,8 @@ const ListItemLink = (props) => {
     const textComp = (badge) ?
         <span className={classes.textNew}>{text}<Icon className={classes.iconNew}>fiber_new</Icon></span>
         : text;
+
+    if (isBar) return <Divider className={classes.divider} />;
 
     return <ListItem button component={RenderLink}>
         {!open && <ListItemIcon>

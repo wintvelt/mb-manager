@@ -452,7 +452,7 @@ export function deleteVatFile(filename, year, access_token) {
                 setTimeout(() => {
                     dispatch(getVatExportData(access_token, year))
                     dispatch({ type: SET_OPT_DELETED, payload: [] });
-                }, 30);
+                }, 4000);
 
             })
             .catch(error => {

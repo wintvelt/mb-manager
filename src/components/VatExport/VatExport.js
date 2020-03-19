@@ -67,10 +67,11 @@ const VatExport = (props) => {
 
     const rows = vatExportData && vatExportData.files
         .filter(file => !optDeleted.includes(file.filename))
-        .map(file => ({ 
-            id: file.filename, 
+        .map(file => ({
+            id: file.filename,
             noDelete: file.filename !== latestExportName,
-            ...file }))
+            ...file
+        }))
 
     return <Grid>
         <DataPanel expanded={false} onChange={() => {
