@@ -29,7 +29,9 @@ export const VatStats = (props) => {
         end_date,
         doc_count
     } = unexported;
-    const latestExportDate = moment(latest_export_create_date).format('D MMM YYYY');
+    const latestExportDate = (latest_export_create_date)?
+        moment(latest_export_create_date).format('D MMM YYYY')
+        : 'nog nooit';
     const addedDocsCount = new_docs_after_export_count + new_docs_before_export_count;
     const hasBeforeDocs = (new_docs_before_export_count > 0);
 
