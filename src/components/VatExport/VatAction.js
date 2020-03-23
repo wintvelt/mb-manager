@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export const VatAction = props => {
-    const { vatExportPending, docCount, onExport } = props;
+    const { vatExportPending, vatExport, docCount, onExport } = props;
     const classes = useStyles();
     return (
         <Grid item xs={6} style={{ paddingBottom: '24px' }}>
@@ -35,14 +35,16 @@ export const VatAction = props => {
                     <Grid item xs={6}>
                         <Button variant='contained' color='primary' className={classes.button}
                             onClick={onExport}
-                            disabled={!!vatExportPending && docCount > 0}
+                            disabled={!!vatExportPending || !vatExport.hasData || docCount === 0}
                             startIcon={<Icon>cloud_download</Icon>} >
                             Maak xlsx export
                         </Button>
                     </Grid>
                     {(!!vatExportPending) &&
                         <Grid item xs={6}>
-                            <Typography className={classes.caption}>Export-bestand aan het maken..</Typography>
+                            <Typography className={classes.caption}>
+                                Export-bestand aan het maken..
+                            </Typography>
                             <LinearProgress />
                         </Grid>
                     }

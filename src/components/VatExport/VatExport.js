@@ -11,11 +11,13 @@ import { getVatExportData, exportVat, deleteVatFile } from '../../actions/apiAct
 import { DO_SNACK } from '../../store/action-types';
 import { DataPanel } from '../Page/DataPanel';
 import { VatStats } from './VatStats';
+import { VatAdmin } from './VatAdmin';
 import { VatFilters } from './VatFilters';
 import { VatAction } from './VatAction';
 import { VatTable } from './VatTable';
 
 const VatExport = (props) => {
+    const isAdmin = (props.location && props.location.search && props.location.search === '?admin=true');
     const { vatExportListNew, vatExportPending, optDeleted, accessToken } = useSelector(store => {
         const { vatExportListNew, vatExportPending, optDeleted, accessToken } = store;
         return { vatExportListNew, vatExportPending, optDeleted, accessToken };
@@ -89,17 +91,18 @@ const VatExport = (props) => {
                 </Button>
                 : <></>}
         </DataPanel>
-        {vatExport.hasData && <VatStats unexported={vatExportData.unexported} />}
-        {vatExport.hasData && <Grid container spacing={2} style={{ alignItems: 'stretch', paddingTop: '24px' }}>
+        <VatStats unexported={(vatExport.hasData)? vatExportData.unexported : {}} />
+        {isAdmin && <VatAdmin /> }
+        <Grid container spacing={2} style={{ alignItems: 'stretch', paddingTop: '24px' }}>
             <VatFilters selection={selection} onChangeInput={onChangeInput} />
-            <VatAction vatExportPending={vatExportPending} docCount={docCount}
+            <VatAction vatExportPending={vatExportPending} vatExport={vatExport} docCount={docCount}
                 onExport={() => onExport(selection, access_token)} />
-        </Grid>}
+        </Grid>
         {hasFiles && <VatTable rows={rows}
             latestExportName={latestExportName}
             selected={selectedForDelete ? [selectedForDelete] : []}
             onSelect={onDelete} />}
-        <pre>{JSON.stringify(vatExportData, null, 2)}</pre>
+        {/* <pre>{JSON.stringify(vatExportData, null, 2)}</pre> */}
     </Grid>
 }
 

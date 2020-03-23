@@ -41,7 +41,7 @@ export const VatFilters = props => {
 }
 
 const InputLine = props => {
-    const { label, onChange } = props;
-    return <TextField label={label} placeholder="jjjj-mm-dd" size="small"
+    const { label, value, onChange } = props;
+    return <TextField label={label} value={value} placeholder="jjjj-mm-dd" size="small"
         onChange={onChange} />
 }

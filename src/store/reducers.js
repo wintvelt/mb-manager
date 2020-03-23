@@ -15,7 +15,7 @@ import {
     SET_PAY_CONNECT,
     SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE, SET_REVENUE_CONFIG_MANUAL, DEL_REVENUE_CONFIG_MANUAL,
     DELETE_PAYMENT_MANUAL,
-    SET_VAT_EXPORT_LIST, SET_VAT_EXPORT_PENDING
+    SET_VAT_EXPORT_LIST, SET_VAT_EXPORT_PENDING, SET_VAT_SYNC
 } from "./action-types";
 import { initBankData, setBank } from './reducer-helpers-bank';
 import { initApiDataMulti, apiUpdateMulti, apiUpdateMultiMulti } from '../helpers/apiData/apiData-multi';
@@ -46,6 +46,7 @@ export const initialState = {
     batchError: false,
     vatExportListNew: initApiData,
     vatExportPending: '',
+    vatSync: initApiData,
 };
 
 function rootReducer(state = initialState, action) {
@@ -318,7 +319,12 @@ function rootReducer(state = initialState, action) {
                 vatExportPending: action.payload
             })
         }
-
+        case SET_VAT_SYNC: {
+            const newVatSync = apiUpdate(state.vatSync, action.payload);
+            return Object.assign({}, state, {
+                vatSync: newVatSync
+            })
+        }
 
         default:
             return state;

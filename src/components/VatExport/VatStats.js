@@ -16,6 +16,20 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+// stat widget
+const Widget = (classes, isEmpty) => ({ title, text }) => {
+    const safeTitle = (isEmpty) ? '...' : title;
+    const safeText = (isEmpty) ? '...' : text;
+    return (
+        <Grid item key={text} xs={6} md={2} lg={2} className={classes.root}>
+            <Paper className={classes.paper}>
+                <Typography variant='h6'>{safeTitle}</Typography>
+                <Typography variant='subtitle2'>{safeText}</Typography>
+            </Paper>
+        </Grid>
+    );
+}
+
 // Stat Container
 export const VatStats = (props) => {
     const { unexported } = props;
@@ -29,14 +43,17 @@ export const VatStats = (props) => {
         end_date,
         doc_count
     } = unexported;
-    const latestExportDate = (latest_export_create_date)?
+    const isEmpty = (Object.keys(unexported).length === 0);
+    const classes = useStyles();
+
+    const latestExportDate = (latest_export_create_date) ?
         moment(latest_export_create_date).format('D MMM YYYY')
         : 'nog nooit';
     const addedDocsCount = new_docs_after_export_count + new_docs_before_export_count;
     const hasBeforeDocs = (new_docs_before_export_count > 0);
 
     return <Grid container spacing={2}>
-        {(doc_count > 0) ?
+        {(doc_count > 0 || isEmpty) ?
             [
                 { title: latestExportDate, text: 'Laatste export gemaakt' },
                 {
@@ -47,24 +64,11 @@ export const VatStats = (props) => {
                 { title: deleted_docs, text: 'Documenten verwijderd' },
                 { title: moment(start_date).format('D MMM YYYY'), text: 'Factuurdatum vanaf' },
                 { title: moment(end_date).format('D MMM YYYY'), text: 'Factuurdatum tot en met' },
-            ].map(Widget)
+            ].map(Widget(classes, isEmpty))
             : [
                 { title: latestExportDate, text: 'Laatste export gemaakt' },
-                { title: 'Helemaal bij!', text: 'Geen wijzigingen om te exporteren.'}
-            ].map(Widget)
+                { title: 'Helemaal bij!', text: 'Geen wijzigingen om te exporteren.' }
+            ].map(Widget(classes, isEmpty))
         }
     </Grid>
-}
-
-// stat widget
-function Widget({ title, text }) {
-    const classes = useStyles();
-    return (
-        <Grid item key={text} xs={6} md={4} lg={2} className={classes.root}>
-            <Paper className={classes.paper}>
-                <Typography variant='h6'>{title}</Typography>
-                <Typography variant='subtitle2'>{text}</Typography>
-            </Paper>
-        </Grid>
-    );
 }

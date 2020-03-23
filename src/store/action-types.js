@@ -43,3 +43,4 @@ export const SET_COUNT = "SET_COUNT";
 
 export const SET_VAT_EXPORT_LIST = "SET_VAT_EXPORT_LIST";
 export const SET_VAT_EXPORT_PENDING = "SET_VAT_EXPORT_PENDING";
+export const SET_VAT_SYNC = 'SET_VAT_SYNC';
