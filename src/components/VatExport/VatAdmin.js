@@ -2,7 +2,7 @@
 // for extra checks
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getVatSync } from '../../actions/apiActions-new';
+import { getVatSync, getVatVerify } from '../../actions/apiActions-new';
 
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -36,14 +36,14 @@ const useStyles = makeStyles(theme => ({
 
 // Stat Container
 export const VatAdmin = (props) => {
-    const { vatSync, accessToken } = useSelector(store => {
-        const { vatSync, accessToken } = store;
-        return { vatSync, accessToken };
+    const { vatSync, vatVerify, accessToken } = useSelector(store => {
+        const { vatSync, vatVerify, accessToken } = store;
+        return { vatSync, vatVerify, accessToken };
     });
     const access_token = accessToken.toJS().data;
     const vatSyncJs = vatSync.toJS();
     const syncStats = vatSyncJs.data;
-    console.log({ syncStats });
+    const vatVerifyJs = vatVerify.toJS();
     const dispatch = useDispatch();
     const [year, setYear] = useState(new Date().getFullYear());
 
@@ -51,11 +51,20 @@ export const VatAdmin = (props) => {
         (`${syncStats.synced} docs synced just now, `) +
         ((syncStats.maxExceeded) ? `${syncStats.not_synced} docs still to sync.` : 'Sync complete')
         : ''
+    const verifyIssues = vatVerifyJs.hasData ? vatVerifyJs.data.issues : [];
+    const verifyMessage = (vatVerifyJs.hasData) ?
+        (`${vatVerifyJs.data.verified} docs verified just now, `) +
+        ((vatVerifyJs.data.LastEvaluatedKey) ? 'need to run again.' : 'verify complete.') +
+        ((verifyIssues.length > 0) ? ' Issues found, see below' : ' No issues found.')
+        : ''
 
     const classes = useStyles();
 
     const onSync = (year, access_token) => {
         dispatch(getVatSync(year, access_token));
+    }
+    const onVerify = () => {
+        dispatch(getVatVerify(vatVerifyJs.data ? vatVerifyJs.data.LastEvaluatedKey : null, access_token))
     }
 
     return <Grid container spacing={2}>
@@ -91,12 +100,17 @@ export const VatAdmin = (props) => {
                 </Typography>
                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                     <Button variant='contained' color='primary' className={classes.button}
-                        disabled={true}
-                        onClick={() => { }}
+                        disabled={vatVerifyJs.isLoading || (vatVerifyJs.data && !vatVerifyJs.data.LastEvaluatedKey)}
+                        onClick={onVerify}
                         startIcon={<Icon>policy</Icon>} >
                         verify
                     </Button>
-                    <Typography variant='caption'>(not yet implemented)</Typography>
+                    {vatVerifyJs.hasData && <Typography variant='caption'>{verifyMessage}</Typography>}
+                    {(vatVerifyJs.isLoading) &&
+                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                            <Typography variant='caption'>running verify..</Typography>
+                            <LinearProgress />
+                        </div>}
                 </div>
             </Paper>
         </Grid>

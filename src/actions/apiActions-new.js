@@ -11,7 +11,7 @@ import {
     SET_BANK,
     SET_ACCESS_TOKEN, DO_SNACK_ERROR, DELETE_ACCESS_TOKEN,
     SET_REVENUE_CONFIG, SET_REVENUE_CONFIG_UPDATE,
-    SET_VAT_EXPORT_LIST, SET_VAT_EXPORT_PENDING, SET_VAT_SYNC
+    SET_VAT_EXPORT_LIST, SET_VAT_EXPORT_PENDING, SET_VAT_SYNC, SET_VAT_VERIFY
 } from '../store/action-types';
 import { doSnack, doSnackError } from './actions';
 
@@ -473,6 +473,19 @@ export function getVatSync(year, access_token) {
         loadingMsg: 'running sync...',
         storeAction: (payload) => {
             return { type: SET_VAT_SYNC, payload }
+        }
+   })
+}
+
+export function getVatVerify(key, access_token) {
+    return apiAction({
+        url : `${baseUrlAwsVatExport}/${adminCode}/verify`,
+        method: 'POST',
+        body: { ExclusiveStartKey: key },
+        headers: { Authorization: 'Bearer ' + access_token },
+        loadingMsg: 'verifying...',
+        storeAction: (payload) => {
+            return { type: SET_VAT_VERIFY, payload }
         }
    })
 }

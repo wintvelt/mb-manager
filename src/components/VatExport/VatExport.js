@@ -18,9 +18,9 @@ import { VatTable } from './VatTable';
 
 const VatExport = (props) => {
     const isAdmin = (props.location && props.location.search && props.location.search === '?admin=true');
-    const { vatExportListNew, vatExportPending, optDeleted, accessToken } = useSelector(store => {
-        const { vatExportListNew, vatExportPending, optDeleted, accessToken } = store;
-        return { vatExportListNew, vatExportPending, optDeleted, accessToken };
+    const { vatExportListNew, vatExportPending, optDeleted, vatVerify, accessToken } = useSelector(store => {
+        const { vatExportListNew, vatExportPending, optDeleted, vatVerify, accessToken } = store;
+        return { vatExportListNew, vatExportPending, optDeleted, vatVerify, accessToken };
     });
     const vatExport = vatExportListNew.toJS();
     const vatExportData = vatExport && vatExport.data;
@@ -28,6 +28,8 @@ const VatExport = (props) => {
     const latestExportName = vatExportData && vatExportData.unexported.latest_export_name;
     const hasOlder = vatExportData && vatExportData.hasOlder;
     const hasFiles = vatExportData && vatExportData.files.length > 0;
+    const vatVerifyJs = vatVerify.toJS();
+
     const [year, setYear] = useState(new Date().getFullYear());
 
     const access_token = accessToken.toJS().data;
@@ -91,8 +93,8 @@ const VatExport = (props) => {
                 </Button>
                 : <></>}
         </DataPanel>
-        <VatStats unexported={(vatExport.hasData)? vatExportData.unexported : {}} />
-        {isAdmin && <VatAdmin /> }
+        <VatStats unexported={(vatExport.hasData) ? vatExportData.unexported : {}} />
+        {isAdmin && <VatAdmin />}
         <Grid container spacing={2} style={{ alignItems: 'stretch', paddingTop: '24px' }}>
             <VatFilters selection={selection} onChangeInput={onChangeInput} />
             <VatAction vatExportPending={vatExportPending} vatExport={vatExport} docCount={docCount}
@@ -102,7 +104,8 @@ const VatExport = (props) => {
             latestExportName={latestExportName}
             selected={selectedForDelete ? [selectedForDelete] : []}
             onSelect={onDelete} />}
-        {/* <pre>{JSON.stringify(vatExportData, null, 2)}</pre> */}
+        {(vatVerifyJs.hasData && vatVerifyJs.data.issues.length > 0) &&
+            <pre>{JSON.stringify(vatVerifyJs.data.issues, null, 2)}</pre>}
     </Grid>
 }
 
