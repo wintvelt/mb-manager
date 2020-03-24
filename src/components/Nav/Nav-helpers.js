@@ -57,7 +57,7 @@ const useStyles = makeStyles(theme => ({
     },
     appBar: {
         // backgroundColor: deepPurple[300],
-        background: 'linear-gradient(90deg, rgba(229,115,115,1) 50%, rgba(239,108,0,1) 100%)',
+        background: 'linear-gradient(90deg, rgba(149,117,205,1) 50%, rgba(239,108,0,1) 100%)',
         zIndex: theme.zIndex.drawer + 1,
         transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
