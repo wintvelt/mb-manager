@@ -32,7 +32,10 @@ const baseUrlAwsFinvisionExport = 'https://auhidn35t6.execute-api.eu-central-1.a
 const baseUrlAwsFinvisionSync = 'https://auhidn35t6.execute-api.eu-central-1.amazonaws.com/Prod/sync';
 const baseUrlAwsSimpleDb = 'https://ocankaagm4.execute-api.eu-central-1.amazonaws.com/Prod/simpledb';
 const baseUrlAwsBankmutations = 'https://3pfhatqis6.execute-api.eu-central-1.amazonaws.com/Prod';
-const baseUrlAwsVatExport = 'https://nt74qhnjbh.execute-api.eu-central-1.amazonaws.com/dev/btw-export';
+// Moblybird.com address
+// const baseUrlAwsVatExport = 'https://nt74qhnjbh.execute-api.eu-central-1.amazonaws.com/dev/btw-export';
+// Mobly address
+const baseUrlAwsVatExport = 'https://c4c49l42i1.execute-api.eu-central-1.amazonaws.com/dev/btw-export';
 
 export const getPayments = (access_token, periodFilter = 'this_quarter', extraFilters = '') => {
     return apiActionSync({

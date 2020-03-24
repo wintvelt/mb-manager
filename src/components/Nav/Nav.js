@@ -36,7 +36,7 @@ export const menu = [
     { isBar: true, text: 'bar1' },
     {
         icon: 'local_pizza', link: '/vat-export', text: 'Export voor BTW', badge: true,
-        helpLink: '',
+        helpLink: 'https://docs.google.com/document/d/1dkLriw6y-Ln0Ei9samMKt-5_GCiFqxatoDjSKBuhRGc/edit?usp=sharing',
         longText: 'Exports maken van alle btw-boekingen en kosten naar excel. Voor de (maandelijkse) aangifte aan de fiscus.'
     },
     {
