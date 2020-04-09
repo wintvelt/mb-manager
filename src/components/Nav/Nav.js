@@ -7,12 +7,12 @@ export const menu = [
     { icon: 'home', link: '/', text: 'Home', public: true },
     {
         icon: 'cloud_upload', link: '/bankupload', text: 'Upload bankfile',
-        helpLink: 'https://drive.google.com/open?id=1QdOWgoR2iVNtEirSc5--zElL7qW-tKJEM7GahppQrcY',
+        helpLink: 'https://docs.google.com/document/d/1QdOWgoR2iVNtEirSc5--zElL7qW-tKJEM7GahppQrcY/edit?usp=sharing',
         longText: 'Betalingsbestanden (die je als csv van een bank hebt gedownload) uploaden naar Moneybird om daar te verwerken.'
     },
     {
         icon: 'remove_shopping_cart', link: '/betalingen/uitgaven', text: 'Uitgaven zonder bon',
-        helpLink: 'https://drive.google.com/open?id=1e5eBWf0bWdqKFSFcargVlGP3KKaDJVKIAQWs5dIdIqE',
+        helpLink: 'https://docs.google.com/document/d/1e5eBWf0bWdqKFSFcargVlGP3KKaDJVKIAQWs5dIdIqE/edit?usp=sharing',
         longText: 'Uitgaven zonder bon downloaden, om de owners te vragen om ontbrekende bonnetjes te leveren.'
     },
     {
@@ -25,7 +25,7 @@ export const menu = [
     },
     {
         icon: 'attachment', link: '/betalingen/match', text: 'Betalingen matchen',
-        helpLink: 'https://drive.google.com/open?id=1kQgazR3nxiLSxtklKpKcKVM6XL61XLQN2JO1aYEi9cQ',
+        helpLink: 'https://docs.google.com/document/d/1kQgazR3nxiLSxtklKpKcKVM6XL61XLQN2JO1aYEi9cQ/edit?usp=sharing',
         longText: 'Betalingen (uitgaand) matchen met (openstaande) bonnetjes en facturen.'
     },
     {
@@ -36,12 +36,12 @@ export const menu = [
     { isBar: true, text: 'bar1' },
     {
         icon: 'local_pizza', link: '/vat-export', text: 'Export voor BTW', badge: true,
-        helpLink: 'https://docs.google.com/document/d/1dkLriw6y-Ln0Ei9samMKt-5_GCiFqxatoDjSKBuhRGc/edit?usp=sharing',
+        helpLink: '',
         longText: 'Exports maken van alle btw-boekingen en kosten naar excel. Voor de (maandelijkse) aangifte aan de fiscus.'
     },
     {
         icon: 'sync', link: '/export', text: 'Export Finvision',
-        helpLink: 'https://drive.google.com/open?id=1ztY5_jXGgFWT-gpPUeAJ5h6ykwTUl6h_b-Prbq6kv9E',
+        helpLink: 'https://docs.google.com/document/d/1ztY5_jXGgFWT-gpPUeAJ5h6ykwTUl6h_b-Prbq6kv9E/edit?usp=sharing',
         longText: 'Facturen exporteren voor synchronisatie met Exactonline (nieuwe facturen en mutaties sinds laatste export).'
     },
     { isBar: true, text: 'bar2' },
